@@ -1,10 +1,28 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from './context/AuthContext'
+import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
-import Dashboard from './pages/Dashboard'
+import AppLayout from './components/AppLayout'
 import SwipeFeed from './pages/SwipeFeed'
+import ReviewPage from './pages/ReviewPage'
+import WishlistPage from './pages/WishlistPage'
 import './App.css'
+
+function MainApp() {
+  const [activeTab, setActiveTab] = useState('swipe')
+  return (
+    <AppLayout activeTab={activeTab} onTabChange={setActiveTab}>
+      {({ showToast }) => (
+        <>
+          {activeTab === 'swipe' && <SwipeFeed showToast={showToast} />}
+          {activeTab === 'review' && <ReviewPage onToast={showToast} />}
+          {activeTab === 'wishlist' && <WishlistPage onToast={showToast} />}
+        </>
+      )}
+    </AppLayout>
+  )
+}
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -30,18 +48,23 @@ function PublicRoute({ children }) {
       </div>
     )
   }
-  if (user) return <Navigate to="/swipe" replace />
+  if (user) return <Navigate to="/app" replace />
   return children
 }
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login"     element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/signup"    element={<PublicRoute><Signup /></PublicRoute>} />
-      <Route path="/swipe"     element={<ProtectedRoute><SwipeFeed /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="*"          element={<Navigate to="/login" replace />} />
-    </Routes>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+          <Route path="/app" element={<ProtectedRoute><MainApp /></ProtectedRoute>} />
+          <Route path="/swipe" element={<Navigate to="/app" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/app" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }

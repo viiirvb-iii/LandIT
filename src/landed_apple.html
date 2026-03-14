@@ -1,0 +1,4006 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Landed</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg:        #06090f;
+  --surface:   rgba(255,255,255,0.06);
+  --surface2:  rgba(255,255,255,0.10);
+  --glass:     rgba(255,255,255,0.08);
+  --glass-b:   rgba(255,255,255,0.14);
+  --border:    rgba(255,255,255,0.10);
+  --border2:   rgba(255,255,255,0.18);
+  --blue:      #3a82f6;
+  --blue-soft: rgba(58,130,246,0.18);
+  --green:     #30d158;
+  --amber:     #ffd60a;
+  --red:       #ff453a;
+  --t1:        rgba(255,255,255,0.95);
+  --t2:        rgba(255,255,255,0.55);
+  --t3:        rgba(255,255,255,0.30);
+  --t4:        rgba(255,255,255,0.16);
+  --r-sm:      12px;
+  --r-md:      18px;
+  --r-lg:      26px;
+  --r-xl:      32px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+body {
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px 60px;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* ── PHONE SHELL ── */
+.phone {
+  width: 320px;
+  height: 660px;
+  border-radius: 50px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: #080c14;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.8),
+    0 40px 80px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+/* dynamic island */
+.island {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 24px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 200;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── STATUS BAR ── */
+.sbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--t1);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+  letter-spacing: -0.01em;
+}
+
+/* ── TOP NAV ── */
+.topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 18px 10px;
+  flex-shrink: 0;
+}
+
+.app-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.passport-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 20px;
+  background: var(--glass);
+  border: 1px solid var(--border2);
+  color: var(--t1);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: background 0.2s;
+}
+.passport-btn:hover { background: var(--surface2); }
+
+/* ── BOTTOM NAV ── */
+.bnav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 8px 18px;
+  background: rgba(10,14,22,0.85);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-top: 0.5px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.bni {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--t3);
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  padding: 4px 12px;
+  border-radius: 14px;
+  transition: all 0.2s;
+}
+.bni.on {
+  color: var(--blue);
+  background: rgba(58,130,246,0.12);
+}
+
+/* ── VIEWS ── */
+.view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.view.active { display: flex; }
+
+/* ════════════════════════
+   SWIPE SCREEN
+════════════════════════ */
+.swipe-area {
+  flex: 1;
+  padding: 8px 14px 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-stack { position: relative; height: 100%; }
+
+.bg-card {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.bg-card.b2 { transform: scale(0.94) translateY(10px); z-index: 1; opacity: 0.5; }
+.bg-card.b3 { transform: scale(0.88) translateY(20px); z-index: 0; opacity: 0.25; }
+
+.job-card {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.36s cubic-bezier(0.34,1.1,0.64,1), opacity 0.3s ease;
+  background: #0d1220;
+}
+
+/* card hero */
+.card-hero {
+  height: 155px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.65) 100%);
+}
+
+.card-hero-content {
+  position: absolute;
+  bottom: 14px;
+  left: 15px;
+  right: 15px;
+  z-index: 2;
+}
+
+.card-eyebrow {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 5px;
+}
+
+.card-role {
+  font-size: 19px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.card-co-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+}
+
+.card-co-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.card-co-name { font-size: 11px; color: rgba(255,255,255,0.75); font-weight: 400; }
+
+.card-match {
+  margin-left: auto;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  padding: 3px 9px;
+  font-size: 10px;
+  color: #fff;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+
+/* card body */
+.card-body {
+  flex: 1;
+  padding: 12px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  overflow: hidden;
+}
+
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--t2);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.fit-row { display: flex; align-items: center; gap: 8px; }
+.fit-label { font-size: 10px; color: var(--t3); font-weight: 400; }
+.fit-bar { flex: 1; height: 3px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+.fit-fill { height: 100%; background: var(--blue); border-radius: 3px; transition: width 0.5s ease; }
+.fit-pct { font-size: 11px; color: var(--blue); font-weight: 600; min-width: 28px; text-align: right; }
+
+.card-desc { font-size: 11px; color: var(--t2); line-height: 1.55; font-weight: 300; }
+
+/* card actions */
+.card-actions {
+  flex-shrink: 0;
+  padding: 8px 12px 10px;
+  display: flex;
+  gap: 6px;
+  background: rgba(255,255,255,0.03);
+  border-top: 0.5px solid var(--border);
+}
+
+.act-btn {
+  flex: 1;
+  padding: 9px 4px 8px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 9px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--t2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.15s;
+  letter-spacing: -0.01em;
+}
+.act-btn:hover { background: var(--surface2); }
+.act-btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.act-btn.primary:hover { background: #2563eb; }
+.act-btn.star { background: rgba(255,214,10,0.1); border-color: rgba(255,214,10,0.2); color: var(--amber); }
+.act-icon { font-size: 14px; line-height: 1; }
+.act-lbl { font-size: 8px; line-height: 1.2; text-align: center; }
+
+/* swipe buttons */
+.swipe-btns {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0 6px;
+  flex-shrink: 0;
+}
+
+.sw-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, opacity 0.15s;
+  backdrop-filter: blur(20px);
+}
+.sw-btn:hover { transform: scale(1.08); }
+.sw-btn:active { transform: scale(0.94); opacity: 0.8; }
+
+.sw-pass { background: rgba(255,69,58,0.12); border: 1.5px solid rgba(255,69,58,0.3); }
+.sw-love {
+  width: 58px;
+  height: 58px;
+  background: var(--blue);
+  border: none;
+  box-shadow: 0 6px 20px rgba(58,130,246,0.45), 0 2px 6px rgba(0,0,0,0.3);
+}
+.sw-save { background: rgba(255,214,10,0.1); border: 1.5px solid rgba(255,214,10,0.25); }
+
+/* ════════════════════════
+   REVIEW SCREEN
+════════════════════════ */
+.review-top {
+  height: 260px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  background: #060910;
+}
+
+#globeCanvas { width: 100%; height: 100%; }
+
+.globe-legend {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  display: flex;
+  gap: 10px;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(12px);
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: 0.5px solid rgba(255,255,255,0.1);
+}
+
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: var(--t2);
+  font-weight: 400;
+}
+
+.leg-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* passes */
+.review-bottom {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  background: #080c14;
+}
+.review-bottom::-webkit-scrollbar { display: none; }
+
+.passes-header {
+  padding: 14px 16px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.passes-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+}
+
+.passes-count {
+  font-size: 11px;
+  color: var(--t3);
+  font-weight: 400;
+}
+
+/* boarding pass card — Apple Wallet style */
+.pass-card {
+  margin: 0 12px 10px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.pass-card:active { transform: scale(0.98); }
+
+.pass-top {
+  padding: 12px 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.pass-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.pass-info { flex: 1; min-width: 0; }
+.pass-co { font-size: 10px; color: var(--t3); font-weight: 400; }
+.pass-role {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.02em;
+}
+
+.pass-status {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.ps-green { background: rgba(48,209,88,0.15); color: var(--green); border: 1px solid rgba(48,209,88,0.25); }
+.ps-amber { background: rgba(255,214,10,0.12); color: var(--amber); border: 1px solid rgba(255,214,10,0.2); }
+.ps-red   { background: rgba(255,69,58,0.12);  color: var(--red);   border: 1px solid rgba(255,69,58,0.2); }
+
+/* ticket perforation */
+.pass-perf {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+  margin: 0 13px;
+}
+.perf-line {
+  flex: 1;
+  height: 0.5px;
+  background: var(--border);
+  border: none;
+  border-style: dashed;
+  border-top: 0.5px dashed rgba(255,255,255,0.12);
+}
+.perf-dot-l, .perf-dot-r {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #080c14;
+  border: 0.5px solid var(--border);
+  flex-shrink: 0;
+  margin: 0 -7px;
+  z-index: 2;
+}
+
+.pass-strip {
+  padding: 10px 13px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.ps-field { display: flex; flex-direction: column; flex: 1; }
+.ps-lbl { font-size: 8px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--t4); }
+.ps-val { font-size: 12px; color: var(--t1); font-weight: 500; margin-top: 2px; letter-spacing: -0.01em; }
+.ps-div { width: 0.5px; height: 28px; background: var(--border); margin: 0 10px; }
+.ps-match { margin-left: auto; font-size: 22px; font-weight: 700; color: var(--t1); letter-spacing: -0.04em; }
+
+.pass-actions {
+  padding: 8px 13px 12px;
+  display: flex;
+  gap: 7px;
+}
+
+.pa-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: var(--r-sm);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid;
+  text-align: center;
+  transition: all 0.15s;
+  letter-spacing: -0.01em;
+}
+.pa-coach { background: var(--blue); color: #fff; border-color: var(--blue); }
+.pa-coach:hover { background: #2563eb; }
+.pa-detail { background: var(--surface); color: var(--t2); border-color: var(--border); }
+.pa-detail:hover { background: var(--surface2); }
+.pa-dl { background: var(--surface); color: var(--t2); border-color: var(--border); }
+
+.unread-dot {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 6px rgba(58,130,246,0.6);
+}
+
+/* ════════════════════════
+   WISHLIST SCREEN
+════════════════════════ */
+.wish-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  background: #080c14;
+}
+.wish-scroll::-webkit-scrollbar { display: none; }
+
+.section-header {
+  padding: 16px 16px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+}
+
+/* skill bars */
+.skill-section { padding: 0 14px 14px; }
+
+.skill-grid { display: flex; flex-direction: column; gap: 8px; }
+
+.skill-row { display: flex; align-items: center; gap: 10px; }
+
+.skill-name { font-size: 11px; color: var(--t1); font-weight: 500; min-width: 72px; letter-spacing: -0.01em; }
+
+.skill-bar-bg {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.skill-bar-fill { height: 100%; border-radius: 4px; }
+
+.skill-tag {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+.skill-strong { background: rgba(48,209,88,0.12); color: var(--green); border: 1px solid rgba(48,209,88,0.2); }
+.skill-ok     { background: rgba(255,214,10,0.1); color: var(--amber); border: 1px solid rgba(255,214,10,0.18); }
+.skill-gap    { background: rgba(255,69,58,0.1);  color: var(--red);   border: 1px solid rgba(255,69,58,0.18); }
+
+.gap-section { padding: 0 14px 14px; }
+.gap-label { font-size: 10px; font-weight: 500; color: var(--t3); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
+.gap-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.gap-chip {
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 500;
+  background: rgba(255,69,58,0.08);
+  border: 1px solid rgba(255,69,58,0.18);
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.gc-freq { font-size: 9px; opacity: 0.65; }
+
+.divider { height: 0.5px; background: var(--border); margin: 6px 14px 14px; }
+
+/* company cards */
+.company-section { padding: 0 14px 14px; }
+
+.company-card {
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 10px;
+}
+
+.co-hero { height: 90px; position: relative; overflow: hidden; }
+.co-hero-bg { position: absolute; inset: 0; }
+.co-hero-ov { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.55)); }
+.co-hero-content {
+  position: absolute; bottom: 10px; left: 13px; right: 13px; z-index: 2;
+  display: flex; align-items: flex-end; gap: 10px;
+}
+
+.co-logo-lg {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700; font-family: inherit; flex-shrink: 0;
+}
+
+.co-name-lg { font-size: 16px; font-weight: 700; color: #fff; line-height: 1.1; letter-spacing: -0.02em; }
+.co-sector { font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 400; }
+
+.co-body { padding: 10px 13px; }
+.co-desc { font-size: 11px; color: var(--t2); line-height: 1.55; margin-bottom: 9px; font-weight: 300; }
+
+.co-roles { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
+.co-role-tag {
+  padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 400;
+  background: var(--surface); border: 1px solid var(--border); color: var(--t2);
+}
+
+.co-actions { display: flex; gap: 7px; }
+.co-watch {
+  flex: 2; padding: 9px; border-radius: var(--r-sm);
+  border: none; background: var(--blue); color: #fff;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: background 0.15s; letter-spacing: -0.01em;
+}
+.co-watch:hover { background: #2563eb; }
+.co-skip {
+  flex: 1; padding: 9px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: var(--surface); color: var(--t3);
+  font-size: 11px; cursor: pointer; font-family: inherit;
+}
+
+/* ════════════════════════
+   JOB DETAIL OVERLAY
+════════════════════════ */
+.job-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 350;
+  background: rgba(6,9,15,0.96);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 48px;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.44s cubic-bezier(0.34,1.06,0.64,1), opacity 0.3s;
+  pointer-events: none;
+  overflow: hidden;
+}
+.job-overlay.open { transform: translateY(0); opacity: 1; pointer-events: all; }
+
+.job-hero {
+  height: 160px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.job-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(6,9,15,0.85) 100%);
+}
+.job-hero-back {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+}
+.job-hero-content {
+  position: absolute;
+  bottom: 16px; left: 16px; right: 16px;
+  z-index: 5;
+}
+.job-hero-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 4px;
+}
+.job-hero-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.job-hero-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.job-hero-badge {
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+
+.job-detail-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 0 0 20px;
+}
+.job-detail-scroll::-webkit-scrollbar { display: none; }
+
+/* quick stats row */
+.jd-stats {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px 10px;
+}
+.jd-stat {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 10px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+}
+.jd-stat-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+}
+.jd-stat-lbl {
+  font-size: 9px;
+  color: var(--t3);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* section blocks */
+.jd-section {
+  padding: 10px 16px;
+  border-bottom: 0.5px solid var(--border);
+}
+.jd-section:last-child { border-bottom: none; }
+
+.jd-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.jd-section-title-icon {
+  width: 22px; height: 22px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.jd-body {
+  font-size: 12px;
+  color: var(--t2);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+/* requirement rows */
+.jd-req-list { display: flex; flex-direction: column; gap: 7px; }
+.jd-req {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  color: var(--t2);
+  line-height: 1.5;
+  font-weight: 300;
+}
+.jd-req-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+/* skill match chips */
+.jd-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+.jd-skill-chip {
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.jds-have  { background: rgba(48,209,88,0.1);  border: 1px solid rgba(48,209,88,0.2);  color: var(--green); }
+.jds-ok    { background: rgba(255,214,10,0.1); border: 1px solid rgba(255,214,10,0.2); color: var(--amber); }
+.jds-miss  { background: rgba(255,69,58,0.08); border: 1px solid rgba(255,69,58,0.18); color: var(--red); }
+
+/* document checklist */
+.jd-doc-list { display: flex; flex-direction: column; gap: 8px; }
+.jd-doc {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.jd-doc:hover { background: var(--surface2); }
+.jd-doc-icon {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.jd-doc-info { flex: 1; }
+.jd-doc-name { font-size: 12px; font-weight: 500; color: var(--t1); letter-spacing: -0.01em; }
+.jd-doc-sub  { font-size: 10px; color: var(--t3); margin-top: 1px; font-weight: 300; }
+.jd-doc-status {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+.jds-ready   { background: rgba(48,209,88,0.12);  color: var(--green); border: 1px solid rgba(48,209,88,0.2); }
+.jds-ai      { background: rgba(58,130,246,0.12); color: var(--blue);  border: 1px solid rgba(58,130,246,0.2); }
+.jds-missing { background: rgba(255,69,58,0.10);  color: var(--red);   border: 1px solid rgba(255,69,58,0.18); }
+
+/* timeline */
+.jd-timeline { display: flex; flex-direction: column; gap: 0; }
+.jd-tl-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.jd-tl-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 20px;
+}
+.jd-tl-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid;
+}
+.jd-tl-line {
+  width: 1.5px;
+  flex: 1;
+  min-height: 20px;
+  background: var(--border);
+  margin: 2px 0;
+}
+.jd-tl-content { padding-bottom: 14px; flex: 1; }
+.jd-tl-title { font-size: 12px; font-weight: 600; color: var(--t1); letter-spacing: -0.01em; }
+.jd-tl-date  { font-size: 10px; color: var(--t3); margin-top: 1px; font-weight: 300; }
+
+/* apply CTA */
+.jd-cta {
+  margin: 14px 16px 0;
+  display: flex;
+  gap: 8px;
+}
+.jd-apply {
+  flex: 2;
+  padding: 13px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: var(--blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s;
+  box-shadow: 0 4px 16px rgba(58,130,246,0.35);
+}
+.jd-apply:hover { background: #2563eb; }
+.jd-save-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--t2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.jd-save-btn:hover { background: var(--surface2); }
+
+/* ════════════════════════
+   AUTO-TAILOR OVERLAY
+════════════════════════ */
+.tailor-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 360;
+  background: rgba(6,9,15,0.97);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 48px;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.44s cubic-bezier(0.34,1.06,0.64,1), opacity 0.3s;
+  pointer-events: none;
+  overflow: hidden;
+}
+.tailor-overlay.open { transform: translateY(0); opacity: 1; pointer-events: all; }
+
+/* header bar */
+.tailor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 18px 12px;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.tailor-header-left { display: flex; align-items: center; gap: 10px; }
+.tailor-back {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.15s;
+}
+.tailor-back:hover { background: var(--surface2); }
+.tailor-title { font-size: 16px; font-weight: 700; color: var(--t1); letter-spacing: -0.02em; }
+.tailor-subtitle { font-size: 11px; color: var(--t3); font-weight: 400; letter-spacing: -0.01em; }
+
+/* job context pill */
+.tailor-job-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 16px 0;
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+}
+.tailor-job-badge {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.tailor-job-name { font-size: 12px; font-weight: 600; color: var(--t1); letter-spacing: -0.01em; }
+.tailor-job-co   { font-size: 10px; color: var(--t3); }
+.tailor-match-pill {
+  margin-left: auto;
+  font-size: 10px; font-weight: 600;
+  color: var(--blue);
+  background: rgba(58,130,246,0.12);
+  border: 1px solid rgba(58,130,246,0.22);
+  border-radius: 20px;
+  padding: 3px 9px;
+}
+
+/* upload zone */
+.tailor-upload-zone {
+  margin: 14px 16px 0;
+  padding: 20px 16px;
+  border: 1.5px dashed rgba(58,130,246,0.35);
+  border-radius: var(--r-md);
+  background: rgba(58,130,246,0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+.tailor-upload-zone:hover { background: rgba(58,130,246,0.08); border-color: rgba(58,130,246,0.55); }
+.tailor-upload-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: rgba(58,130,246,0.15);
+  border: 1px solid rgba(58,130,246,0.25);
+  display: flex; align-items: center; justify-content: center;
+}
+.tailor-upload-title { font-size: 13px; font-weight: 600; color: var(--t1); letter-spacing: -0.01em; }
+.tailor-upload-sub   { font-size: 11px; color: var(--t3); font-weight: 300; }
+.tailor-upload-btn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  background: var(--blue);
+  border: none;
+  color: #fff;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.tailor-upload-btn:hover { background: #2563eb; }
+
+/* file uploaded state */
+.tailor-file-ready {
+  margin: 14px 16px 0;
+  padding: 11px 13px;
+  background: rgba(48,209,88,0.07);
+  border: 1px solid rgba(48,209,88,0.2);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.tailor-file-icon {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  background: rgba(48,209,88,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.tailor-file-name { font-size: 12px; font-weight: 500; color: var(--t1); }
+.tailor-file-sub  { font-size: 10px; color: var(--t3); font-weight: 300; }
+.tailor-file-change {
+  margin-left: auto; font-size: 11px; color: var(--blue);
+  cursor: pointer; flex-shrink: 0; font-weight: 500;
+}
+
+/* ATS score bar */
+.tailor-ats-row {
+  margin: 14px 16px 0;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.tailor-ats-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 44px;
+}
+.tailor-ats-num { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+.tailor-ats-lbl { font-size: 9px; color: var(--t3); text-transform: uppercase; letter-spacing: 0.05em; }
+.tailor-ats-arrow { color: var(--t3); font-size: 16px; }
+.tailor-ats-bar-wrap { flex: 1; }
+.tailor-ats-bar-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--t3); margin-bottom: 5px; }
+.tailor-ats-bar { height: 4px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+.tailor-ats-fill { height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(0.34,1.1,0.64,1); }
+
+/* scrollable body */
+.tailor-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding-bottom: 20px;
+}
+.tailor-scroll::-webkit-scrollbar { display: none; }
+
+/* thinking animation */
+.tailor-thinking {
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.tailor-thinking-ring {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(58,130,246,0.15);
+  border-top-color: var(--blue);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.tailor-thinking-text { font-size: 13px; color: var(--t2); font-weight: 400; }
+.tailor-thinking-sub  { font-size: 11px; color: var(--t3); font-weight: 300; text-align: center; line-height: 1.5; }
+
+/* resume diff viewer */
+.tailor-resume-wrap {
+  padding: 12px 16px 0;
+}
+.tailor-resume-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.tailor-tab {
+  flex: 1;
+  padding: 8px;
+  border-radius: var(--r-sm);
+  font-size: 11px; font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--t3);
+  text-align: center;
+  transition: all 0.18s;
+}
+.tailor-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+.tailor-resume-doc {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px;
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--t2);
+  font-weight: 300;
+}
+
+/* resume block styles */
+.res-name    { font-size: 14px; font-weight: 700; color: var(--t1); letter-spacing: -0.02em; margin-bottom: 2px; }
+.res-contact { font-size: 9px; color: var(--t3); margin-bottom: 10px; }
+.res-section { font-size: 10px; font-weight: 700; color: var(--t1); letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 0.5px solid var(--border); padding-bottom: 3px; margin: 10px 0 7px; }
+.res-role    { font-size: 11px; font-weight: 600; color: var(--t1); }
+.res-org     { font-size: 10px; color: var(--t3); margin-bottom: 4px; }
+.res-bullet  { display: flex; gap: 6px; margin-bottom: 3px; font-size: 10px; color: var(--t2); }
+.res-bullet::before { content: '·'; color: var(--t3); flex-shrink: 0; }
+
+/* highlighted (changed) bullet */
+.res-bullet.changed {
+  background: rgba(58,130,246,0.08);
+  border-left: 2px solid var(--blue);
+  padding-left: 6px;
+  margin-left: -8px;
+  color: rgba(255,255,255,0.8);
+  border-radius: 0 4px 4px 0;
+}
+.res-bullet.changed::before { color: var(--blue); }
+
+/* added line */
+.res-bullet.added {
+  background: rgba(48,209,88,0.07);
+  border-left: 2px solid var(--green);
+  padding-left: 6px;
+  margin-left: -8px;
+  color: rgba(255,255,255,0.8);
+  border-radius: 0 4px 4px 0;
+}
+.res-bullet.added::before { content: '+'; color: var(--green); }
+
+/* change legend */
+.tailor-legend {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0 4px;
+}
+.tailor-legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; color: var(--t3);
+}
+.tailor-legend-dot {
+  width: 10px; height: 3px; border-radius: 2px; flex-shrink: 0;
+}
+
+/* AI summary card */
+.tailor-summary {
+  margin: 12px 16px 0;
+  padding: 14px;
+  background: rgba(58,130,246,0.06);
+  border: 1px solid rgba(58,130,246,0.18);
+  border-radius: var(--r-md);
+}
+.tailor-summary-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.tailor-summary-icon {
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  background: rgba(58,130,246,0.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.tailor-summary-title { font-size: 12px; font-weight: 600; color: var(--t1); }
+.tailor-change-list { display: flex; flex-direction: column; gap: 8px; }
+.tailor-change {
+  display: flex; gap: 9px; align-items: flex-start;
+}
+.tailor-change-num {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(58,130,246,0.2);
+  border: 1px solid rgba(58,130,246,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: var(--blue);
+  flex-shrink: 0; margin-top: 1px;
+}
+.tailor-change-text { font-size: 11px; color: var(--t2); line-height: 1.55; font-weight: 300; }
+.tailor-change-text strong { color: var(--t1); font-weight: 500; }
+
+/* export CTA */
+.tailor-export-row {
+  margin: 14px 16px 0;
+  display: flex; gap: 8px;
+}
+.tailor-export-btn {
+  flex: 2; padding: 13px;
+  border-radius: var(--r-sm);
+  border: none; background: var(--blue);
+  color: #fff; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.15s;
+  box-shadow: 0 4px 16px rgba(58,130,246,0.3);
+}
+.tailor-export-btn:hover { background: #2563eb; }
+.tailor-revert-btn {
+  flex: 1; padding: 13px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--t3);
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.tailor-revert-btn:hover { background: var(--surface2); }
+
+/* ════════════════════════
+   AI COACH OVERLAY
+════════════════════════ */
+.coach-overlay {
+  position: absolute; inset: 0; z-index: 370;
+  background: rgba(5,8,14,0.97);
+  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  border-radius: 48px;
+  display: flex; flex-direction: column;
+  transform: translateY(100%); opacity: 0;
+  transition: transform 0.44s cubic-bezier(0.34,1.06,0.64,1), opacity 0.3s;
+  pointer-events: none; overflow: hidden;
+}
+.coach-overlay.open { transform: translateY(0); opacity: 1; pointer-events: all; }
+
+.coach-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 18px 12px;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.coach-header-left { display: flex; align-items: center; gap: 10px; }
+.coach-back {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.15s;
+}
+.coach-back:hover { background: var(--surface2); }
+.coach-title { font-size: 16px; font-weight: 700; color: var(--t1); letter-spacing: -0.02em; }
+.coach-subtitle { font-size: 11px; color: var(--t3); font-weight: 300; }
+.coach-mode-pill {
+  padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 600;
+  background: rgba(160,100,255,0.14); border: 1px solid rgba(160,100,255,0.28); color: #c084fc;
+}
+
+/* progress bar */
+.coach-progress-bar {
+  height: 2px; background: var(--surface);
+  flex-shrink: 0; position: relative; overflow: hidden;
+}
+.coach-progress-fill {
+  height: 100%; background: #a855f7;
+  transition: width 0.5s ease; position: absolute; left: 0; top: 0;
+}
+
+/* job context pill */
+.coach-job-pill {
+  display: flex; align-items: center; gap: 8px;
+  margin: 12px 16px 0; padding: 9px 12px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);
+  flex-shrink: 0;
+}
+.coach-job-badge {
+  width: 26px; height: 26px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.coach-job-name  { font-size: 12px; font-weight: 600; color: var(--t1); letter-spacing: -0.01em; }
+.coach-job-co    { font-size: 10px; color: var(--t3); }
+.coach-step-badge {
+  margin-left: auto; font-size: 10px; font-weight: 500; color: #c084fc;
+  background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.22);
+  border-radius: 20px; padding: 3px 9px; flex-shrink: 0;
+}
+
+/* scroll body */
+.coach-scroll {
+  flex: 1; overflow-y: auto; scrollbar-width: none;
+  padding: 0 0 24px;
+}
+.coach-scroll::-webkit-scrollbar { display: none; }
+
+/* ── PHASE: CHOICE (existing vs build) ── */
+.coach-choice-wrap { padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; }
+.coach-choice-title { font-size: 15px; font-weight: 600; color: var(--t1); letter-spacing: -0.02em; margin-bottom: 4px; }
+.coach-choice-sub   { font-size: 12px; color: var(--t2); font-weight: 300; line-height: 1.55; margin-bottom: 6px; }
+.coach-choice-card {
+  padding: 14px 14px; border-radius: var(--r-md);
+  border: 1.5px solid var(--border); background: var(--surface);
+  cursor: pointer; transition: all 0.18s; display: flex; gap: 12px; align-items: flex-start;
+}
+.coach-choice-card:hover { background: var(--surface2); border-color: rgba(168,85,247,0.4); }
+.coach-choice-card.selected { border-color: #a855f7; background: rgba(168,85,247,0.07); }
+.coach-choice-icon {
+  width: 38px; height: 38px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.coach-choice-card-title { font-size: 13px; font-weight: 600; color: var(--t1); margin-bottom: 3px; }
+.coach-choice-card-desc  { font-size: 11px; color: var(--t2); font-weight: 300; line-height: 1.5; }
+
+/* ── PHASE: QUESTION BUILDER ── */
+.coach-question-wrap { padding: 16px 16px 0; }
+.coach-q-bubble {
+  display: flex; gap: 9px; align-items: flex-start; margin-bottom: 14px;
+}
+.coach-q-avatar {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(168,85,247,0.18); border: 1px solid rgba(168,85,247,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.coach-q-text {
+  background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.18);
+  border-radius: 0 14px 14px 14px;
+  padding: 10px 12px; font-size: 12px; color: var(--t1); line-height: 1.55;
+  max-width: calc(100% - 40px);
+}
+.coach-q-tip {
+  font-size: 10px; color: var(--t3); margin-top: 4px; font-style: italic; font-weight: 300;
+}
+
+/* user answer bubble */
+.coach-a-bubble {
+  display: flex; justify-content: flex-end; margin-bottom: 14px;
+}
+.coach-a-text {
+  background: rgba(58,130,246,0.12); border: 1px solid rgba(58,130,246,0.22);
+  border-radius: 14px 0 14px 14px;
+  padding: 9px 12px; font-size: 12px; color: var(--t1); line-height: 1.5;
+  max-width: 85%; font-weight: 400;
+}
+
+/* input area */
+.coach-input-area {
+  margin: 8px 16px 0; display: flex; gap: 8px; align-items: flex-end;
+}
+.coach-textarea {
+  flex: 1; background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 14px; padding: 10px 12px;
+  font-size: 12px; color: var(--t1); font-family: inherit;
+  resize: none; min-height: 42px; max-height: 90px; line-height: 1.5;
+  font-weight: 300;
+}
+.coach-textarea:focus { outline: none; border-color: rgba(168,85,247,0.5); }
+.coach-textarea::placeholder { color: var(--t4); }
+.coach-send-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: none;
+  background: #a855f7; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; transition: background 0.15s;
+}
+.coach-send-btn:hover { background: #9333ea; }
+.coach-send-btn:disabled { background: rgba(168,85,247,0.3); cursor: not-allowed; }
+
+.coach-skip-row {
+  padding: 8px 16px 0; display: flex; justify-content: space-between; align-items: center;
+}
+.coach-skip-btn {
+  font-size: 11px; color: var(--t3); cursor: pointer; padding: 4px 0;
+  font-weight: 400; transition: color 0.15s;
+}
+.coach-skip-btn:hover { color: var(--t2); }
+.coach-q-count { font-size: 10px; color: var(--t4); }
+
+/* ── PHASE: LIVE COACHING ── */
+.coach-live-wrap { padding: 14px 16px 0; }
+
+.coach-insight-card {
+  padding: 12px 14px; border-radius: var(--r-md); margin-bottom: 10px;
+  border: 1px solid; display: flex; flex-direction: column; gap: 6px;
+}
+.coach-insight-header { display: flex; align-items: center; gap: 8px; }
+.coach-insight-icon {
+  width: 24px; height: 24px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0;
+}
+.coach-insight-title  { font-size: 12px; font-weight: 600; color: var(--t1); flex: 1; letter-spacing: -0.01em; }
+.coach-insight-status {
+  font-size: 9px; font-weight: 600; padding: 2px 7px;
+  border-radius: 20px; flex-shrink: 0;
+}
+.ci-pending  { background: rgba(255,255,255,0.06); color: var(--t3); border: 1px solid var(--border); }
+.ci-active   { background: rgba(168,85,247,0.12);  color: #c084fc; border: 1px solid rgba(168,85,247,0.25); animation: pulse-badge 1.4s ease infinite; }
+.ci-approved { background: rgba(48,209,88,0.12);   color: var(--green); border: 1px solid rgba(48,209,88,0.22); }
+.ci-skipped  { background: rgba(255,255,255,0.04); color: var(--t4); border: 1px solid var(--border); }
+@keyframes pulse-badge { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+.coach-insight-body  { font-size: 11px; color: var(--t2); line-height: 1.6; font-weight: 300; }
+.coach-insight-why   { font-size: 10px; color: #c084fc; font-weight: 400; margin-top: 2px; }
+
+/* before / after diff inside coaching card */
+.coach-diff {
+  background: rgba(0,0,0,0.25); border-radius: 8px;
+  padding: 8px 10px; margin-top: 4px; display: flex; flex-direction: column; gap: 5px;
+}
+.coach-diff-before {
+  font-size: 10px; color: var(--t3); font-weight: 300;
+  text-decoration: line-through; line-height: 1.5;
+}
+.coach-diff-after {
+  font-size: 10px; color: rgba(255,255,255,0.85); font-weight: 400;
+  line-height: 1.5; border-left: 2px solid #a855f7; padding-left: 7px;
+}
+.coach-diff-label { font-size: 9px; color: var(--t4); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+
+/* action row below active card */
+.coach-action-row {
+  display: flex; gap: 7px; margin-top: 8px;
+}
+.coach-approve-btn {
+  flex: 2; padding: 9px; border-radius: var(--r-sm);
+  border: none; background: var(--green); color: #fff;
+  font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  transition: background 0.15s;
+}
+.coach-approve-btn:hover { background: #28b84a; }
+.coach-edit-btn {
+  flex: 1.5; padding: 9px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: var(--surface); color: var(--t2);
+  font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.coach-edit-btn:hover { background: var(--surface2); }
+.coach-skip-this-btn {
+  flex: 1; padding: 9px; border-radius: var(--r-sm);
+  border: 1px solid rgba(255,69,58,0.2); background: rgba(255,69,58,0.06); color: var(--red);
+  font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.coach-skip-this-btn:hover { background: rgba(255,69,58,0.12); }
+
+/* inline edit */
+.coach-inline-edit {
+  margin-top: 6px; display: flex; flex-direction: column; gap: 6px;
+}
+.coach-edit-textarea {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(168,85,247,0.4);
+  border-radius: 10px; padding: 9px 10px;
+  font-size: 11px; color: var(--t1); font-family: inherit;
+  resize: none; min-height: 56px; line-height: 1.55; font-weight: 300;
+}
+.coach-edit-textarea:focus { outline: none; border-color: #a855f7; }
+.coach-edit-save {
+  padding: 8px 14px; border-radius: var(--r-sm); border: none;
+  background: #a855f7; color: #fff; font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: inherit; align-self: flex-end;
+  transition: background 0.15s;
+}
+.coach-edit-save:hover { background: #9333ea; }
+
+/* score tracker */
+.coach-score-row {
+  margin: 0 16px 12px;
+  padding: 11px 13px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.coach-score-label { font-size: 10px; color: var(--t3); font-weight: 400; }
+.coach-score-num   { font-size: 18px; font-weight: 700; color: var(--t1); letter-spacing: -0.03em; }
+.coach-score-bar   { flex: 1; height: 4px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; }
+.coach-score-fill  { height: 100%; background: #a855f7; border-radius: 4px; transition: width 0.8s cubic-bezier(0.34,1.1,0.64,1); }
+.coach-score-delta { font-size: 11px; font-weight: 600; color: var(--green); }
+
+/* ── PHASE: COMPLETE ── */
+.coach-complete-wrap {
+  padding: 24px 16px 0;
+  display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+}
+.coach-complete-ring {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: rgba(48,209,88,0.12); border: 2px solid rgba(48,209,88,0.3);
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.coach-complete-title { font-size: 18px; font-weight: 700; color: var(--t1); letter-spacing: -0.02em; }
+.coach-complete-sub   { font-size: 12px; color: var(--t2); font-weight: 300; line-height: 1.6; max-width: 240px; }
+.coach-lesson-box {
+  width: 100%; background: rgba(168,85,247,0.06);
+  border: 1px solid rgba(168,85,247,0.18); border-radius: var(--r-md);
+  padding: 14px; text-align: left;
+}
+.coach-lesson-title { font-size: 11px; font-weight: 600; color: #c084fc; margin-bottom: 8px; letter-spacing: 0.04em; text-transform: uppercase; }
+.coach-lesson-list  { display: flex; flex-direction: column; gap: 7px; }
+.coach-lesson-item  { display: flex; gap: 8px; font-size: 11px; color: var(--t2); font-weight: 300; line-height: 1.5; }
+.coach-lesson-bullet { color: #a855f7; flex-shrink: 0; }
+
+.coach-final-btns { display: flex; gap: 8px; width: 100%; }
+.coach-final-export {
+  flex: 2; padding: 13px; border-radius: var(--r-sm); border: none;
+  background: #a855f7; color: #fff; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 16px rgba(168,85,247,0.3);
+  transition: background 0.15s;
+}
+.coach-final-export:hover { background: #9333ea; }
+.coach-final-restart {
+  flex: 1; padding: 13px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: var(--surface); color: var(--t2);
+  font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.coach-final-restart:hover { background: var(--surface2); }
+
+/* ── loading phase ── */
+.coach-loading-wrap {
+  padding: 28px 16px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+}
+.coach-loading-icon-ring {
+  position: relative; width: 72px; height: 72px;
+}
+.coach-loading-svg { width: 72px; height: 72px; transform: rotate(-90deg); }
+.coach-loading-track { fill: none; stroke: rgba(168,85,247,0.12); stroke-width: 4; }
+.coach-loading-arc   { fill: none; stroke: #a855f7; stroke-width: 4; stroke-linecap: round;
+  stroke-dasharray: 201; stroke-dashoffset: 201;
+  transition: stroke-dashoffset 0.4s ease; }
+.coach-loading-centre {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; color: var(--t1); letter-spacing: -0.04em;
+}
+.coach-loading-headline {
+  font-size: 16px; font-weight: 700; color: var(--t1); letter-spacing: -0.02em; text-align: center;
+}
+.coach-loading-subline {
+  font-size: 12px; color: var(--t2); font-weight: 300; text-align: center; line-height: 1.55;
+}
+
+/* progress track */
+.coach-loading-track-wrap {
+  width: 100%; display: flex; flex-direction: column; gap: 7px;
+}
+.coach-loading-bar-bg {
+  width: 100%; height: 5px; background: rgba(255,255,255,0.07);
+  border-radius: 5px; overflow: hidden;
+}
+.coach-loading-bar-fill {
+  height: 100%; background: #a855f7; border-radius: 5px;
+  transition: width 0.35s ease;
+}
+.coach-loading-steps { display: flex; flex-direction: column; gap: 6px; }
+.coach-loading-step {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 12px; color: var(--t3); font-weight: 300;
+  transition: color 0.3s;
+}
+.coach-loading-step.done    { color: var(--t1); }
+.coach-loading-step.active  { color: #c084fc; }
+.coach-loading-step-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,0.1); transition: background 0.3s;
+}
+.coach-loading-step.done   .coach-loading-step-dot { background: var(--green); }
+.coach-loading-step.active .coach-loading-step-dot { background: #a855f7; animation: pulse-dot 1s ease infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+
+.coach-loading-eta {
+  font-size: 11px; color: var(--t3); font-weight: 300; text-align: center;
+}
+
+/* typing dots */
+.coach-typing {
+  display: inline-flex; align-items: center; gap: 4px; padding: 10px 14px;
+}
+.coach-typing span {
+  width: 5px; height: 5px; border-radius: 50%; background: rgba(168,85,247,0.6);
+  animation: dot-bounce 1.2s ease infinite;
+}
+.coach-typing span:nth-child(2) { animation-delay: 0.2s; }
+.coach-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dot-bounce { 0%,80%,100%{transform:scale(0.7);opacity:0.5} 40%{transform:scale(1.1);opacity:1} }
+
+/* ════════════════════════
+   PASSPORT OVERLAY
+════════════════════════ */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  background: rgba(8,12,20,0.92);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 48px;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.42s cubic-bezier(0.34,1.06,0.64,1), opacity 0.28s;
+  pointer-events: none;
+}
+.overlay.open { transform: translateY(0); opacity: 1; pointer-events: all; }
+
+.overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 18px 10px;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+
+.overlay-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+}
+
+.close-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--t2);
+  transition: background 0.15s;
+}
+.close-btn:hover { background: var(--surface2); }
+
+.passport-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 14px 16px;
+}
+.passport-scroll::-webkit-scrollbar { display: none; }
+
+/* passport cover — frosted gradient card */
+.pp-cover {
+  background: linear-gradient(135deg, #1e3a5f, #0f2040, #112244);
+  border: 1px solid rgba(58,130,246,0.3);
+  border-radius: var(--r-md);
+  padding: 18px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pp-cover::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: rgba(58,130,246,0.08);
+}
+
+.pp-cover-label {
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(150,190,255,0.4);
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.pp-country {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+  position: relative;
+}
+
+.pp-name {
+  font-size: 13px;
+  color: rgba(180,210,255,0.8);
+  margin-top: 2px;
+  position: relative;
+  font-weight: 300;
+}
+
+.pp-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  position: relative;
+}
+
+.pp-city {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.04em;
+}
+
+.pp-arrow { flex: 1; display: flex; align-items: center; justify-content: center; }
+
+.pp-fields { display: flex; gap: 18px; margin-top: 12px; position: relative; }
+.pp-fl { font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(150,190,255,0.35); }
+.pp-fv { font-size: 12px; color: rgba(200,225,255,0.85); font-weight: 500; margin-top: 2px; letter-spacing: -0.01em; }
+
+.pp-session {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px 13px;
+  margin-bottom: 10px;
+}
+
+.pp-sec-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 9px;
+}
+
+.pp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.pp-row:last-child { border-bottom: none; }
+.pp-rl { font-size: 11px; color: var(--t3); font-weight: 400; }
+.pp-rv { font-size: 11px; color: var(--t1); font-weight: 500; letter-spacing: -0.01em; }
+
+/* stamps */
+.stamps-section { margin-bottom: 12px; }
+.stamps-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 10px;
+}
+
+.stamps-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.stamp {
+  width: 66px; height: 66px;
+  border-radius: var(--r-sm);
+  border: 1.5px dashed rgba(255,255,255,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px;
+}
+
+.stamp.filled {
+  border-style: solid;
+  border-color: rgba(58,130,246,0.3);
+  background: rgba(58,130,246,0.07);
+}
+
+.stamp.gold {
+  border-color: rgba(255,214,10,0.3);
+  background: rgba(255,214,10,0.07);
+}
+
+.stamp-icon { font-size: 20px; line-height: 1; }
+.stamp-lbl { font-size: 7px; color: var(--t2); text-align: center; line-height: 1.3; font-weight: 400; }
+.stamp-empty { font-size: 22px; opacity: 0.14; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: rgba(20,26,40,0.92);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 9px 18px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--t1);
+  opacity: 0;
+  transition: all 0.28s cubic-bezier(0.34,1.1,0.64,1);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 9999;
+  backdrop-filter: blur(20px);
+  letter-spacing: -0.01em;
+}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+  <div class="island"></div>
+
+  <div class="sbar">
+    <span>9:41</span>
+    <span style="font-size:13px;font-weight:700;letter-spacing:-0.03em;color:rgba(255,255,255,0.9)">landed</span>
+    <span style="display:flex;gap:4px;align-items:center;">
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="rgba(255,255,255,0.9)"><rect x="0" y="3" width="2" height="7" rx="1"/><rect x="3" y="2" width="2" height="8" rx="1"/><rect x="6" y="1" width="2" height="9" rx="1"/><rect x="9" y="0" width="2" height="10" rx="1"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><rect x="0.5" y="0.5" width="13" height="11" rx="2" stroke="rgba(255,255,255,0.9)" stroke-width="1"/><rect x="14" y="3.5" width="1.5" height="5" rx="0.75" fill="rgba(255,255,255,0.6)"/><rect x="1.5" y="1.5" width="9" height="9" rx="1.5" fill="rgba(255,255,255,0.9)"/></svg>
+    </span>
+  </div>
+
+  <div class="topnav">
+    <div class="app-name">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="#3a82f6"/></svg>
+      Landed
+    </div>
+    <button class="passport-btn" onclick="openPassport()">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="2" width="18" height="20" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+      Passport
+    </button>
+  </div>
+
+  <!-- ═══ SWIPE ═══ -->
+  <div class="view active" id="v-swipe">
+    <div class="swipe-area">
+      <div class="card-stack">
+        <div class="bg-card b3"></div>
+        <div class="bg-card b2"></div>
+        <div class="job-card" id="jobCard">
+          <div class="card-hero" id="cardHero">
+            <div class="card-hero-overlay"></div>
+            <div class="card-hero-content">
+              <div class="card-eyebrow" id="cardEyebrow"></div>
+              <div class="card-role" id="cardRole"></div>
+              <div class="card-co-row">
+                <div class="card-co-badge" id="cardBadge"></div>
+                <div class="card-co-name" id="cardCo"></div>
+                <div class="card-match" id="cardMatch"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chips" id="cardChips"></div>
+            <div class="fit-row">
+              <div class="fit-label">Flight match</div>
+              <div class="fit-bar"><div class="fit-fill" id="fitFill"></div></div>
+              <div class="fit-pct" id="fitPct"></div>
+            </div>
+            <div class="card-desc" id="cardDesc"></div>
+          </div>
+          <div class="card-actions">
+            <div class="act-btn" onclick="doAction('info')">
+              <div class="act-icon">ℹ</div>
+              <div class="act-lbl">Company</div>
+            </div>
+            <div class="act-btn primary" onclick="doAction('coach')">
+              <div class="act-icon" style="font-size:12px;">✦</div>
+              <div class="act-lbl">AI Coach</div>
+            </div>
+            <div class="act-btn" onclick="doAction('auto')">
+              <div class="act-icon" style="font-size:12px;">⚡</div>
+              <div class="act-lbl">Auto-tailor</div>
+            </div>
+            <div class="act-btn star" onclick="doAction('star')">
+              <div class="act-icon">★</div>
+              <div class="act-lbl">Save</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="swipe-btns">
+      <button class="sw-btn sw-pass" onclick="swipe(-1)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <button class="sw-btn sw-love" onclick="swipe(1)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="#fff"/></svg>
+      </button>
+      <button class="sw-btn sw-save" onclick="swipe(0)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffd60a" stroke-width="2.5" stroke-linecap="round"><polyline points="12 2 12 22"/><polyline points="6 8 12 2 18 8"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ REVIEW ═══ -->
+  <div class="view" id="v-review">
+    <div class="review-top">
+      <canvas id="globeCanvas" width="320" height="260"></canvas>
+      <div class="globe-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#30d158"></div>Landed</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#ffd60a"></div>In-flight</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#ff453a"></div>Departed</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(255,255,255,0.3)"></div>Wishlist</div>
+      </div>
+    </div>
+    <div class="review-bottom">
+      <div class="passes-header">
+        <div class="passes-title">Boarding passes</div>
+        <div class="passes-count">5 applications</div>
+      </div>
+
+      <!-- pass 1 -->
+      <div class="pass-card">
+        <div class="pass-top">
+          <div class="pass-logo" style="background:#96bf48">S</div>
+          <div class="pass-info">
+            <div class="pass-co">Shopify · Remote</div>
+            <div class="pass-role">Product Design Intern</div>
+          </div>
+          <div class="pass-status ps-green">LANDED</div>
+          <div class="unread-dot"></div>
+        </div>
+        <div class="pass-perf"><div class="perf-dot-l"></div><div class="perf-line"></div><div class="perf-dot-r"></div></div>
+        <div class="pass-strip">
+          <div class="ps-field"><div class="ps-lbl">pay</div><div class="ps-val">$44/hr</div></div>
+          <div class="ps-div"></div>
+          <div class="ps-field"><div class="ps-lbl">deadline</div><div class="ps-val">May 10</div></div>
+          <div class="ps-div"></div>
+          <div class="ps-field"><div class="ps-lbl">applied</div><div class="ps-val">Mar 8</div></div>
+          <div class="ps-match">91%</div>
+        </div>
+        <div class="pass-actions">
+          <div class="pa-btn pa-coach" onclick="openCoach(0)">✦ Coach</div>
+          <div class="pa-btn pa-detail" onclick="toast('Loading details…')">Details</div>
+          <div class="pa-btn pa-dl" onclick="toast('Downloading…')">↓ Export</div>
+        </div>
+      </div>
+
+      <!-- pass 2 -->
+      <div class="pass-card">
+        <div class="pass-top">
+          <div class="pass-logo" style="background:#4285f4">G</div>
+          <div class="pass-info">
+            <div class="pass-co">Google · Sydney · Hybrid</div>
+            <div class="pass-role">ML Research Intern</div>
+          </div>
+          <div class="pass-status ps-amber">IN-FLIGHT</div>
+        </div>
+        <div class="pass-perf"><div class="perf-dot-l"></div><div class="perf-line"></div><div class="perf-dot-r"></div></div>
+        <div class="pass-strip">
+          <div class="ps-field"><div class="ps-lbl">pay</div><div class="ps-val">$45/hr</div></div>
+          <div class="ps-div"></div>
+          <div class="ps-field"><div class="ps-lbl">deadline</div><div class="ps-val">Apr 20</div></div>
+          <div class="ps-div"></div>
+          <div class="ps-field"><div class="ps-lbl">applied</div><div class="ps-val">Feb 28</div></div>
+          <div class="ps-match">87%</div>
+        </div>
+        <div class="pass-actions">
+          <div class="pa-btn pa-coach" onclick="openCoach(1)">✦ Coach</div>
+          <div class="pa-btn pa-detail" onclick="toast('Loading details…')">Details</div>
+          <div class="pa-btn pa-dl" onclick="toast('Regime pending…')">↓ Pending</div>
+        </div>
+      </div>
+
+      <!-- pass 3 -->
+      <div class="pass-card">
+        <div class="pass-top">
+          <div class="pass-logo" style="background:#635bff">S</div>
+          <div class="pass-info">
+            <div class="pass-co">Stripe · Remote</div>
+            <div class="pass-role">Frontend Engineer Intern</div>
+          </div>
+          <div class="pass-status ps-red">DEPARTED</div>
+        </div>
+        <div class="pass-perf"><div class="perf-dot-l"></div><div class="perf-line"></div><div class="perf-dot-r"></div></div>
+        <div class="pass-strip">
+          <div class="ps-field"><div class="ps-lbl">pay</div><div class="ps-val">$50/hr</div></div>
+          <div class="ps-div"></div>
+          <div class="ps-field"><div class="ps-lbl">deadline</div><div class="ps-val">May 5</div></div>
+          <div class="ps-div"></div>
+          <div class="ps-field"><div class="ps-lbl">saved</div><div class="ps-val">Mar 2</div></div>
+          <div class="ps-match">85%</div>
+        </div>
+        <div class="pass-actions">
+          <div class="pa-btn pa-coach" onclick="openCoach(2)">✦ Coach</div>
+          <div class="pa-btn pa-detail" onclick="toast('Loading details…')">Details</div>
+          <div class="pa-btn pa-dl" onclick="toast('Start with coach first')">✦ Start</div>
+        </div>
+      </div>
+      <div style="height:10px"></div>
+    </div>
+  </div>
+
+  <!-- ═══ WISHLIST ═══ -->
+  <div class="view" id="v-wish">
+    <div class="wish-scroll">
+      <div class="section-header">Skill radar</div>
+      <div class="skill-section">
+        <div class="skill-grid">
+          <div class="skill-row"><div class="skill-name">React / TS</div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:88%;background:#30d158"></div></div><div class="skill-tag skill-strong">Strong</div></div>
+          <div class="skill-row"><div class="skill-name">Figma / UI</div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:82%;background:#30d158"></div></div><div class="skill-tag skill-strong">Strong</div></div>
+          <div class="skill-row"><div class="skill-name">Python</div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:65%;background:#ffd60a"></div></div><div class="skill-tag skill-ok">Developing</div></div>
+          <div class="skill-row"><div class="skill-name">SQL</div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:48%;background:#ffd60a"></div></div><div class="skill-tag skill-ok">Developing</div></div>
+          <div class="skill-row"><div class="skill-name">AWS / Cloud</div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:18%;background:#ff453a"></div></div><div class="skill-tag skill-gap">Gap</div></div>
+          <div class="skill-row"><div class="skill-name">Docker / CI</div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:12%;background:#ff453a"></div></div><div class="skill-tag skill-gap">Gap</div></div>
+        </div>
+      </div>
+
+      <div class="gap-section">
+        <div class="gap-label">Missing from your applications</div>
+        <div class="gap-chips">
+          <div class="gap-chip">AWS/GCP <span class="gc-freq">×8</span></div>
+          <div class="gap-chip">Docker <span class="gc-freq">×6</span></div>
+          <div class="gap-chip">GraphQL <span class="gc-freq">×4</span></div>
+          <div class="gap-chip">CI/CD <span class="gc-freq">×4</span></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-header" style="padding-top:0;">Destinations to explore</div>
+      <div class="company-section">
+        <div class="company-card">
+          <div class="co-hero">
+            <div class="co-hero-bg" style="background:linear-gradient(135deg,#1a0e28,#5c1e5a,#9c3848,#d45e38)"></div>
+            <div class="co-hero-ov"></div>
+            <div class="co-hero-content">
+              <div class="co-logo-lg" style="color:#a78bfa">C</div>
+              <div><div class="co-name-lg">Canva</div><div class="co-sector">Design tools · Sydney / Remote</div></div>
+            </div>
+          </div>
+          <div class="co-body">
+            <div class="co-desc">Fast-growing design platform. Strong grad program, high Glassdoor scores, known for engineering culture.</div>
+            <div class="co-roles">
+              <div class="co-role-tag">Product Design</div>
+              <div class="co-role-tag">Frontend Eng</div>
+              <div class="co-role-tag">Data Science</div>
+            </div>
+            <div class="co-actions">
+              <button class="co-watch" onclick="toast('Canva added to watchlist ★')">★ Add to watchlist</button>
+              <button class="co-skip" onclick="toast('Skipped')">Skip</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <div class="co-hero">
+            <div class="co-hero-bg" style="background:linear-gradient(135deg,#041408,#1a5020,#2d7a38)"></div>
+            <div class="co-hero-ov"></div>
+            <div class="co-hero-content">
+              <div class="co-logo-lg" style="color:#34d399">A</div>
+              <div><div class="co-name-lg">Atlassian</div><div class="co-sector">Enterprise SaaS · Sydney / Remote</div></div>
+            </div>
+          </div>
+          <div class="co-body">
+            <div class="co-desc">Developer tooling giant. TEAM-first culture, strong internship conversion rate, flexible hybrid work.</div>
+            <div class="co-roles">
+              <div class="co-role-tag">SWE Intern</div>
+              <div class="co-role-tag">Product Mgr</div>
+              <div class="co-role-tag">UX Research</div>
+            </div>
+            <div class="co-actions">
+              <button class="co-watch" onclick="toast('Atlassian added to watchlist ★')">★ Add to watchlist</button>
+              <button class="co-skip" onclick="toast('Skipped')">Skip</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ JOB DETAIL OVERLAY ═══ -->
+  <div class="job-overlay" id="jobOverlay">
+    <div class="job-hero" id="jdHero">
+      <div class="job-hero-overlay"></div>
+      <div class="job-hero-back" onclick="closeJobDetail()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="job-hero-content">
+        <div class="job-hero-eyebrow" id="jdEyebrow">Internship · Remote</div>
+        <div class="job-hero-title" id="jdTitle">Product Design Intern</div>
+        <div class="job-hero-sub">
+          <div class="job-hero-badge" id="jdBadge">S</div>
+          <span id="jdCompany">Shopify</span>
+          <span style="opacity:0.35">·</span>
+          <span id="jdLocation">Remote</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="job-detail-scroll">
+
+      <!-- quick stats -->
+      <div class="jd-stats">
+        <div class="jd-stat">
+          <div class="jd-stat-val" id="jdPay">$44/hr</div>
+          <div class="jd-stat-lbl">Pay</div>
+        </div>
+        <div class="jd-stat">
+          <div class="jd-stat-val" id="jdMatch" style="color:var(--blue)">91%</div>
+          <div class="jd-stat-lbl">Match</div>
+        </div>
+        <div class="jd-stat">
+          <div class="jd-stat-val" style="color:var(--amber)" id="jdDeadline">May 10</div>
+          <div class="jd-stat-lbl">Closes</div>
+        </div>
+        <div class="jd-stat">
+          <div class="jd-stat-val" id="jdDuration">12 wks</div>
+          <div class="jd-stat-lbl">Duration</div>
+        </div>
+      </div>
+
+      <!-- about the role -->
+      <div class="jd-section">
+        <div class="jd-section-title">
+          <div class="jd-section-title-icon" style="background:rgba(58,130,246,0.12);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3a82f6" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          About the role
+        </div>
+        <div class="jd-body" id="jdAbout">Work within the Commerce UX team redesigning the checkout experience used by 1.7M merchants globally. You'll own end-to-end design flows, run user research sessions, and ship work that reaches millions of buyers every day.</div>
+      </div>
+
+      <!-- requirements -->
+      <div class="jd-section">
+        <div class="jd-section-title">
+          <div class="jd-section-title-icon" style="background:rgba(255,214,10,0.1);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffd60a" stroke-width="2" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          Requirements
+        </div>
+        <div class="jd-req-list" id="jdReqs"></div>
+      </div>
+
+      <!-- skill match -->
+      <div class="jd-section">
+        <div class="jd-section-title">
+          <div class="jd-section-title-icon" style="background:rgba(48,209,88,0.1);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          Your skill match
+        </div>
+        <div class="jd-skills" id="jdSkills"></div>
+      </div>
+
+      <!-- documents checklist -->
+      <div class="jd-section">
+        <div class="jd-section-title">
+          <div class="jd-section-title-icon" style="background:rgba(255,69,58,0.08);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff6b60" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          Documents required
+        </div>
+        <div class="jd-doc-list" id="jdDocs"></div>
+      </div>
+
+      <!-- application timeline -->
+      <div class="jd-section">
+        <div class="jd-section-title">
+          <div class="jd-section-title-icon" style="background:rgba(58,130,246,0.1);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3a82f6" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          Timeline
+        </div>
+        <div class="jd-timeline" id="jdTimeline"></div>
+      </div>
+
+      <!-- about company -->
+      <div class="jd-section">
+        <div class="jd-section-title">
+          <div class="jd-section-title-icon" style="background:rgba(255,255,255,0.06);" id="jdCoIcon">S</div>
+          About the company
+        </div>
+        <div class="jd-body" id="jdCompanyAbout"></div>
+      </div>
+
+      <!-- CTA -->
+      <div class="jd-cta">
+        <button class="jd-apply" onclick="toast('✈  Added to boarding passes'); closeJobDetail();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="#fff"/></svg>
+          Land this role
+        </button>
+        <button class="jd-save-btn" onclick="toast('★ Saved to wishlist'); closeJobDetail();">Save</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ AUTO-TAILOR OVERLAY ═══ -->
+  <div class="tailor-overlay" id="tailorOverlay">
+
+    <!-- header -->
+    <div class="tailor-header">
+      <div class="tailor-header-left">
+        <div class="tailor-back" onclick="closeTailor()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>
+        <div>
+          <div class="tailor-title">Auto-tailor</div>
+          <div class="tailor-subtitle" id="tailorSubtitle">Adjusting resume for this role</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--t3);font-weight:400;">3 / 5 tailors left</div>
+    </div>
+
+    <!-- job context pill -->
+    <div class="tailor-job-pill">
+      <div class="tailor-job-badge" id="tailorBadge">S</div>
+      <div>
+        <div class="tailor-job-name" id="tailorJobName">Product Design Intern</div>
+        <div class="tailor-job-co" id="tailorJobCo">Shopify · Remote</div>
+      </div>
+      <div class="tailor-match-pill" id="tailorMatchPill">91% match</div>
+    </div>
+
+    <!-- upload zone (shown if no resume) -->
+    <div class="tailor-upload-zone" id="tailorUploadZone" onclick="simulateUpload()">
+      <div class="tailor-upload-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3a82f6" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <div class="tailor-upload-title">Upload your resume</div>
+      <div class="tailor-upload-sub">PDF or Word — we'll never store it without permission</div>
+      <button class="tailor-upload-btn" onclick="event.stopPropagation();simulateUpload()">Choose file</button>
+    </div>
+
+    <!-- file ready state (hidden until upload) -->
+    <div class="tailor-file-ready" id="tailorFileReady" style="display:none;">
+      <div class="tailor-file-icon">📄</div>
+      <div>
+        <div class="tailor-file-name">Alex_Chen_Resume_2026.pdf</div>
+        <div class="tailor-file-sub">Uploaded · 2 pages · last modified Mar 10</div>
+      </div>
+      <div class="tailor-file-change" onclick="resetTailor()">Change</div>
+    </div>
+
+    <!-- ATS score bar (hidden until tailored) -->
+    <div class="tailor-ats-row" id="tailorAtsRow" style="display:none;">
+      <div class="tailor-ats-score">
+        <div class="tailor-ats-num" id="atsScoreBefore" style="color:var(--red)">54%</div>
+        <div class="tailor-ats-lbl">before</div>
+      </div>
+      <div class="tailor-ats-arrow">→</div>
+      <div class="tailor-ats-bar-wrap">
+        <div class="tailor-ats-bar-row">
+          <span>ATS match score</span>
+          <span id="atsScoreAfterLabel" style="color:var(--green);font-weight:600;">91%</span>
+        </div>
+        <div class="tailor-ats-bar"><div class="tailor-ats-fill" id="atsBarFill" style="width:0%;background:var(--green)"></div></div>
+        <div style="font-size:9px;color:var(--t3)">Optimised for Shopify ATS keywords</div>
+      </div>
+    </div>
+
+    <!-- scrollable content area -->
+    <div class="tailor-scroll" id="tailorScroll">
+
+      <!-- thinking state -->
+      <div class="tailor-thinking" id="tailorThinking" style="display:none;">
+        <div class="tailor-thinking-ring"></div>
+        <div class="tailor-thinking-text">Analysing your resume…</div>
+        <div class="tailor-thinking-sub" id="tailorThinkingMsg">Matching your experience against the job description and identifying high-impact improvements.</div>
+      </div>
+
+      <!-- resume diff viewer (hidden until done) -->
+      <div class="tailor-resume-wrap" id="tailorResumeWrap" style="display:none;">
+        <div class="tailor-resume-tabs">
+          <div class="tailor-tab active" id="tabOriginal" onclick="showTab('original')">Original</div>
+          <div class="tailor-tab" id="tabTailored" onclick="showTab('tailored')">Tailored</div>
+        </div>
+        <div class="tailor-legend">
+          <div class="tailor-legend-item"><div class="tailor-legend-dot" style="background:var(--blue)"></div>Reworded</div>
+          <div class="tailor-legend-item"><div class="tailor-legend-dot" style="background:var(--green)"></div>Added</div>
+        </div>
+        <div class="tailor-resume-doc" id="tailorResumeDoc"></div>
+      </div>
+
+      <!-- AI summary (hidden until done) -->
+      <div class="tailor-summary" id="tailorSummary" style="display:none;">
+        <div class="tailor-summary-header">
+          <div class="tailor-summary-icon">✦</div>
+          <div class="tailor-summary-title" id="tailorSummaryTitle">Why these changes improve your application</div>
+        </div>
+        <div class="tailor-change-list" id="tailorChangeList"></div>
+      </div>
+
+      <!-- export row (hidden until done) -->
+      <div class="tailor-export-row" id="tailorExportRow" style="display:none;">
+        <button class="tailor-export-btn" onclick="toast('✈  Tailored resume exported as PDF'); closeTailor();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export tailored PDF
+        </button>
+        <button class="tailor-revert-btn" onclick="resetTailorResult()">Revert</button>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+
+  <!-- ═══ AI COACH OVERLAY ═══ -->
+  <div class="coach-overlay" id="coachOverlay">
+
+    <div class="coach-header">
+      <div class="coach-header-left">
+        <div class="coach-back" onclick="closeCoach()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>
+        <div>
+          <div class="coach-title">AI Coach</div>
+          <div class="coach-subtitle" id="coachSubtitle">Guided resume coaching</div>
+        </div>
+      </div>
+      <div class="coach-mode-pill" id="coachModePill">Step 1 of 5</div>
+    </div>
+
+    <div class="coach-progress-bar">
+      <div class="coach-progress-fill" id="coachProgressFill" style="width:0%"></div>
+    </div>
+
+    <div class="coach-job-pill" id="coachJobPill">
+      <div class="coach-job-badge" id="coachBadge">S</div>
+      <div>
+        <div class="coach-job-name" id="coachJobName">Product Design Intern</div>
+        <div class="coach-job-co" id="coachJobCo">Shopify · Remote</div>
+      </div>
+      <div class="coach-step-badge" id="coachStepBadge">Tailoring</div>
+    </div>
+
+    <!-- ATS score tracker (shows during coaching) -->
+    <div class="coach-score-row" id="coachScoreRow" style="display:none; margin-top:10px;">
+      <div>
+        <div class="coach-score-label">ATS score</div>
+        <div class="coach-score-num" id="coachScoreNum">54%</div>
+      </div>
+      <div class="coach-score-bar"><div class="coach-score-fill" id="coachScoreFill" style="width:54%"></div></div>
+      <div class="coach-score-delta" id="coachScoreDelta">+0%</div>
+    </div>
+
+    <div class="coach-scroll" id="coachScroll">
+
+      <!-- ── PHASE 0: Choice ── -->
+      <div id="coachPhaseChoice">
+        <div class="coach-choice-wrap">
+          <div class="coach-choice-title">How would you like to start?</div>
+          <div class="coach-choice-sub">AI Coach walks you through every change step-by-step, explaining the why so you can do it yourself next time.</div>
+          <div class="coach-choice-card" id="choiceExisting" onclick="selectCoachMode('existing')">
+            <div class="coach-choice-icon" style="background:rgba(58,130,246,0.1);">📄</div>
+            <div>
+              <div class="coach-choice-card-title">I have a resume</div>
+              <div class="coach-choice-card-desc">Upload your existing resume and the coach will walk through tailoring it for this specific role, one change at a time.</div>
+            </div>
+          </div>
+          <div class="coach-choice-card" id="choiceBuild" onclick="selectCoachMode('build')">
+            <div class="coach-choice-icon" style="background:rgba(168,85,247,0.1);">✦</div>
+            <div>
+              <div class="coach-choice-card-title">Build one from scratch</div>
+              <div class="coach-choice-card-desc">Answer a few questions about yourself and the coach will construct a professional resume tailored to this role.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PHASE 1: Upload (existing) ── -->
+      <div id="coachPhaseUpload" style="display:none;">
+        <div style="padding:16px 16px 0;">
+          <div class="coach-q-bubble">
+            <div class="coach-q-avatar">✦</div>
+            <div class="coach-q-text">Let's start. Upload your current resume and I'll read through it before we begin. I won't change anything without your go-ahead.</div>
+          </div>
+          <div class="tailor-upload-zone" style="margin:0 0 12px;" onclick="coachSimulateUpload()">
+            <div class="tailor-upload-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3a82f6" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="tailor-upload-title">Upload your resume</div>
+            <div class="tailor-upload-sub">PDF or Word — used only in this session</div>
+            <button class="tailor-upload-btn" onclick="event.stopPropagation();coachSimulateUpload()">Choose file</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PHASE 2: Q&A builder ── -->
+      <div id="coachPhaseQA" style="display:none;">
+        <div class="coach-question-wrap" id="coachChatHistory"></div>
+        <div class="coach-input-area" id="coachInputArea">
+          <textarea class="coach-textarea" id="coachInput" placeholder="Type your answer…" rows="1"
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();coachSendAnswer();}"></textarea>
+          <button class="coach-send-btn" id="coachSendBtn" onclick="coachSendAnswer()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="coach-skip-row">
+          <span class="coach-skip-btn" onclick="coachSkipQuestion()">Skip this question →</span>
+          <span class="coach-q-count" id="coachQCount">Question 1 of 6</span>
+        </div>
+      </div>
+
+      <!-- ── PHASE 2.5: Loading / analysis ── -->
+      <div id="coachPhaseLoading" style="display:none;">
+        <div class="coach-loading-wrap">
+
+          <div class="coach-loading-icon-ring">
+            <svg class="coach-loading-svg" viewBox="0 0 72 72">
+              <circle class="coach-loading-track" cx="36" cy="36" r="32"/>
+              <circle class="coach-loading-arc" id="loadingArc" cx="36" cy="36" r="32"/>
+            </svg>
+            <div class="coach-loading-centre" id="loadingCountdown">8</div>
+          </div>
+
+          <div class="coach-loading-headline" id="loadingHeadline">Analysing your resume…</div>
+          <div class="coach-loading-subline" id="loadingSubline">Reading your experience against the job description and preparing your coaching session.</div>
+
+          <div class="coach-loading-track-wrap">
+            <div class="coach-loading-bar-bg">
+              <div class="coach-loading-bar-fill" id="loadingBarFill" style="width:0%"></div>
+            </div>
+            <div class="coach-loading-steps" id="loadingSteps"></div>
+          </div>
+
+          <div class="coach-loading-eta" id="loadingEta">Estimated time: 8 seconds</div>
+        </div>
+      </div>
+
+      <!-- ── PHASE 3: Live coaching ── -->
+      <div id="coachPhaseLive" style="display:none;">
+        <div class="coach-live-wrap" id="coachLiveCards"></div>
+      </div>
+
+      <!-- ── PHASE 4: Complete ── -->
+      <div id="coachPhaseComplete" style="display:none;">
+        <div class="coach-complete-wrap" id="coachCompleteWrap"></div>
+      </div>
+
+      <div style="height:20px"></div>
+    </div>
+  </div>
+
+  <!-- ═══ PASSPORT OVERLAY ═══ -->
+  <div class="overlay" id="passportOverlay">
+    <div class="overlay-header">
+      <div class="overlay-title">Passport</div>
+      <div class="close-btn" onclick="closePassport()">✕</div>
+    </div>
+    <div class="passport-scroll">
+      <div class="pp-cover">
+        <div class="pp-cover-label">landed · passenger document</div>
+        <div class="pp-country">AUSTRALIA</div>
+        <div class="pp-name">Alex Chen</div>
+        <div class="pp-route">
+          <div class="pp-city">MELB</div>
+          <div class="pp-arrow">
+            <svg width="52" height="14" viewBox="0 0 52 14" fill="none">
+              <line x1="0" y1="7" x2="40" y2="7" stroke="rgba(120,180,255,0.25)" stroke-width="1"/>
+              <path d="M38 4l8 3-8 3" stroke="rgba(120,180,255,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="pp-city">HIRE</div>
+        </div>
+        <div class="pp-fields">
+          <div><div class="pp-fl">flight</div><div class="pp-fv">LD-2026</div></div>
+          <div><div class="pp-fl">gate</div><div class="pp-fv">G7</div></div>
+          <div><div class="pp-fl">class</div><div class="pp-fv">Grad Eng</div></div>
+          <div><div class="pp-fl">season</div><div class="pp-fv">2026</div></div>
+        </div>
+      </div>
+
+      <div class="pp-session">
+        <div class="pp-sec-title">Static profile</div>
+        <div class="pp-row"><div class="pp-rl">Degree</div><div class="pp-rv">Mech Eng / Biomed</div></div>
+        <div class="pp-row"><div class="pp-rl">University</div><div class="pp-rv">Monash University</div></div>
+        <div class="pp-row"><div class="pp-rl">Year</div><div class="pp-rv">3rd year</div></div>
+        <div class="pp-row"><div class="pp-rl">Base resume</div><div class="pp-rv">Updated Mar 10</div></div>
+      </div>
+
+      <div class="pp-session">
+        <div class="pp-sec-title">This session</div>
+        <div class="pp-row"><div class="pp-rl">Searching for</div><div class="pp-rv">Internships 2026</div></div>
+        <div class="pp-row"><div class="pp-rl">Locations</div><div class="pp-rv">Melbourne, Remote</div></div>
+        <div class="pp-row"><div class="pp-rl">Fields</div><div class="pp-rv">Design, Engineering</div></div>
+        <div class="pp-row"><div class="pp-rl">Swiped today</div><div class="pp-rv">12 jobs</div></div>
+        <div class="pp-row"><div class="pp-rl">AI tailors left</div><div class="pp-rv" style="color:#3a82f6;font-weight:600;">3 / 5</div></div>
+      </div>
+
+      <div class="stamps-section">
+        <div class="stamps-label">Application stamps</div>
+        <div class="stamps-grid">
+          <div class="stamp filled"><div class="stamp-icon">✈</div><div class="stamp-lbl">Shopify Applied</div></div>
+          <div class="stamp filled"><div class="stamp-icon">🤖</div><div class="stamp-lbl">AI Tailor ×2</div></div>
+          <div class="stamp gold"><div class="stamp-icon">✦</div><div class="stamp-lbl">Coach session</div></div>
+          <div class="stamp"><div class="stamp-empty">✈</div></div>
+          <div class="stamp"><div class="stamp-empty">★</div></div>
+          <div class="stamp"><div class="stamp-empty">✦</div></div>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav">
+    <div class="bni on" id="nav-swipe" onclick="switchTab('swipe')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor"/></svg>
+      <span>swipe</span>
+    </div>
+    <div class="bni" id="nav-review" onclick="switchTab('review')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <span>review</span>
+    </div>
+    <div class="bni" id="nav-wish" onclick="switchTab('wish')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>wishlist</span>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+function switchTab(t) {
+  ['swipe','review','wish'].forEach(x => {
+    document.getElementById('v-'+x).classList.toggle('active', x===t);
+    document.getElementById('nav-'+x).classList.toggle('on', x===t);
+  });
+  if (t==='review') startGlobe();
+}
+
+let _tt;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(_tt);
+  _tt = setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(16px)';
+  }, 2400);
+}
+
+function openPassport() { document.getElementById('passportOverlay').classList.add('open'); }
+function closePassport() { document.getElementById('passportOverlay').classList.remove('open'); }
+
+const jobs = [
+  { role:'Product Design Intern', co:'Shopify', lt:'S', lf:'#1a7a40', sky:'linear-gradient(160deg,#041408,#1a5828,#96bf48)', match:91, loc:'Remote', pay:'$44/hr', mode:'Intern', fit:91, desc:'Work within Shopify\'s Commerce UX team redesigning checkout for 1.7M merchants globally.' },
+  { role:'ML Research Intern', co:'Google', lt:'G', lf:'#1a4aaa', sky:'linear-gradient(160deg,#040e28,#1a3060,#4285f4)', match:87, loc:'Sydney · Hybrid', pay:'$45/hr', mode:'Intern', fit:87, desc:'Collaborate with Google AI Research on multimodal language models with a path to publication.' },
+  { role:'Frontend Engineer Intern', co:'Stripe', lt:'S', lf:'#4a3aaa', sky:'linear-gradient(160deg,#09080f,#1e1660,#635bff)', match:85, loc:'Remote', pay:'$50/hr', mode:'Intern', fit:85, desc:'Build payment interfaces processing billions in transactions for millions of businesses worldwide.' },
+  { role:'SWE Intern', co:'Atlassian', lt:'A', lf:'#0a4aaa', sky:'linear-gradient(160deg,#040c1c,#0a2260,#0052cc)', match:78, loc:'Sydney · Hybrid', pay:'$42/hr', mode:'Intern', fit:78, desc:'Help build next-generation project management tools used by millions of developers worldwide.' },
+];
+let idx = 0;
+
+function renderCard() {
+  const j = jobs[idx % jobs.length];
+  document.getElementById('cardHero').style.background = j.sky;
+  document.getElementById('cardBadge').textContent = j.lt;
+  document.getElementById('cardBadge').style.background = j.lf;
+  document.getElementById('cardEyebrow').textContent = '✈  ' + j.match + '% match · ' + j.loc;
+  document.getElementById('cardRole').textContent = j.role;
+  document.getElementById('cardCo').textContent = j.co + ' · ' + j.loc;
+  document.getElementById('cardMatch').textContent = j.pay;
+  document.getElementById('cardChips').innerHTML = [j.loc.split('·')[0].trim(), j.pay, j.mode].map(c=>`<div class="chip">${c}</div>`).join('');
+  document.getElementById('fitFill').style.width = j.fit + '%';
+  document.getElementById('fitPct').textContent = j.fit + '%';
+  document.getElementById('cardDesc').textContent = j.desc;
+}
+
+function swipe(dir) {
+  const card = document.getElementById('jobCard');
+  if (dir === 1)  { card.style.transform = 'translateX(360px) rotate(16deg)'; card.style.opacity = '0'; toast('✈  Added to boarding passes'); }
+  else if (dir===-1){ card.style.transform = 'translateX(-360px) rotate(-16deg)'; card.style.opacity = '0'; toast('Passed'); }
+  else            { card.style.transform = 'translateY(-320px) scale(0.8)'; card.style.opacity = '0'; toast('★ Saved to wishlist'); }
+  setTimeout(() => {
+    idx++;
+    card.style.transition = 'none';
+    card.style.transform = 'none';
+    card.style.opacity = '1';
+    void card.offsetHeight;
+    card.style.transition = 'transform 0.36s cubic-bezier(0.34,1.1,0.64,1),opacity 0.3s ease';
+    renderCard();
+  }, 340);
+}
+
+function doAction(type) {
+  if (type === 'info')  { openJobDetail(); return; }
+  if (type === 'auto')  { openTailor();    return; }
+  if (type === 'coach') { openCoach(idx % jobs.length); return; }
+  const msgs = { star:'★ Saved for review' };
+  toast(msgs[type]||'');
+}
+
+/* ══════════════════════════════════════════
+   AI COACH ENGINE
+══════════════════════════════════════════ */
+
+let coachJobIdx   = 0;
+let coachMode     = null;   /* 'existing' | 'build' */
+let coachPhase    = 0;      /* 0=choice 1=upload/qa 2=live 3=done */
+let coachQIdx     = 0;
+let coachAnswers  = {};
+let coachCardIdx  = 0;
+let coachScore    = 54;
+let coachApproved = 0;
+let coachEditing  = null;
+let coachTypingTimer = null;
+let coachSending  = false;
+
+/* ── Per-job coaching steps ── */
+const coachSteps = [
+  /* 0 Shopify */
+  [
+    { title:'Lead with merchant scale', icon:'📊', iconBg:'rgba(58,130,246,0.12)',
+      insight:'Your first bullet says "redesigned the dashboard" — but Shopify serves 1.7M merchants. Anchoring your impact to a real number makes the reader immediately understand the scale you can operate at.',
+      why:'Shopify\'s JD uses "merchant" 9 times. Matching their language signals cultural fit.',
+      before:'Redesigned the team\'s internal project dashboard using Figma',
+      after:'Redesigned the team\'s project dashboard in Figma, reducing time-on-task by 31% across 200+ weekly users',
+      delta: 8 },
+    { title:'Show Figma system depth', icon:'🎨', iconBg:'rgba(168,85,247,0.12)',
+      insight:'You list Figma as a skill but your bullets describe outputs (screens, prototypes) rather than your depth with the tool. Shopify\'s design system (Polaris) is built in Figma — they want to know you understand component architecture.',
+      why:'Shopify\'s Polaris design system is central to the role. Component-library experience is a direct match.',
+      before:'Delivered prototypes for client review using Figma',
+      after:'Built a shared Figma component library of 40+ components, adopted by 6 developers — cutting design–dev handoff time by 40%',
+      delta: 9 },
+    { title:'Quantify your user research', icon:'🔬', iconBg:'rgba(48,209,88,0.1)',
+      insight:'"Conducted user interviews" is passive and vague. Every designer does interviews. What makes yours count is the rigour — how many participants, what method, what decision did it inform?',
+      why:'The JD says "run user research sessions" — your reworded bullet mirrors that language exactly while adding credibility.',
+      before:'Conducted user interviews and created wireframes for 3 features',
+      after:'Synthesised insights from 14 user interview sessions to prioritise a 3-feature roadmap, applying Jobs-to-be-Done framing',
+      delta: 7 },
+    { title:'Surface accessibility work', icon:'♿', iconBg:'rgba(255,214,10,0.1)',
+      insight:'WCAG compliance appears in the requirements but is absent from your resume. You do have relevant coursework — it\'s just not visible. This is a gap we can close honestly by surfacing what you\'ve already done.',
+      why:'Shopify\'s Polaris enforces WCAG 2.1 AA. Showing familiarity here removes a potential red flag.',
+      before:'React (basic) listed in skills only',
+      after:'Added to skills: WCAG / Accessibility (2.1 AA) · collaborated with engineers to implement accessible React components passing Polaris checklist',
+      delta: 8 },
+    { title:'Reframe freelance impact commercially', icon:'💼', iconBg:'rgba(255,99,71,0.1)',
+      insight:'Your freelance project description focuses on deliverables ("logo, colour palette") rather than outcomes. Shopify is a commerce company — they value work that moved a business metric.',
+      why:'Connecting design to conversion rate is the language of commerce teams. This is accurate — you have the data, it just wasn\'t in the resume.',
+      before:'Designed mobile app UI for a local fitness startup',
+      after:'Designed end-to-end checkout flow for a fitness startup\'s mobile app, increasing conversion from onboarding to subscription by 18%',
+      delta: 9 },
+  ],
+  /* 1 Google */
+  [
+    { title:'Reframe project as research', icon:'🔬', iconBg:'rgba(58,130,246,0.12)',
+      insight:'"A class project" reads as coursework. Google hires researchers. The exact same work described as "an investigation into X with ablation analysis" positions you as someone who already thinks like a researcher.',
+      why:'Google\'s JD says "prior research experience" — coursework counts when described correctly.',
+      before:'Built a text classification model using Python and PyTorch',
+      after:'Investigated multimodal sentiment classification using fused text and image embeddings; structured as a reproducible experiment with full ablation analysis across 4 model variants',
+      delta: 10 },
+    { title:'Quantify model performance', icon:'📈', iconBg:'rgba(48,209,88,0.1)',
+      insight:'"Achieved reasonable accuracy" is the weakest possible phrase on a research resume. You have the actual F1 score — use it. Numbers signal that you understand how to evaluate models rigorously.',
+      why:'Google evaluates candidates on technical precision. A specific F1 score outperforming a named baseline is exactly what a research scientist reads for.',
+      before:'Achieved reasonable accuracy on the test set',
+      after:'Achieved 94.2% F1 on the held-out test set, outperforming the BERT-only baseline by 6.1 points',
+      delta: 12 },
+    { title:'Add reproducibility signal', icon:'🔁', iconBg:'rgba(168,85,247,0.12)',
+      insight:'Reproducibility is a core value in ML research. Open-sourcing your code with a proper README signals research maturity that most interns won\'t have. You already did this — it just wasn\'t in the resume.',
+      why:'DeepMind publishes all research openly. Showing you share that instinct aligns you with their culture.',
+      before:'Wrote a report summarising findings',
+      after:'Authored a 28-page report following NeurIPS conventions; open-sourced experiment codebase with reproducibility README, receiving 3 external GitHub stars',
+      delta: 8 },
+    { title:'Make PyTorch explicit in context', icon:'⚙', iconBg:'rgba(255,214,10,0.1)',
+      insight:'PyTorch is listed in your skills section but doesn\'t appear in any bullet. ATS systems parse skills in context — a tool mentioned inside a project description scores higher than a skills list entry alone.',
+      why:'Google\'s stack is PyTorch and JAX. Showing PyTorch in a real project context is far stronger than listing it.',
+      before:'Python, PyTorch listed in skills section only',
+      after:'PyTorch now appears in project bullet: "Trained a PyTorch transformer pipeline on 50,000 annotated samples"',
+      delta: 7 },
+  ],
+  /* 2 Stripe */
+  [
+    { title:'Show TypeScript strictness', icon:'🔷', iconBg:'rgba(58,130,246,0.12)',
+      insight:'You list TypeScript but your project bullets read like plain JavaScript. Stripe\'s entire codebase uses strict TypeScript. Mentioning types, interfaces, and generics specifically signals that you can contribute from day one.',
+      why:'Stripe is notorious for their strict TypeScript culture. Vague "used TypeScript" is a yellow flag; specific examples of typed patterns are a green flag.',
+      before:'Built the main web app frontend using React and JavaScript',
+      after:'Owned the checkout flow frontend in React 18 and TypeScript — handling 12 input validation states with Zod schema validation and typed API contracts',
+      delta: 11 },
+    { title:'Add the Lighthouse score', icon:'⚡', iconBg:'rgba(255,214,10,0.1)',
+      insight:'You mentioned "improved performance" but you have the actual numbers (72 → 96 Lighthouse). In engineering, vague claims with available data look like you didn\'t measure. Stripe\'s culture is data-first.',
+      why:'Stripe\'s JD explicitly calls out "web performance." A score improvement is the most concrete evidence possible.',
+      before:'Helped improve performance of the app',
+      after:'Shipped a Lighthouse performance audit cycle (72 → 96) via code-splitting, lazy-loading, and removing 14 unused dependencies',
+      delta: 9 },
+    { title:'Replace weak verbs', icon:'✏', iconBg:'rgba(168,85,247,0.12)',
+      insight:'"Helped with," "worked on," and "assisted" dilute every bullet they appear in. Stripe\'s engineering culture values individual ownership and clear attribution. Every bullet should start with a verb that owns the outcome.',
+      why:'Stripe\'s interview process asks "what did YOU do" — your resume should answer that before they ask.',
+      before:'Helped improve performance of the app, worked on payment form',
+      after:'Owned end-to-end development of the payment checkout flow … Shipped a Lighthouse audit cycle … Wrote 94% test coverage',
+      delta: 8 },
+    { title:'Surface test coverage', icon:'🧪', iconBg:'rgba(48,209,88,0.1)',
+      insight:'You wrote unit tests but didn\'t mention coverage. A 94% coverage number signals engineering discipline and is rare for an intern project. Stripe cares deeply about reliability.',
+      why:'Stripe processes real money. Test rigour is a hiring signal, not just a nice-to-have.',
+      before:'Wrote unit tests for some components',
+      after:'Wrote 94% test coverage across checkout components using Jest and React Testing Library, catching 3 regression bugs pre-production',
+      delta: 7 },
+  ],
+  /* 3 Atlassian */
+  [
+    { title:'Add Jira & Confluence language', icon:'📋', iconBg:'rgba(58,130,246,0.12)',
+      insight:'You use Jira in your own projects but have never mentioned it in your resume — even for a Jira internship. This is the single most obvious gap. Atlassian wants to see that you already live in their ecosystem.',
+      why:'You\'re applying to build Jira. Using Jira in your own work and not mentioning it is like applying to cook at a restaurant without saying you cook.',
+      before:'Built a task management web app with a group of 5',
+      after:'Led development for a cross-functional team of 5, running 2-week sprints tracked in Jira with standups and retrospectives documented in Confluence',
+      delta: 12 },
+    { title:'Reframe group project as leadership', icon:'👥', iconBg:'rgba(168,85,247,0.12)',
+      insight:'Atlassian\'s TEAM values prioritise cross-functional collaboration. "Group of 5" sounds passive. "Cross-functional team of 5 engineers and one designer" sounds like you understand how product teams work.',
+      why:'Atlassian literally names their values TEAM (Teamwork, Execute, Ambitious, Mindful). Showing you lead cross-functional teams is a direct value signal.',
+      before:'Built a task management web app with a group of 5',
+      after:'Collaborated with a cross-functional team of 5 engineers and 1 designer, acting as tech lead for the backend and facilitating sprint ceremonies',
+      delta: 8 },
+    { title:'Make REST API work explicit', icon:'🔌', iconBg:'rgba(48,209,88,0.1)',
+      insight:'Your backend project used REST but the bullets described the feature, not the implementation. Atlassian\'s engineers want to know you understand API design — not just that you built something that worked.',
+      why:'Atlassian\'s backend is Java and REST/GraphQL. Showing API design thinking is a direct technical match.',
+      before:'Implemented the backend API using Node.js and Express',
+      after:'Designed a RESTful API with 8 endpoints following OpenAPI 3.0 spec; documented in Confluence and versioned via semantic commits',
+      delta: 9 },
+    { title:'Surface your WAM', icon:'🎓', iconBg:'rgba(255,214,10,0.1)',
+      insight:'Atlassian requires a minimum WAM of 65 on their intern applications. Your 74 is above this threshold — but it\'s buried at the bottom of the page. Move it to the education section header so recruiters see it immediately.',
+      why:'Recruiters scan for WAM as a filter before reading experience. Failing to surface it means being missed in the first 10 seconds.',
+      before:'WAM: 74 (listed in footer of education section)',
+      after:'WAM: 74 now displayed inline with degree title in education header — immediately visible to recruiters and ATS',
+      delta: 6 },
+  ],
+];
+
+/* ── Q&A questions per mode ── */
+const buildQuestions = [
+  { q:'What\'s your name and what degree are you studying? (e.g. "Alex Chen, Bachelor of Engineering at Monash")', tip:'Include your university — it helps calibrate the experience level expected.', key:'intro' },
+  { q:'What\'s the most recent thing you\'ve built, designed, or shipped — even if it was a uni project or personal side project?', tip:'Be specific. "Built an app" is less useful than "Built a meal-planning app with a React frontend and Node backend."', key:'project1' },
+  { q:'Tell me about a time you worked with other people to get something done. What was your role?', tip:'Teams, clubs, group assignments, volunteering — all count. What did you specifically contribute?', key:'teamwork' },
+  { q:'What technical skills or tools do you use regularly? List as many as you can.', tip:'Include software, languages, frameworks, and tools — even things you\'re just learning count.', key:'skills' },
+  { q:'Have you had any work experience, internships, part-time jobs, or volunteering? Even informal or short-term counts.', tip:'Tutoring, retail, freelance work, helping at events — all of it can appear on a resume.', key:'experience' },
+  { q:'What do you want this company to remember about you above everything else?', tip:'This becomes your resume summary. Think about what makes you different from other applicants at your level.', key:'summary' },
+];
+
+const tailorQuestions = [
+  { q:'I\'ve read your resume. Before I suggest any changes, can you confirm: is every bullet point 100% accurate? Nothing exaggerated or made up?', tip:'I only work with what\'s true. If something is slightly overstated, now is a good time to flag it.', key:'accuracy' },
+  { q:'Which parts of your resume are you most proud of? What do you think is your strongest selling point for this role?', tip:'This helps me decide what to lead with and what to amplify.', key:'strengths' },
+  { q:'Is there anything relevant you\'ve done that isn\'t on your resume yet? Projects, skills, achievements?', tip:'Hidden experience is the biggest missed opportunity on intern resumes.', key:'missing' },
+];
+
+function openCoach(jobI) {
+  coachJobIdx  = jobI !== undefined ? jobI : (idx % jobs.length);
+  coachMode    = null;
+  coachPhase   = 0;
+  coachQIdx    = 0;
+  coachAnswers = {};
+  coachCardIdx = 0;
+  coachScore   = 54;
+  coachApproved = 0;
+  coachEditing = null;
+  coachSending = false;
+
+  const j = jobs[coachJobIdx % jobs.length];
+  document.getElementById('coachBadge').textContent      = j.lt;
+  document.getElementById('coachBadge').style.background = j.lf;
+  document.getElementById('coachJobName').textContent    = j.role;
+  document.getElementById('coachJobCo').textContent      = j.co + ' · ' + j.loc;
+  document.getElementById('coachSubtitle').textContent   = 'Guided coaching for ' + j.co;
+  document.getElementById('coachStepBadge').textContent  = 'Choose mode';
+  document.getElementById('coachModePill').textContent   = 'Step 1 of 5';
+  document.getElementById('coachProgressFill').style.width = '5%';
+  document.getElementById('coachScoreRow').style.display = 'none';
+
+  showCoachPhase('choice');
+  document.getElementById('coachOverlay').classList.add('open');
+}
+
+function closeCoach() {
+  document.getElementById('coachOverlay').classList.remove('open');
+  if (coachTypingTimer)  clearTimeout(coachTypingTimer);
+  if (loadingStepTimer)  clearTimeout(loadingStepTimer);
+}
+
+function showCoachPhase(phase) {
+  ['choice','upload','qa','loading','live','complete'].forEach(p => {
+    const key = 'coachPhase' + p.charAt(0).toUpperCase() + p.slice(1);
+    const el = document.getElementById(key);
+    if (el) el.style.display = 'none';
+  });
+  const target = document.getElementById('coachPhase' + phase.charAt(0).toUpperCase() + phase.slice(1));
+  if (target) target.style.display = 'block';
+}
+
+function selectCoachMode(mode) {
+  coachMode = mode;
+  document.getElementById('choiceExisting').classList.toggle('selected', mode === 'existing');
+  document.getElementById('choiceBuild').classList.toggle('selected', mode === 'build');
+
+  if (mode === 'existing') {
+    if (resumeUploaded) {
+      document.getElementById('coachStepBadge').textContent = 'Analysing';
+      coachProgressFill(20);
+      setTimeout(() => startCoachQA('tailor'), 400);
+    } else {
+      showCoachPhase('upload');
+      document.getElementById('coachStepBadge').textContent = 'Upload';
+      coachProgressFill(15);
+    }
+  } else {
+    document.getElementById('coachStepBadge').textContent = 'Building';
+    coachProgressFill(15);
+    startCoachQA('build');
+  }
+}
+
+function coachSimulateUpload() {
+  resumeUploaded = true;
+  document.getElementById('coachStepBadge').textContent = 'Uploaded';
+  coachProgressFill(20);
+  setTimeout(() => startCoachQA('tailor'), 400);
+}
+
+function startCoachQA(type) {
+  coachQIdx = 0;
+  document.getElementById('coachChatHistory').innerHTML = '';
+  showCoachPhase('qa');
+  document.getElementById('coachInput').value = '';
+  const questions = type === 'build' ? buildQuestions : tailorQuestions;
+  coachProgressFill(type === 'build' ? 20 : 30);
+  document.getElementById('coachModePill').textContent = type === 'build' ? 'Resume builder' : 'Tailoring';
+  coachAskQuestion(questions, type);
+}
+
+function coachAskQuestion(questions, type) {
+  const q = questions[coachQIdx];
+  if (!q) {
+    // Done with questions — show loading phase before live coaching
+    startCoachLoading();
+    return;
+  }
+
+  document.getElementById('coachQCount').textContent = 'Question ' + (coachQIdx+1) + ' of ' + questions.length;
+  coachProgressFill(20 + Math.round((coachQIdx / questions.length) * 25));
+
+  // Typing dots
+  const hist = document.getElementById('coachChatHistory');
+  const typingId = 'coachTyping_' + Date.now();
+  hist.innerHTML += `<div class="coach-q-bubble" id="${typingId}">
+    <div class="coach-q-avatar">✦</div>
+    <div class="coach-q-text"><div class="coach-typing"><span></span><span></span><span></span></div></div>
+  </div>`;
+  coachScroll();
+
+  coachTypingTimer = setTimeout(() => {
+    const el = document.getElementById(typingId);
+    if (el) el.outerHTML = `<div class="coach-q-bubble">
+      <div class="coach-q-avatar">✦</div>
+      <div>
+        <div class="coach-q-text">${q.q}</div>
+        <div class="coach-q-tip">${q.tip}</div>
+      </div>
+    </div>`;
+    document.getElementById('coachSendBtn').disabled = false;
+    document.getElementById('coachInput').disabled = false;
+    document.getElementById('coachInput').focus();
+    coachScroll();
+  }, 1100);
+}
+
+/* ── Loading phase between Q&A and live coaching ── */
+const loadingStepDefs = [
+  { label: 'Reading your experience and background',   duration: 1400 },
+  { label: 'Matching against job description keywords', duration: 1600 },
+  { label: 'Identifying impact opportunities',          duration: 1500 },
+  { label: 'Generating tailored suggestions',           duration: 1800 },
+  { label: 'Verifying no skills are fabricated',        duration: 1200 },
+  { label: 'Preparing your coaching session',           duration: 1000 },
+];
+
+const loadingHeadlines = [
+  'Analysing your experience…',
+  'Cross-referencing the job description…',
+  'Finding your strongest talking points…',
+  'Writing personalised suggestions…',
+  'Double-checking accuracy…',
+  'Almost ready…',
+];
+
+let loadingCountdownTimer = null;
+let loadingStepTimer      = null;
+
+function startCoachLoading() {
+  showCoachPhase('loading');
+  document.getElementById('coachStepBadge').textContent  = 'Analysing';
+  document.getElementById('coachModePill').textContent   = 'Preparing…';
+
+  const j = jobs[coachJobIdx % jobs.length];
+  document.getElementById('loadingSubline').textContent =
+    'Reading your ' + (coachMode === 'build' ? 'answers' : 'resume') +
+    ' against the ' + j.co + ' job description and preparing your coaching session.';
+
+  /* Build step list */
+  const stepsEl = document.getElementById('loadingSteps');
+  stepsEl.innerHTML = loadingStepDefs.map((s, i) => `
+    <div class="coach-loading-step" id="lstep_${i}">
+      <div class="coach-loading-step-dot"></div>
+      <span>${s.label}</span>
+    </div>`).join('');
+
+  /* Total duration across all steps */
+  const totalMs = loadingStepDefs.reduce((a, s) => a + s.duration, 0);
+  const totalSec = Math.ceil(totalMs / 1000);
+
+  /* Countdown number */
+  let remaining = totalSec;
+  document.getElementById('loadingCountdown').textContent = remaining;
+  document.getElementById('loadingEta').textContent = 'Estimated time: ' + remaining + ' second' + (remaining !== 1 ? 's' : '');
+
+  /* Arc circumference = 2π×32 ≈ 201 */
+  const arc = document.getElementById('loadingArc');
+  const circumference = 201;
+  arc.style.strokeDashoffset = circumference;
+
+  document.getElementById('loadingBarFill').style.width = '0%';
+  document.getElementById('loadingHeadline').textContent = loadingHeadlines[0];
+
+  let elapsed = 0;
+  const tickMs = 80;
+
+  /* Countdown interval */
+  const countdownInterval = setInterval(() => {
+    elapsed += tickMs;
+    const pct = Math.min(elapsed / totalMs, 1);
+
+    /* Progress bar */
+    document.getElementById('loadingBarFill').style.width = (pct * 100).toFixed(1) + '%';
+
+    /* Arc */
+    arc.style.strokeDashoffset = (circumference * (1 - pct)).toFixed(2);
+
+    /* Countdown number */
+    const newRemaining = Math.max(0, Math.ceil((totalMs - elapsed) / 1000));
+    if (newRemaining !== remaining) {
+      remaining = newRemaining;
+      document.getElementById('loadingCountdown').textContent = remaining || '✓';
+      document.getElementById('loadingEta').textContent =
+        remaining > 0
+          ? 'Estimated time: ' + remaining + ' second' + (remaining !== 1 ? 's' : '')
+          : 'Finishing up…';
+    }
+
+    if (elapsed >= totalMs) {
+      clearInterval(countdownInterval);
+      /* Transition to live coaching */
+      setTimeout(() => {
+        coachProgressFill(50);
+        document.getElementById('coachStepBadge').textContent = 'Coaching';
+        document.getElementById('coachModePill').textContent  = 'Step 3 of 5';
+        document.getElementById('coachScoreRow').style.display = 'flex';
+        document.getElementById('coachScoreFill').style.width  = coachScore + '%';
+        document.getElementById('coachScoreNum').textContent   = coachScore + '%';
+        document.getElementById('coachScoreDelta').textContent = '+0%';
+        document.getElementById('coachLiveCards').innerHTML    = '';
+        showCoachPhase('live');
+        setTimeout(() => coachShowNextCard(), 300);
+      }, 300);
+    }
+  }, tickMs);
+
+  /* Step-by-step highlight */
+  let stepIdx = 0;
+  let stepElapsed = 0;
+
+  function activateNextStep() {
+    if (stepIdx >= loadingStepDefs.length) return;
+
+    /* Mark previous as done */
+    if (stepIdx > 0) {
+      const prev = document.getElementById('lstep_' + (stepIdx - 1));
+      if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
+    }
+
+    const cur = document.getElementById('lstep_' + stepIdx);
+    if (cur) cur.classList.add('active');
+
+    if (stepIdx < loadingHeadlines.length) {
+      document.getElementById('loadingHeadline').textContent = loadingHeadlines[stepIdx];
+    }
+
+    const delay = loadingStepDefs[stepIdx].duration;
+    stepIdx++;
+    loadingStepTimer = setTimeout(() => {
+      /* mark last step done */
+      if (stepIdx === loadingStepDefs.length) {
+        const last = document.getElementById('lstep_' + (stepIdx - 1));
+        if (last) { last.classList.remove('active'); last.classList.add('done'); }
+      }
+      activateNextStep();
+    }, delay);
+  }
+
+  activateNextStep();
+}
+
+function coachSendAnswer() {
+  if (coachSending) return;
+  const input = document.getElementById('coachInput');
+  const val = input.value.trim();
+  if (!val) return;
+  coachSending = true;
+  input.disabled = true;
+  document.getElementById('coachSendBtn').disabled = true;
+
+  const questions = coachMode === 'build' ? buildQuestions : tailorQuestions;
+  coachAnswers[questions[coachQIdx].key] = val;
+
+  const hist = document.getElementById('coachChatHistory');
+  hist.innerHTML += `<div class="coach-a-bubble"><div class="coach-a-text">${val}</div></div>`;
+  input.value = '';
+  input.style.height = 'auto';
+  coachScroll();
+
+  coachQIdx++;
+  coachSending = false;
+
+  setTimeout(() => {
+    input.disabled = false;
+    coachAskQuestion(questions, coachMode === 'build' ? 'build' : 'tailor');
+  }, 300);
+}
+
+function coachSkipQuestion() {
+  const questions = coachMode === 'build' ? buildQuestions : tailorQuestions;
+  if (coachQIdx >= questions.length) return;
+  coachAnswers[questions[coachQIdx].key] = '(skipped)';
+  const hist = document.getElementById('coachChatHistory');
+  hist.innerHTML += `<div class="coach-a-bubble"><div class="coach-a-text" style="color:var(--t3);font-style:italic;">Skipped</div></div>`;
+  coachQIdx++;
+  coachSending = false;
+  setTimeout(() => coachAskQuestion(questions, coachMode === 'build' ? 'build' : 'tailor'), 200);
+}
+
+function coachScroll() {
+  const s = document.getElementById('coachScroll');
+  setTimeout(() => { s.scrollTop = s.scrollHeight; }, 100);
+}
+
+/* ── Live coaching cards ── */
+function coachShowNextCard() {
+  const steps = coachSteps[coachJobIdx % coachSteps.length];
+  if (coachCardIdx >= steps.length) {
+    showCoachComplete();
+    return;
+  }
+
+  const s = steps[coachCardIdx];
+  const container = document.getElementById('coachLiveCards');
+  const cardId = 'coachCard_' + coachCardIdx;
+  const prevApproved = document.querySelectorAll('.ci-approved-card').length;
+
+  // Mark all previous cards approved/locked
+  container.querySelectorAll('.coach-insight-card').forEach(c => {
+    c.style.opacity = '0.65';
+  });
+
+  const pct = 50 + Math.round((coachCardIdx / steps.length) * 45);
+  coachProgressFill(pct);
+  document.getElementById('coachModePill').textContent = `Change ${coachCardIdx+1} of ${steps.length}`;
+
+  container.innerHTML += `
+  <div class="coach-insight-card ci-active-card" id="${cardId}"
+       style="border-color:rgba(168,85,247,0.35);background:rgba(168,85,247,0.06);">
+    <div class="coach-insight-header">
+      <div class="coach-insight-icon" style="background:${s.iconBg}">${s.icon}</div>
+      <div class="coach-insight-title">${s.title}</div>
+      <div class="coach-insight-status ci-active">● reviewing</div>
+    </div>
+    <div class="coach-insight-body">${s.insight}</div>
+    <div class="coach-insight-why">${s.why}</div>
+    <div class="coach-diff">
+      <div class="coach-diff-label">Before</div>
+      <div class="coach-diff-before">${s.before}</div>
+      <div style="height:6px"></div>
+      <div class="coach-diff-label">After (suggested)</div>
+      <div class="coach-diff-after" id="diffAfter_${coachCardIdx}">${s.after}</div>
+    </div>
+    <div class="coach-action-row">
+      <button class="coach-approve-btn" onclick="coachApproveCard(${coachCardIdx})">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Approve change
+      </button>
+      <button class="coach-edit-btn" onclick="coachEditCard(${coachCardIdx})">Edit</button>
+      <button class="coach-skip-this-btn" onclick="coachSkipCard(${coachCardIdx})">Skip</button>
+    </div>
+    <div class="coach-inline-edit" id="inlineEdit_${coachCardIdx}" style="display:none;">
+      <textarea class="coach-edit-textarea" id="editTextarea_${coachCardIdx}">${s.after}</textarea>
+      <button class="coach-edit-save" onclick="coachSaveEdit(${coachCardIdx})">Save & approve</button>
+    </div>
+  </div>`;
+
+  coachScroll();
+}
+
+function coachApproveCard(i) {
+  const steps = coachSteps[coachJobIdx % coachSteps.length];
+  const s = steps[i];
+  const card = document.getElementById('coachCard_' + i);
+  if (!card) return;
+
+  const editedText = document.getElementById('editTextarea_' + i)
+    ? document.getElementById('editTextarea_' + i).value
+    : s.after;
+
+  card.style.borderColor = 'rgba(48,209,88,0.3)';
+  card.style.background  = 'rgba(48,209,88,0.05)';
+  card.querySelector('.coach-insight-status').className = 'coach-insight-status ci-approved';
+  card.querySelector('.coach-insight-status').textContent = '✓ approved';
+  card.querySelector('.coach-action-row').style.display = 'none';
+  const ie = document.getElementById('inlineEdit_' + i);
+  if (ie) ie.style.display = 'none';
+
+  coachApproved++;
+  coachScore = Math.min(97, coachScore + s.delta);
+  const startScore = coachScore - s.delta;
+  document.getElementById('coachScoreNum').textContent = coachScore + '%';
+  document.getElementById('coachScoreFill').style.width = coachScore + '%';
+  document.getElementById('coachScoreDelta').textContent = '+' + (coachScore - 54) + '%';
+
+  coachCardIdx++;
+  setTimeout(() => coachShowNextCard(), 500);
+  coachScroll();
+}
+
+function coachSkipCard(i) {
+  const card = document.getElementById('coachCard_' + i);
+  if (!card) return;
+  card.style.opacity = '0.5';
+  card.style.borderColor = 'var(--border)';
+  card.querySelector('.coach-insight-status').className = 'coach-insight-status ci-skipped';
+  card.querySelector('.coach-insight-status').textContent = '— skipped';
+  card.querySelector('.coach-action-row').style.display = 'none';
+
+  coachCardIdx++;
+  setTimeout(() => coachShowNextCard(), 400);
+}
+
+function coachEditCard(i) {
+  const ie = document.getElementById('inlineEdit_' + i);
+  if (!ie) return;
+  ie.style.display = 'flex';
+  document.getElementById('editTextarea_' + i).focus();
+}
+
+function coachSaveEdit(i) {
+  const steps = coachSteps[coachJobIdx % coachSteps.length];
+  const s = steps[i];
+  const editedText = document.getElementById('editTextarea_' + i).value;
+  const diffAfter = document.getElementById('diffAfter_' + i);
+  if (diffAfter) diffAfter.textContent = editedText;
+  document.getElementById('inlineEdit_' + i).style.display = 'none';
+  coachApproveCard(i);
+}
+
+function showCoachComplete() {
+  coachProgressFill(100);
+  document.getElementById('coachModePill').textContent = 'Complete';
+  document.getElementById('coachStepBadge').textContent = 'Done';
+  showCoachPhase('complete');
+
+  const j = jobs[coachJobIdx % jobs.length];
+  const scoreGain = coachScore - 54;
+  const lessons = coachMode === 'build'
+    ? [
+        'Every bullet should start with a strong action verb — "built," "designed," "led," "shipped."',
+        'Quantify wherever possible. Numbers make claims credible: "improved X by Y%."',
+        'Tailor your language to mirror the company\'s job description — it scores higher on ATS.',
+        'A resume doesn\'t need to list everything you\'ve done. It needs to list the most relevant things.',
+        'Your summary statement is the first thing read — make it specific to the role, not generic.',
+      ]
+    : [
+        'Use the company\'s own language back at them — it signals cultural fit and helps ATS.',
+        'Reframe coursework using research or professional language when it accurately describes the work.',
+        'Quantify outcomes even on small projects — percentages, numbers, and comparisons stand out.',
+        'List tools in context inside bullets, not just in a skills section — it reads as real experience.',
+        'Weak verbs (helped, worked on) make strong work sound passive — own your contributions.',
+      ];
+
+  document.getElementById('coachCompleteWrap').innerHTML = `
+    <div class="coach-complete-ring">✓</div>
+    <div class="coach-complete-title">Coaching complete</div>
+    <div class="coach-complete-sub">You approved ${coachApproved} change${coachApproved!==1?'s':''}, lifting your ATS score from 54% to ${coachScore}% — a +${scoreGain}% improvement for ${j.co}.</div>
+    <div class="coach-lesson-box">
+      <div class="coach-lesson-title">What you learned today</div>
+      <div class="coach-lesson-list">
+        ${lessons.map(l => `<div class="coach-lesson-item"><span class="coach-lesson-bullet">✦</span>${l}</div>`).join('')}
+      </div>
+    </div>
+    <div class="coach-final-btns">
+      <button class="coach-final-export" onclick="toast('✈ Coached resume exported'); closeCoach();">
+        Export coached resume
+      </button>
+      <button class="coach-final-restart" onclick="openCoach(coachJobIdx)">Start over</button>
+    </div>
+  `;
+  coachScroll();
+}
+
+function coachProgressFill(pct) {
+  document.getElementById('coachProgressFill').style.width = pct + '%';
+}
+
+/* ══════════════════════════════════
+   AUTO-TAILOR DATA (per job index)
+══════════════════════════════════ */
+let resumeUploaded = false;
+let tailorDone     = false;
+let currentTab     = 'original';
+
+const tailorData = [
+  /* 0 — Shopify Product Design */
+  {
+    atsAfter: 91, atsAfterLabel: '91%', atsKeywords: 'Shopify ATS keywords',
+    thinkingMsg: 'Matching your UX portfolio experience against Shopify\'s Commerce UX requirements and design system language.',
+    summaryTitle: 'Why these changes help you land the Shopify role',
+    changes: [
+      { text: '<strong>Led with merchant impact.</strong> Shopify\'s job spec mentions "1.7M merchants" — your redesigned bullet now reflects the commercial scale of your work, which resonates with their commerce-first culture.' },
+      { text: '<strong>Added Figma component library language.</strong> You listed Figma as a skill but your bullets didn\'t demonstrate depth. Adding "built a shared component library" shows system-level thinking Shopify explicitly hires for.' },
+      { text: '<strong>Reframed user research as quantitative.</strong> Shopify values data-driven design. Changing "conducted interviews" to "synthesised insights from 14 user sessions" signals rigour without inventing anything.' },
+      { text: '<strong>Surfaced accessibility work.</strong> WCAG compliance was listed as required but absent from your resume. Your existing accessibility coursework is now visible in the skills section.' },
+    ],
+    original: buildResume(false, 0),
+    tailored: buildResume(true,  0),
+  },
+  /* 1 — Google ML Research */
+  {
+    atsAfter: 87, atsAfterLabel: '87%', atsKeywords: 'Google DeepMind keywords',
+    thinkingMsg: 'Cross-referencing your project experience with Google\'s multimodal research requirements and PyTorch/JAX ecosystem language.',
+    summaryTitle: 'Why these changes help you land the Google role',
+    changes: [
+      { text: '<strong>Reframed coursework as research contributions.</strong> Google hires researchers, not just students. Describing your final-year ML project as "an investigation into X" rather than "a class project on X" accurately reflects the work.' },
+      { text: '<strong>Added publication-readiness signal.</strong> Your literature review section existed but wasn\'t described. Mentioning "structured as a reproducible experiment with ablation analysis" directly addresses Google\'s co-authorship path.' },
+      { text: '<strong>Quantified model performance.</strong> Google\'s spec asks for "prior research experience." Changing "trained a text classifier" to "achieved 94.2% F1 on the test set, outperforming the BERT baseline" is factual and compelling.' },
+      { text: '<strong>Made PyTorch expertise explicit.</strong> You use PyTorch but it was buried in a skills list. It now appears in context inside your project bullet — which is how ATS parsers find it.' },
+    ],
+    original: buildResume(false, 1),
+    tailored: buildResume(true,  1),
+  },
+  /* 2 — Stripe Frontend */
+  {
+    atsAfter: 85, atsAfterLabel: '85%', atsKeywords: 'Stripe engineering keywords',
+    thinkingMsg: 'Analysing your frontend project bullets against Stripe\'s TypeScript-first stack, performance culture, and payments domain language.',
+    summaryTitle: 'Why these changes help you land the Stripe role',
+    changes: [
+      { text: '<strong>Added transaction-scale context.</strong> Stripe processes billions in GMV. Rewriting "built a payment form UI" to "built a checkout form handling real-time validation across 12 input states" shows you understand the complexity they care about.' },
+      { text: '<strong>Surfaced TypeScript depth.</strong> Your resume listed TypeScript as a skill but all code examples used plain JS syntax. Three bullets now reference types, interfaces, and generics specifically — Stripe\'s codebase is strictly typed.' },
+      { text: '<strong>Added web performance metric.</strong> Stripe\'s spec calls out performance explicitly. Your existing Lighthouse optimisation project is now in the resume with the actual score improvement (72 → 96) rather than just "improved performance".' },
+      { text: '<strong>Removed vague verbs.</strong> Words like "helped with" and "worked on" were replaced with "owned," "shipped," and "reduced" — Stripe\'s engineering culture values individual ownership and values direct language.' },
+    ],
+    original: buildResume(false, 2),
+    tailored: buildResume(true,  2),
+  },
+  /* 3 — Atlassian SWE */
+  {
+    atsAfter: 78, atsAfterLabel: '78%', atsKeywords: 'Atlassian Jira keywords',
+    thinkingMsg: 'Matching your backend and team project experience against Atlassian\'s Java/Kotlin stack, agile culture, and Jira product domain.',
+    summaryTitle: 'Why these changes help you land the Atlassian role',
+    changes: [
+      { text: '<strong>Added agile process language.</strong> You use Jira in your own team projects but never mentioned it. Describing how you "tracked sprints in Jira and ran retrospectives using Confluence" directly maps to Atlassian\'s own product stack.' },
+      { text: '<strong>Reframed team projects as cross-functional collaboration.</strong> Atlassian\'s TEAM values prioritise collaboration. Changing "group assignment" to "cross-functional team of 5 engineers and one designer" speaks their language.' },
+      { text: '<strong>Made REST API work visible.</strong> Your backend project used REST but the bullets described the feature, not the implementation. Adding "designed a RESTful API with 8 endpoints following OpenAPI spec" is truthful and specific.' },
+      { text: '<strong>Moved WAM above the fold.</strong> Atlassian requires a minimum WAM of 65. Your 74 was buried at the bottom. It\'s now in the education section header alongside your degree, making it immediately visible to recruiters.' },
+    ],
+    original: buildResume(false, 3),
+    tailored: buildResume(true,  3),
+  },
+];
+
+/* ── RESUME CONTENT BUILDER ── */
+function buildResume(isTailored, jobIdx) {
+  const variants = [
+    /* 0 — Shopify */
+    {
+      orig: [
+        {t:'exp', role:'UI/UX Design Lead', org:'Monash Design Lab · 2024–present', bullets:[
+          'Redesigned the team\'s internal project dashboard using Figma',
+          'Conducted user interviews and created wireframes for 3 features',
+          'Worked with developers to implement designs in React',
+          'Improved task completion rate based on usability testing',
+        ]},
+        {t:'exp', role:'Freelance Product Designer', org:'Self-employed · 2023', bullets:[
+          'Designed mobile app UI for a local fitness startup',
+          'Created brand identity including logo, colour palette and type system',
+          'Delivered prototypes for client review using Figma',
+        ]},
+        {t:'skills', items:['Figma', 'Adobe XD', 'React (basic)', 'User Research', 'Wireframing', 'Prototyping']},
+      ],
+      tail: [
+        {t:'exp', role:'UI/UX Design Lead', org:'Monash Design Lab · 2024–present', bullets:[
+          {txt:'Redesigned the team\'s internal project dashboard in Figma, reducing time-on-task by 31% across 200+ weekly users', changed:true},
+          {txt:'Synthesised insights from 14 user interview sessions to prioritise a 3-feature roadmap, applying Jobs-to-be-Done framing', changed:true},
+          {txt:'Built a shared Figma component library of 40+ components adopted by 6 developers, cutting design–dev handoff time by 40%', added:true},
+          {txt:'Collaborated with engineers to ship accessible React components (WCAG 2.1 AA), passing Shopify\'s Polaris accessibility checklist', changed:true},
+        ]},
+        {t:'exp', role:'Freelance Product Designer', org:'Self-employed · 2023', bullets:[
+          {txt:'Designed end-to-end checkout flow for a fitness startup\'s mobile app, increasing conversion rate from onboarding to subscription by 18%', changed:true},
+          {txt:'Delivered a complete design system — tokens, type scale, colour ramps — enabling a solo developer to build consistently without design review', added:true},
+          {txt:'Iterated through 3 prototype rounds based on moderated user testing sessions, reducing critical errors to zero before launch', changed:true},
+        ]},
+        {t:'skills', items:['Figma (Advanced)', 'Component systems', 'React (basic)', 'User Research', 'WCAG / Accessibility', 'Prototyping', 'Usability testing']},
+      ],
+    },
+    /* 1 — Google ML */
+    {
+      orig: [
+        {t:'exp', role:'ML Research Project', org:'Monash University FYP · 2024', bullets:[
+          'Built a text classification model using Python and PyTorch',
+          'Trained on a dataset of 50,000 samples',
+          'Wrote a report summarising findings',
+          'Achieved reasonable accuracy on the test set',
+        ]},
+        {t:'exp', role:'Data Science Tutor', org:'Monash University · 2023–2024', bullets:[
+          'Tutored 30 students per semester in Python and statistics',
+          'Created supplementary materials for weekly labs',
+          'Helped students debug code and understand ML concepts',
+        ]},
+        {t:'skills', items:['Python', 'PyTorch', 'NumPy', 'Pandas', 'scikit-learn', 'LaTeX', 'Git']},
+      ],
+      tail: [
+        {t:'exp', role:'ML Research Project — Multimodal Sentiment Analysis', org:'Monash University FYP · 2024', bullets:[
+          {txt:'Investigated multimodal sentiment classification using fused text and image embeddings; structured as a reproducible experiment with full ablation analysis across 4 model variants', changed:true},
+          {txt:'Trained a PyTorch transformer pipeline on 50,000 annotated samples; achieved 94.2% F1 on the held-out test set, outperforming the BERT-only baseline by 6.1 points', changed:true},
+          {txt:'Authored a 28-page research report following NeurIPS formatting conventions, with results independently verified by a second assessor', changed:true},
+          {txt:'Open-sourced the experiment codebase on GitHub with reproducibility README; received 3 external stars within 2 weeks of posting', added:true},
+        ]},
+        {t:'exp', role:'Data Science Tutor', org:'Monash University · 2023–2024', bullets:[
+          {txt:'Designed and delivered weekly lab content on probabilistic modelling and PyTorch fundamentals to cohorts of 30 students', changed:true},
+          {txt:'Produced 8 supplementary Jupyter notebooks covering gradient descent, attention mechanisms, and evaluation metrics — now part of the official course materials', added:true},
+          {txt:'Mentored 4 students through final-year ML projects; 3 received distinction or above', changed:true},
+        ]},
+        {t:'skills', items:['Python', 'PyTorch', 'JAX (familiar)', 'Transformers / Attention', 'NumPy · Pandas', 'Experiment design', 'LaTeX', 'Git']},
+      ],
+    },
+    /* 2 — Stripe Frontend */
+    {
+      orig: [
+        {t:'exp', role:'Frontend Developer', org:'Student Startup Incubator · 2024', bullets:[
+          'Built the main web app frontend using React and JavaScript',
+          'Worked on the payment form component',
+          'Helped improve performance of the app',
+          'Wrote unit tests for some components',
+        ]},
+        {t:'exp', role:'Open Source Contributor', org:'Various · 2023', bullets:[
+          'Fixed bugs in a React component library',
+          'Submitted 4 pull requests that were merged',
+          'Improved documentation for 2 components',
+        ]},
+        {t:'skills', items:['React', 'TypeScript', 'JavaScript', 'HTML/CSS', 'Jest', 'Git', 'REST APIs']},
+      ],
+      tail: [
+        {t:'exp', role:'Frontend Developer', org:'Student Startup Incubator · 2024', bullets:[
+          {txt:'Owned end-to-end development of the payment checkout flow in React 18 and TypeScript — handling 12 distinct input validation states, error recovery, and card tokenisation against a Stripe-compatible API', changed:true},
+          {txt:'Shipped a Lighthouse performance audit cycle (72 → 96) by implementing code-splitting, lazy-loading images, and removing 14 unused dependencies', changed:true},
+          {txt:'Wrote 94% test coverage across checkout components using Jest and React Testing Library, catching 3 critical regression bugs before production', changed:true},
+          {txt:'Introduced a typed API client layer using Zod schemas, eliminating an entire class of runtime type errors across the application', added:true},
+        ]},
+        {t:'exp', role:'Open Source Contributor', org:'Various · 2023', bullets:[
+          {txt:'Merged 4 PRs into a 2k-star React component library; contributions included converting 3 class components to typed functional components with full TypeScript generics', changed:true},
+          {txt:'Refactored storybook documentation for 2 components, increasing usage examples from 2 to 9 per component based on maintainer requests', changed:true},
+        ]},
+        {t:'skills', items:['React 18', 'TypeScript (strict)', 'Zod / schema validation', 'Jest · RTL', 'Web performance', 'REST APIs', 'HTML/CSS', 'Git']},
+      ],
+    },
+    /* 3 — Atlassian SWE */
+    {
+      orig: [
+        {t:'exp', role:'Full-Stack Developer', org:'Monash CS Group Project · 2024', bullets:[
+          'Built a task management web app with a group of 5',
+          'Implemented the backend API using Node.js and Express',
+          'Created the database schema in PostgreSQL',
+          'Presented the final product to the class',
+        ]},
+        {t:'exp', role:'IT Support Volunteer', org:'Monash Student Union · 2023', bullets:[
+          'Provided technical support for student events',
+          'Set up AV equipment and troubleshot network issues',
+          'Documented recurring issues for the next volunteer',
+        ]},
+        {t:'skills', items:['Java', 'Node.js', 'Python', 'PostgreSQL', 'React', 'Git', 'REST APIs']},
+      ],
+      tail: [
+        {t:'exp', role:'Full-Stack Developer — Agile Task Platform', org:'Monash CS Group Project · 2024', bullets:[
+          {txt:'Led backend development for a cross-functional team of 5 engineers and one designer, running 2-week sprints tracked in Jira with daily standups and bi-weekly retrospectives documented in Confluence', changed:true},
+          {txt:'Designed and implemented a RESTful API with 8 endpoints following OpenAPI 3.0 spec; documented in Confluence and versioned via semantic commits', changed:true},
+          {txt:'Modelled a normalised PostgreSQL schema supporting multi-user workspaces with row-level security — handling 10,000+ test records with sub-20ms query times', changed:true},
+          {txt:'Delivered a live product demo to a panel of 3 industry judges; received distinction grade and commendation for code quality and documentation', changed:true},
+        ]},
+        {t:'exp', role:'IT Support & Documentation Lead', org:'Monash Student Union · 2023', bullets:[
+          {txt:'Maintained a shared Confluence wiki of 30+ technical runbooks for AV and network setup, reducing onboarding time for new volunteers from 3 hours to 45 minutes', added:true},
+          {txt:'Diagnosed and resolved network configuration issues under time pressure during 12 live student events with zero service disruptions', changed:true},
+        ]},
+        {t:'skills', items:['Java · Kotlin (learning)', 'Node.js · Express', 'REST / OpenAPI 3.0', 'PostgreSQL', 'React', 'Jira · Confluence', 'Git · GitHub Actions']},
+      ],
+    },
+  ];
+
+  const v = variants[jobIdx];
+  const blocks = isTailored ? v.tail : v.orig;
+
+  let html = `
+    <div class="res-name">Alex Chen</div>
+    <div class="res-contact">alex.chen@student.monash.edu · linkedin.com/in/alexchen · Melbourne, VIC · GitHub: alexchen-dev</div>
+    <div class="res-section">Education</div>
+    <div class="res-role">Bachelor of Engineering (Mechanical) / Biomedical Engineering</div>
+    <div class="res-org">Monash University · 2022–2025 (expected) · WAM: 74</div>
+  `;
+
+  html += `<div class="res-section">Experience</div>`;
+
+  blocks.forEach(b => {
+    if (b.t === 'exp') {
+      html += `<div class="res-role">${b.role}</div><div class="res-org">${b.org}</div>`;
+      b.bullets.forEach(bl => {
+        if (typeof bl === 'string') {
+          html += `<div class="res-bullet">${bl}</div>`;
+        } else if (bl.added) {
+          html += `<div class="res-bullet added">${bl.txt}</div>`;
+        } else if (bl.changed) {
+          html += `<div class="res-bullet changed">${bl.txt}</div>`;
+        } else {
+          html += `<div class="res-bullet">${bl.txt||bl}</div>`;
+        }
+      });
+    }
+    if (b.t === 'skills') {
+      html += `<div class="res-section">Skills</div><div class="res-bullet">${b.items.join(' · ')}</div>`;
+    }
+  });
+
+  return html;
+}
+
+/* ── TAILOR OVERLAY LOGIC ── */
+function openTailor() {
+  const j  = jobs[idx % jobs.length];
+  const td = tailorData[idx % tailorData.length];
+
+  document.getElementById('tailorBadge').textContent    = j.lt;
+  document.getElementById('tailorBadge').style.background = j.lf;
+  document.getElementById('tailorJobName').textContent  = j.role;
+  document.getElementById('tailorJobCo').textContent    = j.co + ' · ' + j.loc;
+  document.getElementById('tailorMatchPill').textContent = td.atsAfter + '% match';
+  document.getElementById('tailorSubtitle').textContent  = 'Adjusting resume for ' + j.co;
+
+  document.getElementById('atsScoreAfterLabel').textContent = td.atsAfterLabel;
+  document.getElementById('atsKeywordsLabel') && (document.getElementById('atsKeywordsLabel').textContent = 'Optimised for ' + td.atsKeywords);
+
+  if (resumeUploaded) {
+    document.getElementById('tailorUploadZone').style.display = 'none';
+    document.getElementById('tailorFileReady').style.display  = 'flex';
+    if (tailorDone) showTailorResult(td);
+    else            startTailoring(td);
+  } else {
+    document.getElementById('tailorUploadZone').style.display = 'flex';
+    document.getElementById('tailorFileReady').style.display  = 'none';
+    document.getElementById('tailorAtsRow').style.display     = 'none';
+    document.getElementById('tailorThinking').style.display   = 'none';
+    document.getElementById('tailorResumeWrap').style.display = 'none';
+    document.getElementById('tailorSummary').style.display    = 'none';
+    document.getElementById('tailorExportRow').style.display  = 'none';
+  }
+
+  document.getElementById('tailorOverlay').classList.add('open');
+}
+
+function closeTailor() {
+  document.getElementById('tailorOverlay').classList.remove('open');
+}
+
+function simulateUpload() {
+  resumeUploaded = true;
+  tailorDone = false;
+  document.getElementById('tailorUploadZone').style.display = 'none';
+  document.getElementById('tailorFileReady').style.display  = 'flex';
+  document.getElementById('tailorAtsRow').style.display     = 'none';
+  document.getElementById('tailorResumeWrap').style.display = 'none';
+  document.getElementById('tailorSummary').style.display    = 'none';
+  document.getElementById('tailorExportRow').style.display  = 'none';
+  const td = tailorData[idx % tailorData.length];
+  startTailoring(td);
+}
+
+function resetTailor() {
+  resumeUploaded = false;
+  tailorDone = false;
+  document.getElementById('tailorUploadZone').style.display = 'flex';
+  document.getElementById('tailorFileReady').style.display  = 'none';
+  document.getElementById('tailorAtsRow').style.display     = 'none';
+  document.getElementById('tailorThinking').style.display   = 'none';
+  document.getElementById('tailorResumeWrap').style.display = 'none';
+  document.getElementById('tailorSummary').style.display    = 'none';
+  document.getElementById('tailorExportRow').style.display  = 'none';
+}
+
+function resetTailorResult() {
+  tailorDone = false;
+  const td = tailorData[idx % tailorData.length];
+  startTailoring(td);
+}
+
+const thinkingSteps = [
+  'Matching your experience against the job description…',
+  'Identifying high-impact keyword gaps…',
+  'Rewriting bullets to reflect verified achievements…',
+  'Checking no skills have been fabricated…',
+  'Calculating ATS match score…',
+];
+
+function startTailoring(td) {
+  tailorDone = false;
+  document.getElementById('tailorThinking').style.display   = 'flex';
+  document.getElementById('tailorResumeWrap').style.display = 'none';
+  document.getElementById('tailorSummary').style.display    = 'none';
+  document.getElementById('tailorExportRow').style.display  = 'none';
+  document.getElementById('tailorAtsRow').style.display     = 'none';
+
+  let step = 0;
+  const msgEl = document.getElementById('tailorThinkingMsg');
+  msgEl.textContent = thinkingSteps[0];
+
+  const stepInterval = setInterval(() => {
+    step++;
+    if (step < thinkingSteps.length) {
+      msgEl.textContent = thinkingSteps[step];
+    } else {
+      clearInterval(stepInterval);
+      showTailorResult(td);
+    }
+  }, 700);
+}
+
+function showTailorResult(td) {
+  tailorDone = true;
+  document.getElementById('tailorThinking').style.display   = 'none';
+
+  document.getElementById('tailorAtsRow').style.display     = 'flex';
+  setTimeout(() => {
+    document.getElementById('atsBarFill').style.width = td.atsAfter + '%';
+  }, 100);
+
+  currentTab = 'tailored';
+  document.getElementById('tailorResumeWrap').style.display = 'block';
+  document.getElementById('tailorResumeDoc').innerHTML = td.tailored;
+  document.getElementById('tabTailored').classList.add('active');
+  document.getElementById('tabOriginal').classList.remove('active');
+
+  document.getElementById('tailorSummary').style.display    = 'block';
+  document.getElementById('tailorSummaryTitle').textContent = td.summaryTitle;
+  document.getElementById('tailorChangeList').innerHTML = td.changes.map((c, i) => `
+    <div class="tailor-change">
+      <div class="tailor-change-num">${i+1}</div>
+      <div class="tailor-change-text">${c.text}</div>
+    </div>`).join('');
+
+  document.getElementById('tailorExportRow').style.display  = 'flex';
+  document.getElementById('tailorScroll').scrollTop = 0;
+}
+
+function showTab(tab) {
+  currentTab = tab;
+  const td = tailorData[idx % tailorData.length];
+  document.getElementById('tailorResumeDoc').innerHTML = tab === 'tailored' ? td.tailored : td.original;
+  document.getElementById('tabOriginal').classList.toggle('active', tab === 'original');
+  document.getElementById('tabTailored').classList.toggle('active', tab === 'tailored');
+}
+
+/* ── JOB DETAIL DATA ── */
+const jobDetails = [
+  {
+    about: "Work within Shopify's Commerce UX team redesigning the checkout experience used by 1.7M merchants globally. You'll own end-to-end design flows, run user research sessions, and ship work that reaches millions of buyers every day.",
+    reqs: [
+      { text: 'Currently enrolled in a UX, Industrial Design, or related degree', ok: true },
+      { text: 'Strong portfolio demonstrating user-centred design process', ok: true },
+      { text: 'Proficiency in Figma including auto-layout and component systems', ok: true },
+      { text: 'Experience running usability tests or user interviews', ok: false },
+      { text: 'Familiarity with design systems and accessibility standards (WCAG)', ok: false },
+      { text: 'Available for a 12-week term starting June 2026', ok: true },
+    ],
+    skills: [
+      { name:'Figma', state:'have' },
+      { name:'UX Research', state:'have' },
+      { name:'Prototyping', state:'have' },
+      { name:'Design Systems', state:'ok' },
+      { name:'Accessibility', state:'miss' },
+      { name:'User Testing', state:'ok' },
+    ],
+    docs: [
+      { icon:'📄', name:'Tailored resume', sub:'AI-tailored for this role · ready to export', status:'ready', cls:'jds-ready' },
+      { icon:'🖼', name:'Portfolio / case studies', sub:'PDF or URL with 2–3 UX projects required', status:'required', cls:'jds-missing' },
+      { icon:'✉', name:'Cover letter', sub:'AI can draft a personalised version instantly', status:'AI draft', cls:'jds-ai' },
+      { icon:'🎓', name:'Academic transcript', sub:'Unofficial copy accepted for internship applications', status:'required', cls:'jds-missing' },
+      { icon:'💼', name:'References', sub:'2 professional or academic references with contact info', status:'optional', cls:'jds-ai' },
+    ],
+    timeline: [
+      { title:'Applications open', date:'Now — closes May 10, 2026', color:'#30d158', done:true },
+      { title:'Online assessment', date:'~1 week after applying', color:'#3a82f6', done:false },
+      { title:'Portfolio review', date:'Rolling, within 2 weeks', color:'#3a82f6', done:false },
+      { title:'Design interview', date:'30 min with a senior designer', color:'#ffd60a', done:false },
+      { title:'Offer extended', date:'~4 weeks after applying', color:'#30d158', done:false },
+    ],
+    companyAbout: 'Shopify powers over 1.7 million businesses in 175 countries. Known for strong intern-to-full-time conversion (62%), a remote-first culture, and generous perks including a $1,000 setup budget. Glassdoor rating 4.3 / 5.',
+    pay:'$44/hr', match:'91%', deadline:'May 10', duration:'12 wks', loc:'Remote'
+  },
+  {
+    about: "Collaborate directly with Google DeepMind researchers on multimodal language model development. You'll run experiments, analyse results, and contribute to papers with a realistic path to co-authorship.",
+    reqs: [
+      { text: 'Enrolled in a CS, Math, Statistics or related postgraduate programme', ok: true },
+      { text: 'Strong foundations in linear algebra, probability and calculus', ok: true },
+      { text: 'Hands-on experience with PyTorch or JAX', ok: true },
+      { text: 'Familiarity with transformer architectures and attention mechanisms', ok: false },
+      { text: 'Prior research experience — coursework projects count', ok: false },
+      { text: 'Ability to work on-site in Sydney 3 days per week', ok: true },
+    ],
+    skills: [
+      { name:'Python', state:'have' },
+      { name:'PyTorch', state:'have' },
+      { name:'LLMs', state:'ok' },
+      { name:'JAX', state:'miss' },
+      { name:'Research writing', state:'ok' },
+      { name:'Statistics', state:'have' },
+    ],
+    docs: [
+      { icon:'📄', name:'Tailored resume', sub:'AI-tailored for ML research · ready to export', status:'ready', cls:'jds-ready' },
+      { icon:'📝', name:'Research statement', sub:'500 words on your research interests and goals', status:'required', cls:'jds-missing' },
+      { icon:'✉', name:'Cover letter', sub:'AI can draft a personalised version instantly', status:'AI draft', cls:'jds-ai' },
+      { icon:'🔬', name:'GitHub / project samples', sub:'Link to ML projects, notebooks, or publications', status:'required', cls:'jds-missing' },
+      { icon:'🎓', name:'Academic transcript', sub:'Official transcript required for Google applications', status:'required', cls:'jds-missing' },
+    ],
+    timeline: [
+      { title:'Applications open', date:'Now — closes Apr 20, 2026', color:'#30d158', done:true },
+      { title:'Technical screen', date:'45-min coding + ML theory call', color:'#3a82f6', done:false },
+      { title:'Research interview', date:'60 min with a Research Scientist', color:'#ffd60a', done:false },
+      { title:'Host matching', date:'Paired with a team based on interests', color:'#ffd60a', done:false },
+      { title:'Offer extended', date:'~5 weeks after applying', color:'#30d158', done:false },
+    ],
+    companyAbout: "Google DeepMind is the world's leading AI research lab, responsible for AlphaFold, Gemini, and AlphaGo. Sydney office is a major hub for research engineering. Strong intern stipend, visa support for international students, and a clear path to PhD sponsorship.",
+    pay:'$45/hr', match:'87%', deadline:'Apr 20', duration:'16 wks', loc:'Sydney · Hybrid'
+  },
+  {
+    about: "Build the payment interfaces that process hundreds of billions in annual transaction volume for millions of businesses. You'll work across Stripe's dashboard, Stripe.js APIs, and internal design systems to ship production-quality frontend code.",
+    reqs: [
+      { text: 'Enrolled in CS, Software Engineering or equivalent degree', ok: true },
+      { text: 'Strong JavaScript / TypeScript fundamentals', ok: true },
+      { text: 'Experience with a modern frontend framework (React preferred)', ok: true },
+      { text: 'Understanding of web performance, accessibility and browser APIs', ok: false },
+      { text: 'Familiarity with REST or GraphQL APIs', ok: false },
+      { text: 'Available for remote full-time for 12 weeks from July 2026', ok: true },
+    ],
+    skills: [
+      { name:'React', state:'have' },
+      { name:'TypeScript', state:'have' },
+      { name:'GraphQL', state:'ok' },
+      { name:'Web perf', state:'miss' },
+      { name:'Accessibility', state:'miss' },
+      { name:'REST APIs', state:'have' },
+    ],
+    docs: [
+      { icon:'📄', name:'Tailored resume', sub:'AI-tailored for frontend engineering · ready', status:'ready', cls:'jds-ready' },
+      { icon:'💻', name:'GitHub profile', sub:'Must include at least 2 public repositories', status:'required', cls:'jds-missing' },
+      { icon:'✉', name:'Cover letter', sub:'AI can draft a personalised version instantly', status:'AI draft', cls:'jds-ai' },
+      { icon:'🧩', name:'Code challenge', sub:'Sent after application — 90 min timed challenge', status:'pending', cls:'jds-ai' },
+      { icon:'🎓', name:'Academic transcript', sub:'Unofficial copy accepted', status:'optional', cls:'jds-ai' },
+    ],
+    timeline: [
+      { title:'Applications open', date:'Now — closes May 5, 2026', color:'#30d158', done:true },
+      { title:'Code challenge sent', date:'Within 3 days of applying', color:'#3a82f6', done:false },
+      { title:'Technical interview', date:'60 min live coding session', color:'#ffd60a', done:false },
+      { title:'Values interview', date:'30 min culture and motivation chat', color:'#3a82f6', done:false },
+      { title:'Offer extended', date:'~3–4 weeks after applying', color:'#30d158', done:false },
+    ],
+    companyAbout: 'Stripe processes payments for Amazon, Shopify, and millions of others. Fully remote internship with a $50/hr rate and $500 equipment budget. Known for extremely high engineering bar and a strong publish-or-perish documentation culture.',
+    pay:'$50/hr', match:'85%', deadline:'May 5', duration:'12 wks', loc:'Remote'
+  },
+  {
+    about: "Work on Jira's core project management engine used by millions of developers globally. You'll build features that help engineering teams plan sprints, track bugs, and ship software. Direct mentorship from a senior engineer, with real code shipping to production.",
+    reqs: [
+      { text: 'Enrolled in a Software Engineering, CS or related degree', ok: true },
+      { text: 'Solid understanding of data structures and algorithms', ok: true },
+      { text: 'Experience with Java, Kotlin, or a JVM language', ok: false },
+      { text: 'Familiarity with REST API design and microservices', ok: false },
+      { text: 'Understanding of agile/scrum workflows (Jira user experience is a plus)', ok: true },
+      { text: 'Able to work hybrid from Sydney 3 days per week', ok: true },
+    ],
+    skills: [
+      { name:'Java / Kotlin', state:'miss' },
+      { name:'REST APIs', state:'have' },
+      { name:'Algorithms', state:'have' },
+      { name:'Microservices', state:'miss' },
+      { name:'Agile / Scrum', state:'have' },
+      { name:'SQL', state:'ok' },
+    ],
+    docs: [
+      { icon:'📄', name:'Tailored resume', sub:'AI-tailored for SWE · ready to export', status:'ready', cls:'jds-ready' },
+      { icon:'💻', name:'GitHub profile', sub:'Active repos demonstrating backend or full-stack work', status:'required', cls:'jds-missing' },
+      { icon:'✉', name:'Cover letter', sub:'AI can draft a personalised version instantly', status:'AI draft', cls:'jds-ai' },
+      { icon:'🧩', name:'Online coding test', sub:'Sent by HireVue — 2 algorithm problems, 75 min', status:'pending', cls:'jds-ai' },
+      { icon:'🎓', name:'Academic transcript', sub:'Unofficial copy — minimum WAM 65 required', status:'required', cls:'jds-missing' },
+    ],
+    timeline: [
+      { title:'Applications open', date:'Rolling — no hard deadline listed', color:'#30d158', done:true },
+      { title:'HireVue assessment', date:'Sent within 48 hrs of applying', color:'#3a82f6', done:false },
+      { title:'Technical phone screen', date:'45 min with an Atlassian engineer', color:'#ffd60a', done:false },
+      { title:'Final interview loop', date:'2 × 45 min interviews (technical + values)', color:'#ffd60a', done:false },
+      { title:'Offer extended', date:'~4 weeks after applying', color:'#30d158', done:false },
+    ],
+    companyAbout: 'Atlassian is a global team collaboration company (Jira, Confluence, Trello) headquartered in Sydney. Intern conversion rate of ~55%, hybrid work in Sydney CBD, $42/hr rate. Glassdoor 4.2/5. Known for TEAM values and internal mobility.',
+    pay:'$42/hr', match:'78%', deadline:'Rolling', duration:'12 wks', loc:'Sydney · Hybrid'
+  },
+];
+
+function openJobDetail() {
+  const j = jobs[idx % jobs.length];
+  const d = jobDetails[idx % jobDetails.length];
+
+  document.getElementById('jdHero').style.background = j.sky;
+  document.getElementById('jdEyebrow').textContent = 'Internship · ' + j.loc;
+  document.getElementById('jdTitle').textContent = j.role;
+  document.getElementById('jdBadge').textContent = j.lt;
+  document.getElementById('jdBadge').style.background = j.lf;
+  document.getElementById('jdCompany').textContent = j.co;
+  document.getElementById('jdLocation').textContent = j.loc;
+  document.getElementById('jdPay').textContent = d.pay;
+  document.getElementById('jdMatch').textContent = d.match;
+  document.getElementById('jdDeadline').textContent = d.deadline;
+  document.getElementById('jdDuration').textContent = d.duration;
+  document.getElementById('jdAbout').textContent = d.about;
+
+  const coIcon = document.getElementById('jdCoIcon');
+  coIcon.textContent = j.lt;
+  coIcon.style.background = j.lf + '28';
+  coIcon.style.color = j.lf;
+  coIcon.style.fontSize = '13px';
+  coIcon.style.fontWeight = '700';
+  document.getElementById('jdCompanyAbout').textContent = d.companyAbout;
+
+  document.getElementById('jdReqs').innerHTML = d.reqs.map(r => `
+    <div class="jd-req">
+      <div class="jd-req-dot" style="background:${r.ok ? '#30d158' : 'rgba(255,255,255,0.2)'}"></div>
+      <span style="color:${r.ok ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)'}">${r.text}</span>
+    </div>`).join('');
+
+  document.getElementById('jdSkills').innerHTML = d.skills.map(s => `
+    <div class="jd-skill-chip ${s.state === 'have' ? 'jds-have' : s.state === 'ok' ? 'jds-ok' : 'jds-miss'}">
+      <span style="font-size:10px">${s.state === 'have' ? '✓' : s.state === 'ok' ? '~' : '+'}</span>
+      ${s.name}
+    </div>`).join('');
+
+  document.getElementById('jdDocs').innerHTML = d.docs.map(doc => `
+    <div class="jd-doc" onclick="toast('Opening ${doc.name}…')">
+      <div class="jd-doc-icon" style="background:var(--surface)">${doc.icon}</div>
+      <div class="jd-doc-info">
+        <div class="jd-doc-name">${doc.name}</div>
+        <div class="jd-doc-sub">${doc.sub}</div>
+      </div>
+      <div class="jd-doc-status ${doc.cls}">${doc.status}</div>
+    </div>`).join('');
+
+  document.getElementById('jdTimeline').innerHTML = d.timeline.map((t, i) => `
+    <div class="jd-tl-row">
+      <div class="jd-tl-spine">
+        <div class="jd-tl-dot" style="border-color:${t.color};background:${t.done ? t.color : 'transparent'}"></div>
+        ${i < d.timeline.length - 1 ? '<div class="jd-tl-line"></div>' : ''}
+      </div>
+      <div class="jd-tl-content">
+        <div class="jd-tl-title" style="color:${t.done ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.55)'}">${t.title}</div>
+        <div class="jd-tl-date">${t.date}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('jobOverlay').classList.add('open');
+}
+
+function closeJobDetail() {
+  document.getElementById('jobOverlay').classList.remove('open');
+}
+
+renderCard();
+
+/* ── 3D GLOBE ── */
+const companies = [
+  { name:'Shopify',   angle:30,  r:72, status:'landed',   color:'#30d158' },
+  { name:'Google',    angle:105, r:58, status:'inflight',  color:'#ffd60a' },
+  { name:'Stripe',    angle:195, r:80, status:'departed',  color:'#ff453a' },
+  { name:'Atlassian', angle:270, r:65, status:'departed',  color:'#ff453a' },
+  { name:'Canva',     angle:340, r:88, status:'wishlist',  color:'rgba(255,255,255,0.3)' },
+  { name:'Cochlear',  angle:155, r:95, status:'wishlist',  color:'rgba(255,255,255,0.2)' },
+  { name:'Seek',      angle:55,  r:100,status:'wishlist',  color:'rgba(255,255,255,0.18)'},
+];
+
+let animT = 0, globeRAF = null;
+
+function startGlobe() {
+  if (globeRAF) cancelAnimationFrame(globeRAF);
+  animT = 0;
+  drawGlobe();
+}
+
+function drawGlobe() {
+  const canvas = document.getElementById('globeCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2 + 8;
+
+  ctx.clearRect(0,0,W,H);
+
+  /* deep space bg */
+  const bgG = ctx.createRadialGradient(cx,cy,0,cx,cy,160);
+  bgG.addColorStop(0,'#0d1830');
+  bgG.addColorStop(0.6,'#070e1e');
+  bgG.addColorStop(1,'#030810');
+  ctx.fillStyle = bgG;
+  ctx.fillRect(0,0,W,H);
+
+  /* stars */
+  const stars = [[20,20],[55,35],[90,18],[150,45],[200,22],[260,38],[300,15],[35,80],[110,90],[190,70],[270,85],[310,55],[45,140],[95,160],[180,145],[250,155],[305,130]];
+  stars.forEach(([sx,sy]) => {
+    ctx.beginPath();
+    ctx.arc(sx,sy,0.8,0,Math.PI*2);
+    ctx.fillStyle = `rgba(255,255,255,${0.2+Math.random()*0.3})`;
+    ctx.fill();
+  });
+
+  /* outer glow */
+  const glow = ctx.createRadialGradient(cx,cy,90,cx,cy,125);
+  glow.addColorStop(0,'rgba(58,130,246,0)');
+  glow.addColorStop(0.7,'rgba(58,130,246,0.04)');
+  glow.addColorStop(1,'rgba(58,130,246,0.10)');
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(cx,cy,125,0,Math.PI*2); ctx.fill();
+
+  /* rings */
+  [38,58,78,98,112].forEach((r,i) => {
+    ctx.beginPath();
+    ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.strokeStyle = `rgba(58,130,246,${0.04+i*0.015})`;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,6]); ctx.stroke(); ctx.setLineDash([]);
+  });
+
+  /* spokes */
+  for (let a=0;a<360;a+=45) {
+    const rad=a*Math.PI/180;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(rad)*115,cy+Math.sin(rad)*115);
+    ctx.strokeStyle='rgba(58,130,246,0.04)';
+    ctx.lineWidth=1; ctx.stroke();
+  }
+
+  /* centre pulse */
+  const pulse = 0.5+0.5*Math.sin(animT*0.06);
+  const cg = ctx.createRadialGradient(cx,cy,0,cx,cy,16+pulse*6);
+  cg.addColorStop(0,'rgba(58,130,246,0.55)');
+  cg.addColorStop(1,'rgba(58,130,246,0)');
+  ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(cx,cy,22+pulse*4,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#3a82f6'; ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.beginPath(); ctx.arc(cx,cy,2.5,0,Math.PI*2); ctx.fill();
+
+  /* paths + nodes */
+  companies.forEach(co => {
+    const rad = co.angle*Math.PI/180;
+    const nx = cx+Math.cos(rad)*co.r;
+    const ny = cy+Math.sin(rad)*co.r;
+    const cp1x = cx+Math.cos(rad-0.45)*co.r*0.5;
+    const cp1y = cy+Math.sin(rad-0.45)*co.r*0.5;
+
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.quadraticCurveTo(cp1x,cp1y,nx,ny);
+    if (co.status==='landed')   { ctx.strokeStyle='rgba(48,209,88,0.45)';  ctx.setLineDash([]); }
+    else if(co.status==='inflight'){ ctx.strokeStyle='rgba(255,214,10,0.4)'; ctx.setLineDash([5,3]); }
+    else if(co.status==='departed'){ ctx.strokeStyle='rgba(255,69,58,0.35)'; ctx.setLineDash([2,4]); }
+    else { ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.setLineDash([1,5]); }
+    ctx.lineWidth=1.5; ctx.stroke(); ctx.setLineDash([]);
+
+    /* animated plane on inflight */
+    if (co.status==='inflight') {
+      const tt=(animT%100)/100;
+      const bx=cx*(1-tt)*( (1-tt)) + cp1x*2*(1-tt)*tt + nx*tt*tt;
+      const by=cy*(1-tt)*(1-tt) + cp1y*2*(1-tt)*tt + ny*tt*tt;
+      const btx=2*(1-tt)*(cp1x-cx)+2*tt*(nx-cp1x);
+      const bty=2*(1-tt)*(cp1y-cy)+2*tt*(ny-cp1y);
+      const ang=Math.atan2(bty,btx);
+      ctx.save(); ctx.translate(bx,by); ctx.rotate(ang);
+      ctx.fillStyle='#ffd60a';
+      ctx.beginPath(); ctx.moveTo(6,0); ctx.lineTo(-4,-2.5); ctx.lineTo(-3,0); ctx.lineTo(-4,2.5); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0,-1.5); ctx.lineTo(-3,-5); ctx.lineTo(-5,-5); ctx.lineTo(-3,-1.5); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0,1.5); ctx.lineTo(-3,5); ctx.lineTo(-5,5); ctx.lineTo(-3,1.5); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    /* node */
+    if (co.status!=='wishlist') {
+      const pg = ctx.createRadialGradient(nx,ny,0,nx,ny,10);
+      pg.addColorStop(0,co.color.replace(')',',0.3)').replace('rgb','rgba')||'rgba(255,255,255,0.15)');
+      pg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=pg; ctx.beginPath(); ctx.arc(nx,ny,10,0,Math.PI*2); ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(nx,ny,5,0,Math.PI*2);
+    ctx.fillStyle=co.color; ctx.fill();
+    if(co.status!=='wishlist'){
+      ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=1; ctx.stroke();
+    }
+
+    /* label */
+    ctx.fillStyle=co.status==='wishlist'?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.8)';
+    ctx.font='500 9px Inter,sans-serif';
+    ctx.textAlign=nx<cx?'right':'left';
+    ctx.fillText(co.name, nx+(nx<cx?-10:10), ny+(ny<cy?-9:14));
+  });
+
+  animT++;
+  if(document.getElementById('v-review').classList.contains('active')) {
+    globeRAF = requestAnimationFrame(drawGlobe);
+  }
+}
+</script>
+</body>
+</html>

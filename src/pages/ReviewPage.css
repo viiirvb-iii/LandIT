@@ -1,0 +1,328 @@
+/* ── ReviewPage – Light Mode ── */
+
+.review-page {
+  min-height: 100vh;
+  background: #f1f5f9;
+  padding: 0 0 100px;
+  color: #0f172a;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── Globe Section ── */
+
+.review-globe-section {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.review-globe-section canvas {
+  display: block;
+}
+
+.review-globe-title {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── Legend Bar ── */
+
+.review-legend-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 14px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.review-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.review-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.review-legend-dot.landed { background: #22c55e; }
+.review-legend-dot.inflight { background: #f59e0b; }
+.review-legend-dot.departed { background: #ef4444; }
+.review-legend-dot.wishlist { background: #94a3b8; }
+
+/* ── Cards List ── */
+
+.review-cards-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── Boarding Pass Card ── */
+
+.review-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: box-shadow 0.2s ease;
+}
+
+.review-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Card Top Section ── */
+
+.review-card-top {
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+}
+
+.review-card-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.review-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.review-card-company {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.review-card-location {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.review-card-role {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.review-card-status-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.review-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3b82f6;
+  flex-shrink: 0;
+  animation: review-pulse 2s ease-in-out infinite;
+}
+
+@keyframes review-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── Status Badge ── */
+
+.review-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.review-status-badge.landed {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.review-status-badge.inflight {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.review-status-badge.departed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+/* ── Perforation Divider ── */
+
+.review-perforation {
+  position: relative;
+  height: 1px;
+  margin: 0;
+}
+
+.review-perforation-line {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  border: none;
+  border-top: 2px dashed #e2e8f0;
+}
+
+.review-perforation-notch {
+  position: absolute;
+  top: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f1f5f9;
+}
+
+.review-perforation-notch.left {
+  left: -10px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.review-perforation-notch.right {
+  right: -10px;
+  border-left: 1px solid #e2e8f0;
+}
+
+/* ── Stats Strip ── */
+
+.review-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  padding: 12px 16px;
+}
+
+.review-stat {
+  text-align: center;
+}
+
+.review-stat-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.review-stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* ── Action Buttons ── */
+
+.review-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+.review-action-btn {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.review-action-btn.coach {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.review-action-btn.coach:active {
+  background: #2563eb;
+}
+
+.review-action-btn.details {
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+}
+
+.review-action-btn.details:active {
+  background: #e2e8f0;
+}
+
+.review-action-btn.export {
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+}
+
+.review-action-btn.export:active {
+  background: #e2e8f0;
+}
+
+/* ── Empty State ── */
+
+.review-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+}
+
+.review-empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.review-empty-text {
+  font-size: 15px;
+  font-weight: 500;
+}
