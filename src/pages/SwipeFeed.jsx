@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { JOBS } from '../data/jobs'
+import { MELBOURNE_JOBS } from '../data/melbourneJobs'
 import { supabase, supabaseConfigured } from '../lib/supabase'
 import { useJobActions } from '../context/JobActionsContext'
+import { computeMatchScore } from '../services/resume'
 import JobDetail from '../components/JobDetail'
 import AutoTailor from '../components/AutoTailor'
 import AICoach from '../components/AICoach'
@@ -18,7 +19,7 @@ const GRADIENT_PALETTES = [
   ['#0a1a1a', '#1a5050', '#14b8a6'],
 ]
 
-function transformSupabaseJob(row, index, companiesMap) {
+function transformSupabaseJob(row, index, companiesMap, userSkills) {
   const fields = typeof row.job_description_fields === 'string'
     ? JSON.parse(row.job_description_fields) : row.job_description_fields || {}
   const skills = typeof row.skills_required === 'string'
@@ -28,13 +29,17 @@ function transformSupabaseJob(row, index, companiesMap) {
   const location = fields.location || (linkedCompany.locations && linkedCompany.locations[0]) || 'Remote'
   const pi = index % GRADIENT_PALETTES.length
   const skillNames = skills.map(s => typeof s === 'object' ? s.name : s)
+  // Real match score from resume skills vs job skills (deterministic, no LLM)
+  const match = userSkills && userSkills.length > 0
+    ? computeMatchScore(userSkills, skills)
+    : Math.floor(Math.random() * 30) + 65
   return {
     id: row.id || fields.linkedin_id || `supa-${index}`,
     role: row.title, company, location, salary: '',
     type: fields.job_type || 'Full-time',
     source: 'LinkedIn',
     posted: row.posted_at || 'Recently',
-    match: Math.floor(Math.random() * 30) + 65,
+    match,
     logo: company.charAt(0).toUpperCase(),
     logoUrl: fields.company_logo || linkedCompany.logo_url || null,
     color: COLORS[pi], g: GRADIENT_PALETTES[pi],
@@ -54,7 +59,7 @@ export default function SwipeFeed({ showToast }) {
   const [showDetail, setShowDetail] = useState(false)
   const [showTailor, setShowTailor] = useState(false)
   const [showCoach, setShowCoach] = useState(false)
-  const [allJobs, setAllJobs] = useState(JOBS)
+  const [allJobs, setAllJobs] = useState([...MELBOURNE_JOBS])
   const dragStart = useRef(null)
   const toast = showToast || (() => {})
   const { boardJob, saveJob, passJob } = useJobActions()
@@ -64,12 +69,14 @@ export default function SwipeFeed({ showToast }) {
     Promise.all([
       supabase.from('jobs').select('*').eq('is_active', true).order('posted_at', { ascending: false }),
       supabase.from('companies').select('id,name,logo_url,locations'),
-    ]).then(([jobsRes, companiesRes]) => {
+      supabase.from('parsed_resumes').select('skills_extracted').limit(1).maybeSingle(),
+    ]).then(([jobsRes, companiesRes, resumeRes]) => {
       const companiesMap = {}
       if (companiesRes.data) companiesRes.data.forEach(c => { companiesMap[c.id] = c })
+      const userSkills = resumeRes?.data?.skills_extracted || null
       if (jobsRes.data && jobsRes.data.length > 0) {
-        const scraped = jobsRes.data.map((row, i) => transformSupabaseJob(row, i, companiesMap))
-        setAllJobs([...scraped, ...JOBS])
+        const scraped = jobsRes.data.map((row, i) => transformSupabaseJob(row, i, companiesMap, userSkills))
+        setAllJobs([...scraped, ...MELBOURNE_JOBS])
       }
     }).catch(err => console.error('Supabase fetch failed:', err))
   }, [])
@@ -204,7 +211,22 @@ export default function SwipeFeed({ showToast }) {
             </div>
 
             {/* ── Body ── */}
-            <div style={{ flex: 1, padding: '12px 15px', display: 'flex', flexDirection: 'column', gap: 9, overflow: 'hidden' }}>
+            <div style={{ flex: 1, padding: '12px 15px', display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}>
+              {/* Salary + Type row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {job.salary && (
+                  <span style={{
+                    fontSize: 14, fontWeight: 700, color: '#30d158',
+                    letterSpacing: '-0.02em',
+                  }}>{job.salary}</span>
+                )}
+                <span style={{
+                  fontSize: 10, fontWeight: 500, color: 'rgba(255,255,255,0.35)',
+                  padding: '3px 9px', borderRadius: 20,
+                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+                }}>{job.type}</span>
+              </div>
+
               {/* Chips */}
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {job.tags.slice(0, 4).map(t => (
@@ -227,9 +249,9 @@ export default function SwipeFeed({ showToast }) {
 
               {/* Description */}
               <p style={{
-                fontSize: 11, color: 'rgba(255,255,255,0.55)', lineHeight: 1.55,
-                fontWeight: 300, overflow: 'hidden',
-                display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+                fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6,
+                fontWeight: 400, overflow: 'hidden', margin: 0,
+                display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical',
               }}>{job.desc}</p>
             </div>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { supabase, supabaseConfigured } from '../lib/supabase'
 import './Auth.css'
 
 export default function Login() {
@@ -16,11 +17,24 @@ export default function Login() {
     setError('')
     setLoading(true)
 
-    const { error } = await signIn(email, password)
+    const { data, error } = await signIn(email, password)
     if (error) {
       setError(error.message)
       setLoading(false)
     } else {
+      // Check if user has completed onboarding (has a degree set)
+      if (supabaseConfigured && supabase && data?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('degree')
+          .eq('id', data.user.id)
+          .single()
+
+        if (!profile?.degree) {
+          navigate('/onboarding')
+          return
+        }
+      }
       navigate('/app')
     }
   }

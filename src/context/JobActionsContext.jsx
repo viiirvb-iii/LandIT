@@ -36,8 +36,12 @@ export function JobActionsProvider({ children }) {
     setSavedJobs(prev => prev.filter(j => j.id !== jobId))
   }, [])
 
+  const updateBoardedStatus = useCallback((jobId, newStatus) => {
+    setBoardedJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: newStatus } : j))
+  }, [])
+
   return (
-    <JobActionsContext.Provider value={{ boardedJobs, savedJobs, passedJobs, boardJob, saveJob, passJob, removeBoarded, removeSaved }}>
+    <JobActionsContext.Provider value={{ boardedJobs, savedJobs, passedJobs, boardJob, saveJob, passJob, removeBoarded, removeSaved, updateBoardedStatus }}>
       {children}
     </JobActionsContext.Provider>
   )

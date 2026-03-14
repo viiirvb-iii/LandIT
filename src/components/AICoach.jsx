@@ -1,57 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { uploadAndParseResume, coachResume, getParsedResume } from "../services/resume";
 import "./AICoach.css";
 
 /* ------------------------------------------------------------------ */
-/*  Hard-coded data                                                    */
+/*  Loading step labels                                                */
 /* ------------------------------------------------------------------ */
-const QUESTIONS = [
-  "Let's start with accuracy -- is everything on your current resume still up-to-date? Any roles, dates, or titles that need correcting?",
-  "Great. What would you say are your top 2-3 strengths that are most relevant to this role?",
-  "Is there any experience or skill the job asks for that you don't have yet? Be honest -- we can work around gaps.",
-];
-
-const SUGGESTIONS = [
-  {
-    title: "Strengthen your summary statement",
-    icon: "✏️",
-    iconBg: "#ede9fe",
-    insight:
-      "Your summary is generic and doesn't mention the target role or company. A tailored summary increases recruiter engagement by 40%.",
-    why: "Recruiters spend ~7 seconds on an initial scan. A role-specific summary anchors their attention and signals you're a deliberate applicant, not a mass-applier.",
-    before:
-      "Motivated professional with experience in various technologies seeking a challenging position to leverage my skills.",
-    after:
-      "Product-focused frontend engineer with 4 years building responsive React applications and design systems, looking to drive UI excellence at Acme Corp as a Senior Frontend Developer.",
-    points: 8,
-  },
-  {
-    title: "Quantify your impact with metrics",
-    icon: "📊",
-    iconBg: "#e0f2fe",
-    insight:
-      "Your bullet points describe responsibilities but lack measurable outcomes. Adding numbers makes claims concrete and credible.",
-    why: "Hiring managers are trained to look for evidence of impact. \"Improved performance\" means nothing without a number; \"Reduced load time by 62%\" is memorable and verifiable.",
-    before:
-      "Responsible for improving website performance and user experience across the platform.",
-    after:
-      "Optimized critical rendering path and lazy-loaded below-fold assets, reducing page load time by 62% (3.1 s → 1.2 s) and increasing conversion rate by 14%.",
-    points: 10,
-  },
-  {
-    title: "Add missing keywords for ATS match",
-    icon: "🔑",
-    iconBg: "#fef3c7",
-    insight:
-      "The job description mentions TypeScript, CI/CD, and accessibility (WCAG) -- none of which appear on your resume. ATS filters may reject you before a human sees it.",
-    why: "75% of resumes are rejected by ATS software before reaching a recruiter. Matching keywords from the job posting is the single most effective way to pass automated screens.",
-    before:
-      "Skills: JavaScript, React, HTML, CSS, Git, Node.js",
-    after:
-      "Skills: JavaScript, TypeScript, React, Next.js, HTML, CSS, WCAG 2.1 Accessibility, Git, CI/CD (GitHub Actions), Node.js",
-    points: 12,
-  },
-];
-
 const LOADING_STEPS = [
   "Reading experience",
   "Matching keywords",
@@ -61,13 +14,11 @@ const LOADING_STEPS = [
   "Finalizing coaching plan",
 ];
 
-const BASE_SCORE = 52;
-
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 export default function AICoach({ job, open, onClose, onToast }) {
-  /* phases: choice | qa | loading | coaching | complete */
+  /* phases: choice | upload | qa | loading | coaching | complete | error */
   const [phase, setPhase] = useState("choice");
 
   /* Q&A state */
@@ -75,17 +26,27 @@ export default function AICoach({ job, open, onClose, onToast }) {
   const [qIndex, setQIndex] = useState(0);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
+  const [questions, setQuestions] = useState([]);
+  const [userAnswers, setUserAnswers] = useState({});
   const messagesEnd = useRef(null);
+  const fileRef = useRef(null);
 
   /* Loading state */
   const [loadStep, setLoadStep] = useState(0);
   const [loadProgress, setLoadProgress] = useState(0);
   const [countdown, setCountdown] = useState(6);
 
-  /* Coaching state */
+  /* Coaching state — populated by RAG pipeline */
+  const [suggestions, setSuggestions] = useState([]);
+  const [genuineGaps, setGenuineGaps] = useState([]);
   const [sugIndex, setSugIndex] = useState(0);
   const [history, setHistory] = useState([]); // {title, status}
-  const [score, setScore] = useState(BASE_SCORE);
+  const [baseScore, setBaseScore] = useState(52);
+  const [score, setScore] = useState(52);
+  const [error, setError] = useState("");
+
+  /* Has a parsed resume already? */
+  const [hasResume, setHasResume] = useState(false);
 
   /* ---- reset when overlay opens ---- */
   useEffect(() => {
@@ -95,12 +56,24 @@ export default function AICoach({ job, open, onClose, onToast }) {
       setQIndex(0);
       setInput("");
       setTyping(false);
+      setQuestions([]);
+      setUserAnswers({});
       setLoadStep(0);
       setLoadProgress(0);
       setCountdown(6);
       setSugIndex(0);
       setHistory([]);
-      setScore(BASE_SCORE);
+      setSuggestions([]);
+      setGenuineGaps([]);
+      setBaseScore(52);
+      setScore(52);
+      setError("");
+      setHasResume(false);
+
+      // Check if user already has a parsed resume
+      getParsedResume().then((data) => {
+        if (data) setHasResume(true);
+      });
     }
   }, [open]);
 
@@ -110,40 +83,86 @@ export default function AICoach({ job, open, onClose, onToast }) {
   }, [messages, typing]);
 
   /* ---- push coach question with typing animation ---- */
-  const pushQuestion = (idx) => {
+  const pushQuestion = (text) => {
     setTyping(true);
     setTimeout(() => {
       setTyping(false);
-      setMessages((prev) => [...prev, { from: "coach", text: QUESTIONS[idx] }]);
-    }, 1200);
+      setMessages((prev) => [...prev, { from: "coach", text }]);
+    }, 800);
+  };
+
+  /* ---- Handle file upload for resume ---- */
+  const handleFileSelect = async (e) => {
+    const file = e?.target?.files?.[0];
+    if (!file) return;
+
+    setPhase("loading");
+    setLoadStep(0);
+
+    try {
+      await uploadAndParseResume(file);
+      setHasResume(true);
+      // Now proceed to coaching
+      await runCoaching();
+    } catch (err) {
+      setError(err.message);
+      setPhase("error");
+    }
+  };
+
+  /* ---- Start paths ---- */
+  const startWithExisting = () => {
+    if (hasResume) {
+      // Already have a resume, go to Q&A with default questions
+      startQAWithDefaults();
+    } else {
+      // Need to upload first
+      setPhase("upload");
+    }
+  };
+
+  const startFromScratch = () => {
+    startQAWithDefaults();
+  };
+
+  const startQAWithDefaults = () => {
+    const defaultQs = [
+      "Is everything on your current resume still up-to-date? Any roles, dates, or titles that need correcting?",
+      "What would you say are your top 2-3 strengths most relevant to this role?",
+      "Is there any experience or skill the job asks for that you don't have yet?",
+    ];
+    setQuestions(defaultQs);
+    setPhase("qa");
+    pushQuestion(defaultQs[0]);
   };
 
   /* ---- Phase 2 handlers ---- */
-  const startQA = () => {
-    setPhase("qa");
-    pushQuestion(0);
-  };
-
   const sendAnswer = () => {
     if (!input.trim()) return;
-    setMessages((prev) => [...prev, { from: "user", text: input.trim() }]);
+    const answer = input.trim();
+    setMessages((prev) => [...prev, { from: "user", text: answer }]);
+    setUserAnswers((prev) => ({
+      ...prev,
+      [questions[qIndex]]: answer,
+    }));
     setInput("");
+
     const next = qIndex + 1;
-    if (next < QUESTIONS.length) {
+    if (next < questions.length) {
       setQIndex(next);
-      pushQuestion(next);
+      pushQuestion(questions[next]);
     } else {
-      startLoading();
+      runCoaching();
     }
   };
 
   const skipQuestion = () => {
     const next = qIndex + 1;
-    if (next < QUESTIONS.length) {
+    if (next < questions.length) {
       setQIndex(next);
-      pushQuestion(next);
+      pushQuestion(questions[next]);
     } else {
-      startLoading();
+      runCoaching();
     }
   };
 
@@ -154,35 +173,70 @@ export default function AICoach({ job, open, onClose, onToast }) {
     }
   };
 
-  /* ---- Phase 3 loading ---- */
-  const startLoading = () => {
+  /* ---- Run the RAG coaching pipeline ---- */
+  const runCoaching = async () => {
     setPhase("loading");
     setLoadStep(0);
     setLoadProgress(0);
-    setCountdown(6);
-  };
+    setCountdown(LOADING_STEPS.length);
 
-  useEffect(() => {
-    if (phase !== "loading") return;
-    const total = LOADING_STEPS.length;
-    const interval = setInterval(() => {
-      setLoadStep((s) => {
-        const next = s + 1;
-        setLoadProgress(Math.round((next / total) * 100));
-        setCountdown(total - next);
-        if (next >= total) {
-          clearInterval(interval);
-          setTimeout(() => setPhase("coaching"), 500);
-        }
-        return next;
-      });
-    }, 800);
-    return () => clearInterval(interval);
-  }, [phase]);
+    try {
+      // Animate loading steps while waiting for API
+      const stepTimer = setInterval(() => {
+        setLoadStep((s) => {
+          const next = s + 1;
+          setLoadProgress(Math.round((next / LOADING_STEPS.length) * 100));
+          setCountdown(LOADING_STEPS.length - next);
+          if (next >= LOADING_STEPS.length) clearInterval(stepTimer);
+          return next;
+        });
+      }, 1200);
+
+      const result = await coachResume(job.id, userAnswers);
+      clearInterval(stepTimer);
+      setLoadStep(LOADING_STEPS.length);
+      setLoadProgress(100);
+      setCountdown(0);
+
+      const { result: coachResult, skill_analysis } = result;
+
+      // Map suggestions from the RAG response
+      const sug = (coachResult.suggestions || []).map((s) => ({
+        title: s.title,
+        icon: s.icon || "✏️",
+        iconBg: s.icon_bg || "#ede9fe",
+        insight: s.insight,
+        why: s.why,
+        before: s.before,
+        after: s.after,
+        points: s.ats_points || 0,
+      }));
+
+      setSuggestions(sug);
+      setGenuineGaps(coachResult.genuine_gaps || []);
+      setBaseScore(skill_analysis?.match_percentage || coachResult.overall_ats_score || 52);
+      setScore(skill_analysis?.match_percentage || coachResult.overall_ats_score || 52);
+
+      // Set dynamic follow-up questions if provided
+      if (coachResult.questions?.length) {
+        setQuestions(coachResult.questions);
+      }
+
+      if (coachResult.validation_warnings?.length > 0) {
+        console.warn("Coach validation warnings:", coachResult.validation_warnings);
+      }
+
+      setTimeout(() => setPhase("coaching"), 500);
+    } catch (err) {
+      console.error("Coach error:", err);
+      setError(err.message || "Coaching failed");
+      setPhase("error");
+    }
+  };
 
   /* ---- Phase 4 coaching actions ---- */
   const approveCard = () => {
-    const sug = SUGGESTIONS[sugIndex];
+    const sug = suggestions[sugIndex];
     setHistory((h) => [...h, { title: sug.title, status: "approved" }]);
     setScore((s) => s + sug.points);
     if (onToast) onToast(`+${sug.points} ATS points -- "${sug.title}" applied`);
@@ -190,14 +244,14 @@ export default function AICoach({ job, open, onClose, onToast }) {
   };
 
   const skipCard = () => {
-    const sug = SUGGESTIONS[sugIndex];
+    const sug = suggestions[sugIndex];
     setHistory((h) => [...h, { title: sug.title, status: "skipped" }]);
     advanceCard();
   };
 
   const advanceCard = () => {
     const next = sugIndex + 1;
-    if (next < SUGGESTIONS.length) {
+    if (next < suggestions.length) {
       setSugIndex(next);
     } else {
       setTimeout(() => setPhase("complete"), 400);
@@ -249,7 +303,7 @@ export default function AICoach({ job, open, onClose, onToast }) {
       </div>
 
       <div className="coach-body">
-        {/* ===================== Phase 1 ===================== */}
+        {/* ===================== Phase 1: Choice ===================== */}
         {phase === "choice" && (
           <div className="coach-choice-wrap">
             <div className="coach-choice-heading">How should we start?</div>
@@ -257,12 +311,18 @@ export default function AICoach({ job, open, onClose, onToast }) {
               Choose a path and your AI coach will guide you step by step.
             </div>
             <div className="coach-choice-cards">
-              <div className="coach-choice-card" onClick={startQA}>
-                <div className="coach-choice-icon">📄</div>
+              <div className="coach-choice-card" onClick={startWithExisting}>
+                <div className="coach-choice-icon">
+                  {hasResume ? "✓" : "📄"}
+                </div>
                 <h3>I have a resume</h3>
-                <p>Upload your existing resume and we'll tailor it for this role.</p>
+                <p>
+                  {hasResume
+                    ? "Your resume is already uploaded. Let's coach it for this role."
+                    : "Upload your existing resume and we'll tailor it for this role."}
+                </p>
               </div>
-              <div className="coach-choice-card" onClick={startQA}>
+              <div className="coach-choice-card" onClick={startFromScratch}>
                 <div className="coach-choice-icon">🛠️</div>
                 <h3>Build one from scratch</h3>
                 <p>Answer a few questions and we'll create a resume for you.</p>
@@ -271,7 +331,31 @@ export default function AICoach({ job, open, onClose, onToast }) {
           </div>
         )}
 
-        {/* ===================== Phase 2 ===================== */}
+        {/* ===================== Upload Phase ===================== */}
+        {phase === "upload" && (
+          <div className="coach-choice-wrap">
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,.txt"
+              style={{ display: "none" }}
+              onChange={handleFileSelect}
+            />
+            <div className="coach-choice-heading">Upload your resume</div>
+            <div className="coach-choice-sub">
+              PDF or TXT up to 5 MB. We'll parse it and coach you for this role.
+            </div>
+            <button
+              className="coach-btn-approve"
+              onClick={() => fileRef.current?.click()}
+              style={{ marginTop: "20px" }}
+            >
+              Choose file
+            </button>
+          </div>
+        )}
+
+        {/* ===================== Phase 2: Q&A ===================== */}
         {phase === "qa" && (
           <div className="coach-qa-wrap">
             <div className="coach-qa-messages">
@@ -319,13 +403,13 @@ export default function AICoach({ job, open, onClose, onToast }) {
                 Skip this question
               </button>
               <span className="coach-q-counter">
-                {Math.min(qIndex + 1, QUESTIONS.length)} / {QUESTIONS.length}
+                {Math.min(qIndex + 1, questions.length)} / {questions.length}
               </span>
             </div>
           </div>
         )}
 
-        {/* ===================== Phase 3 ===================== */}
+        {/* ===================== Phase 3: Loading ===================== */}
         {phase === "loading" && (
           <div className="coach-loading-wrap">
             <div className="coach-progress-ring-container">
@@ -374,8 +458,22 @@ export default function AICoach({ job, open, onClose, onToast }) {
           </div>
         )}
 
-        {/* ===================== Phase 4 ===================== */}
-        {phase === "coaching" && sugIndex < SUGGESTIONS.length && (
+        {/* ===================== Error Phase ===================== */}
+        {phase === "error" && (
+          <div className="coach-choice-wrap">
+            <div className="coach-choice-heading">Something went wrong</div>
+            <p style={{ color: "#ef4444", margin: "12px 0" }}>{error}</p>
+            <button
+              className="coach-btn-approve"
+              onClick={() => setPhase("choice")}
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
+        {/* ===================== Phase 4: Coaching ===================== */}
+        {phase === "coaching" && sugIndex < suggestions.length && (
           <div className="coach-live-wrap">
             {/* ATS score bar */}
             <div className="coach-ats-bar">
@@ -411,7 +509,7 @@ export default function AICoach({ job, open, onClose, onToast }) {
 
             {/* Active suggestion card */}
             {(() => {
-              const sug = SUGGESTIONS[sugIndex];
+              const sug = suggestions[sugIndex];
               return (
                 <div className="coach-suggestion-card" key={sugIndex}>
                   <div className="coach-sug-header">
@@ -451,12 +549,12 @@ export default function AICoach({ job, open, onClose, onToast }) {
             })()}
 
             <div className="coach-card-counter">
-              Suggestion {sugIndex + 1} of {SUGGESTIONS.length}
+              Suggestion {sugIndex + 1} of {suggestions.length}
             </div>
           </div>
         )}
 
-        {/* ===================== Phase 5 ===================== */}
+        {/* ===================== Phase 5: Complete ===================== */}
         {phase === "complete" && (
           <div className="coach-complete-wrap">
             <div className="coach-complete-check">✓</div>
@@ -466,37 +564,39 @@ export default function AICoach({ job, open, onClose, onToast }) {
             </div>
 
             <div className="coach-score-summary">
-              <span className="coach-score-old">{BASE_SCORE}</span>
+              <span className="coach-score-old">{baseScore}</span>
               <span className="coach-score-arrow">→</span>
               <span className="coach-score-new">{score}</span>
               <span>ATS score</span>
             </div>
+
+            {/* Genuine gaps */}
+            {genuineGaps.length > 0 && (
+              <div className="coach-lesson-box" style={{ borderColor: "#fbbf24" }}>
+                <div className="coach-lesson-heading">Honest skill gaps</div>
+                <ul>
+                  {genuineGaps.map((gap, i) => (
+                    <li key={i}>
+                      <strong>{gap.skill}</strong>: {gap.suggestion}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="coach-lesson-box">
               <div className="coach-lesson-heading">
                 What you learned today
               </div>
               <ul>
-                <li>
-                  A tailored summary statement dramatically increases recruiter
-                  engagement.
-                </li>
-                <li>
-                  Quantifying achievements with metrics makes your impact
-                  concrete and credible.
-                </li>
-                <li>
-                  Matching keywords from the job description helps you pass
-                  ATS filters.
-                </li>
-                <li>
-                  Specificity beats vagueness -- every bullet should prove
-                  value, not describe duties.
-                </li>
-                <li>
-                  Reviewing and iterating on your resume before each application
-                  compounds over time.
-                </li>
+                {history
+                  .filter((h) => h.status === "approved")
+                  .map((h, i) => (
+                    <li key={i}>{h.title}</li>
+                  ))}
+                {history.filter((h) => h.status === "approved").length === 0 && (
+                  <li>Review the suggestions above and try applying them to your resume.</li>
+                )}
               </ul>
             </div>
 

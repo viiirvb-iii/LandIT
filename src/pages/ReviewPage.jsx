@@ -1,19 +1,25 @@
-import { useRef, useEffect, useMemo } from 'react'
+import { useRef, useEffect, useMemo, useState } from 'react'
 import { useJobActions } from '../context/JobActionsContext'
-import { JOBS, BOARDING_PASSES } from '../data/jobs'
+import JobDetail from '../components/JobDetail'
 import './ReviewPage.css'
 
 const STATUS_META = {
-  landed:   { label: 'LANDED',    cls: 'landed'   },
-  inflight: { label: 'IN-FLIGHT', cls: 'inflight'  },
-  departed: { label: 'DEPARTED',  cls: 'departed'  },
+  landed:     { label: 'LANDED',          cls: 'landed'     },
+  inflight:   { label: 'IN-FLIGHT',       cls: 'inflight'   },
+  uploaded:   { label: 'RESUME SENT',     cls: 'uploaded'   },
+  downloaded: { label: 'REVIEWED',        cls: 'downloaded' },
+  departed:   { label: 'DEPARTED',        cls: 'departed'   },
 }
 
+const STATUS_FLOW = ['inflight', 'uploaded', 'downloaded', 'landed']
+
 const STATUS_COLORS = {
-  landed:   '#30d158',
-  inflight: '#ffd60a',
-  departed: '#ff453a',
-  saved:    '#3a82f6',
+  landed:     '#30d158',
+  inflight:   '#ffd60a',
+  uploaded:   '#3a82f6',
+  downloaded: '#a78bfa',
+  departed:   '#ff453a',
+  saved:      '#3a82f6',
 }
 
 /* ── Earth Radar Globe ── */
@@ -76,6 +82,8 @@ function EarthRadar({ applied, saved }) {
         statusColor: n.kind === 'saved' ? STATUS_COLORS.saved : (STATUS_COLORS[n.status] || STATUS_COLORS.inflight),
         phase: Math.random() * Math.PI * 2,
         kind: n.kind,
+        location: n.location || '',
+        company: n.company || '',
       }
     })
 
@@ -139,10 +147,6 @@ function EarthRadar({ applied, saved }) {
       ctx.strokeStyle = 'rgba(58,130,246,0.35)'; ctx.lineWidth = 1.5; ctx.stroke()
 
       /* radar sweep glow */
-      const sweepGrd = ctx.createConicalGradient
-        ? null /* not widely supported */
-        : null
-      /* fallback: arc glow */
       ctx.beginPath()
       ctx.moveTo(cx, cy)
       ctx.arc(cx, cy, R, sweepAngle - 0.4, sweepAngle, false)
@@ -190,25 +194,19 @@ function EarthRadar({ applied, saved }) {
         ctx.setLineDash([])
 
         /* node glow */
-        const glowGrd = ctx.createRadialGradient(nx, ny, 0, nx, ny, 20)
-        glowGrd.addColorStop(0, n.statusColor + '25')
+        const glowGrd = ctx.createRadialGradient(nx, ny, 0, nx, ny, 12)
+        glowGrd.addColorStop(0, n.statusColor + '20')
         glowGrd.addColorStop(1, n.statusColor + '00')
         ctx.fillStyle = glowGrd
-        ctx.fillRect(nx - 20, ny - 20, 40, 40)
+        ctx.fillRect(nx - 12, ny - 12, 24, 24)
 
-        /* node circle */
-        ctx.beginPath(); ctx.arc(nx, ny, 14, 0, Math.PI * 2)
+        /* node dot */
+        ctx.beginPath(); ctx.arc(nx, ny, 5, 0, Math.PI * 2)
         ctx.fillStyle = n.color; ctx.fill()
 
         /* status ring */
-        ctx.beginPath(); ctx.arc(nx, ny, 16, 0, Math.PI * 2)
-        ctx.strokeStyle = n.statusColor; ctx.lineWidth = 2; ctx.stroke()
-
-        /* letter */
-        ctx.fillStyle = '#fff'
-        ctx.font = '700 10px -apple-system, sans-serif'
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-        ctx.fillText(n.letter, nx, ny)
+        ctx.beginPath(); ctx.arc(nx, ny, 7, 0, Math.PI * 2)
+        ctx.strokeStyle = n.statusColor; ctx.lineWidth = 1.5; ctx.stroke()
       })
 
       rafRef.current = requestAnimationFrame(draw)
@@ -221,11 +219,16 @@ function EarthRadar({ applied, saved }) {
 }
 
 /* ── Boarding Pass Card ── */
-function BoardingPassCard({ job, onToast }) {
+function BoardingPassCard({ job, onToast, onOpenDetail, onDelete, onAdvanceStatus }) {
   const meta = STATUS_META[job.status] || STATUS_META.inflight
+  const skillsToShow = (job.skills || []).slice(0, 4)
+  const currentIdx = STATUS_FLOW.indexOf(job.status)
+  const canAdvance = currentIdx >= 0 && currentIdx < STATUS_FLOW.length - 1
+  const nextStatus = canAdvance ? STATUS_FLOW[currentIdx + 1] : null
+  const nextLabel = nextStatus ? STATUS_META[nextStatus]?.label : null
 
   return (
-    <div className="review-card">
+    <div className={`review-card ${job.status === 'inflight' ? 'review-card--inflight' : ''}`}>
       <div className="review-card-top">
         <div className="review-card-logo" style={{ background: job.color }}>
           {job.logoUrl
@@ -236,11 +239,56 @@ function BoardingPassCard({ job, onToast }) {
         <div className="review-card-info">
           <div className="review-card-company">{job.company}</div>
           <div className="review-card-role">{job.role}</div>
+          {job.location && (
+            <div className="review-card-location">{job.location}</div>
+          )}
         </div>
         <div className="review-card-status-area">
           <span className={`review-status-badge ${meta.cls}`}>{meta.label}</span>
+          <button className="review-card-delete" onClick={() => onDelete(job.id)} title="Remove">
+            &times;
+          </button>
         </div>
       </div>
+
+      {/* Status progress tracker */}
+      <div className="review-status-track">
+        {STATUS_FLOW.map((step, i) => {
+          const stepIdx = STATUS_FLOW.indexOf(job.status)
+          const done = i <= stepIdx
+          return (
+            <div key={step} className="review-status-step">
+              <div className={`review-status-dot-track ${done ? 'done' : ''} ${step === job.status ? 'current' : ''}`} />
+              {i < STATUS_FLOW.length - 1 && (
+                <div className={`review-status-line ${i < stepIdx ? 'done' : ''}`} />
+              )}
+            </div>
+          )
+        })}
+        <div className="review-status-labels">
+          {STATUS_FLOW.map(step => (
+            <span key={step} className="review-status-step-label">{STATUS_META[step].label}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Description preview */}
+      {job.desc && (
+        <div className="review-card-desc">{job.desc}</div>
+      )}
+
+      {/* Skill tags */}
+      {skillsToShow.length > 0 && (
+        <div className="review-card-skills">
+          {skillsToShow.map((s, i) => {
+            const name = typeof s === 'object' ? s.name : s
+            const state = typeof s === 'object' ? s.state : 'have'
+            return (
+              <span key={i} className={`review-skill-chip ${state}`}>{name}</span>
+            )
+          })}
+        </div>
+      )}
 
       <div className="review-perforation">
         <div className="review-perforation-line" />
@@ -250,12 +298,12 @@ function BoardingPassCard({ job, onToast }) {
 
       <div className="review-stats-strip">
         <div className="review-stat">
-          <div className="review-stat-label">Type</div>
-          <div className="review-stat-value">{job.type || 'Full-time'}</div>
+          <div className="review-stat-label">Salary</div>
+          <div className="review-stat-value">{job.salary || '—'}</div>
         </div>
         <div className="review-stat">
-          <div className="review-stat-label">Source</div>
-          <div className="review-stat-value">{job.source || 'LinkedIn'}</div>
+          <div className="review-stat-label">Type</div>
+          <div className="review-stat-value">{job.type || 'Full-time'}</div>
         </div>
         <div className="review-stat">
           <div className="review-stat-label">Added</div>
@@ -268,8 +316,12 @@ function BoardingPassCard({ job, onToast }) {
       </div>
 
       <div className="review-actions">
-        <button className="review-action-btn coach" onClick={() => onToast?.(`Opening coach for ${job.company}`)}>Coach</button>
-        <button className="review-action-btn details" onClick={() => onToast?.(`Opening ${job.company} details`)}>Details</button>
+        {canAdvance && (
+          <button className="review-action-btn advance" onClick={() => onAdvanceStatus(job.id, nextStatus)}>
+            {nextLabel}
+          </button>
+        )}
+        <button className="review-action-btn details" onClick={() => onOpenDetail(job)}>Details</button>
       </div>
     </div>
   )
@@ -300,18 +352,10 @@ function SavedCard({ job, onBoard, onRemove }) {
 
 /* ── ReviewPage ── */
 export default function ReviewPage({ onToast }) {
-  const { boardedJobs, savedJobs, removeSaved, boardJob } = useJobActions()
+  const { boardedJobs, savedJobs, removeSaved, removeBoarded, boardJob, updateBoardedStatus } = useJobActions()
+  const [detailJob, setDetailJob] = useState(null)
 
-  const seedJobs = BOARDING_PASSES.map(bp => {
-    const job = JOBS.find(j => j.id === bp.jobId)
-    if (!job) return null
-    return { ...job, status: bp.status, appliedDate: bp.appliedDate }
-  }).filter(Boolean)
-
-  const allPasses = [
-    ...boardedJobs,
-    ...seedJobs.filter(s => !boardedJobs.some(b => b.id === s.id)),
-  ]
+  const allPasses = [...boardedJobs]
 
   return (
     <div className="review-page">
@@ -342,7 +386,14 @@ export default function ReviewPage({ onToast }) {
               </div>
             )}
             {allPasses.map(job => (
-              <BoardingPassCard key={job.id} job={job} onToast={onToast} />
+              <BoardingPassCard
+                key={job.id}
+                job={job}
+                onToast={onToast}
+                onOpenDetail={setDetailJob}
+                onDelete={(id) => { removeBoarded(id); onToast?.('Removed from boarding passes') }}
+                onAdvanceStatus={(id, status) => { updateBoardedStatus(id, status); onToast?.(`Status updated to ${STATUS_META[status]?.label}`) }}
+              />
             ))}
 
             {savedJobs.length > 0 && (
@@ -361,6 +412,17 @@ export default function ReviewPage({ onToast }) {
           </>
         )}
       </div>
+
+      {/* Job Detail Modal */}
+      <JobDetail
+        job={detailJob}
+        open={!!detailJob}
+        onClose={() => setDetailJob(null)}
+        onApply={() => { onToast?.(`Applied to ${detailJob?.company}`); setDetailJob(null) }}
+        onSave={() => { onToast?.(`Saved ${detailJob?.company}`); setDetailJob(null) }}
+        onOpenTailor={() => onToast?.('Opening resume tailor...')}
+        onOpenCoach={() => onToast?.('Opening interview coach...')}
+      />
     </div>
   )
 }

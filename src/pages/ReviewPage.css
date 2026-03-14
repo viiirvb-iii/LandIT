@@ -88,8 +88,114 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: transform 0.2s;
+  position: relative;
 }
 .review-card:active { transform: scale(0.98); }
+
+/* In-flight highlight — bigger card */
+.review-card--inflight {
+  border-color: rgba(255,214,10,0.30);
+  box-shadow: 0 0 20px rgba(255,214,10,0.08);
+}
+
+/* ── Delete Button (inline next to status badge) ── */
+
+.review-card-delete {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(255,69,58,0.10);
+  color: rgba(255,69,58,0.45);
+  border: 1px solid rgba(255,69,58,0.15);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  font-family: inherit;
+  padding: 0;
+  flex-shrink: 0;
+}
+.review-card-delete:hover {
+  background: rgba(255,69,58,0.20);
+  color: #ff453a;
+}
+
+/* ── Status Progress Track ── */
+
+.review-status-track {
+  padding: 6px 16px 2px;
+  position: relative;
+}
+
+.review-status-track {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 8px 16px 0;
+}
+
+.review-status-step {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.review-status-step:last-of-type {
+  flex: 0;
+}
+
+.review-status-dot-track {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+  border: 1.5px solid rgba(255,255,255,0.15);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.review-status-dot-track.done {
+  background: #3a82f6;
+  border-color: #3a82f6;
+}
+
+.review-status-dot-track.current {
+  box-shadow: 0 0 8px rgba(58,130,246,0.5);
+  transform: scale(1.2);
+}
+
+.review-status-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(255,255,255,0.08);
+  margin: 0 2px;
+  transition: background 0.2s;
+}
+
+.review-status-line.done {
+  background: #3a82f6;
+}
+
+.review-status-labels {
+  display: flex;
+  width: 100%;
+  padding-top: 4px;
+  padding-bottom: 6px;
+}
+
+.review-status-step-label {
+  flex: 1;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  text-align: center;
+}
+
+.review-status-step-label:first-child { text-align: left; }
+.review-status-step-label:last-child { text-align: right; }
 
 /* ── Card Top Section ── */
 
@@ -123,7 +229,13 @@
 }
 
 .review-card-location {
-  display: none;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.35);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .review-card-role {
@@ -182,10 +294,71 @@
   border: 1px solid rgba(255,214,10,0.2);
 }
 
+.review-status-badge.uploaded {
+  background: rgba(58,130,246,0.12);
+  color: #3a82f6;
+  border: 1px solid rgba(58,130,246,0.2);
+}
+
+.review-status-badge.downloaded {
+  background: rgba(167,139,250,0.12);
+  color: #a78bfa;
+  border: 1px solid rgba(167,139,250,0.2);
+}
+
 .review-status-badge.departed {
   background: rgba(255,69,58,0.12);
   color: #ff453a;
   border: 1px solid rgba(255,69,58,0.2);
+}
+
+/* ── Description Preview ── */
+
+.review-card-desc {
+  padding: 0 14px 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255,255,255,0.40);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Skill Chips ── */
+
+.review-card-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 14px 10px;
+}
+
+.review-skill-chip {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.review-skill-chip.have {
+  background: rgba(48,209,88,0.12);
+  color: #30d158;
+  border: 1px solid rgba(48,209,88,0.20);
+}
+
+.review-skill-chip.ok {
+  background: rgba(255,214,10,0.10);
+  color: #ffd60a;
+  border: 1px solid rgba(255,214,10,0.18);
+}
+
+.review-skill-chip.miss {
+  background: rgba(255,69,58,0.10);
+  color: #ff453a;
+  border: 1px solid rgba(255,69,58,0.18);
 }
 
 /* ── Perforation Divider ── */
@@ -273,6 +446,13 @@
   border-color: #3a82f6;
 }
 .review-action-btn.coach:hover { background: #2563eb; }
+
+.review-action-btn.advance {
+  background: rgba(58,130,246,0.15);
+  color: #3a82f6;
+  border-color: rgba(58,130,246,0.25);
+}
+.review-action-btn.advance:hover { background: rgba(58,130,246,0.25); }
 
 .review-action-btn.details {
   background: rgba(255,255,255,0.06);

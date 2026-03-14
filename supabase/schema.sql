@@ -212,6 +212,40 @@ create table public.stamps (
 );
 
 -- ============================================
+-- RAG: Enable pgvector extension
+-- ============================================
+create extension if not exists vector;
+
+-- ============================================
+-- PARSED RESUMES (Structured extraction from uploaded resumes)
+-- ============================================
+create table public.parsed_resumes (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null unique,
+  storage_path text not null,
+  parsed_data jsonb not null default '{}',
+  skills_extracted text[] default '{}',
+  raw_text text default '',
+  parsed_at timestamptz default now()
+);
+
+-- ============================================
+-- RESUME CHUNKS (Embedded text chunks for semantic retrieval)
+-- ============================================
+create table public.resume_chunks (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  chunk_text text not null,
+  chunk_index int not null,
+  section_label text default '',
+  embedding vector(1536)
+);
+
+create index idx_resume_chunks_embedding on public.resume_chunks
+  using ivfflat (embedding vector_cosine_ops) with (lists = 10);
+create index idx_resume_chunks_user on public.resume_chunks(user_id);
+
+-- ============================================
 -- ROW LEVEL SECURITY
 -- ============================================
 
@@ -263,6 +297,14 @@ create policy "Users can manage own tailored resumes" on public.tailored_resumes
 alter table public.stamps enable row level security;
 create policy "Users can manage own stamps" on public.stamps for all using (auth.uid() = user_id);
 
+-- Parsed resumes
+alter table public.parsed_resumes enable row level security;
+create policy "Users can manage own parsed resumes" on public.parsed_resumes for all using (auth.uid() = user_id);
+
+-- Resume chunks
+alter table public.resume_chunks enable row level security;
+create policy "Users can manage own resume chunks" on public.resume_chunks for all using (auth.uid() = user_id);
+
 -- ============================================
 -- INDEXES
 -- ============================================
@@ -296,3 +338,33 @@ create trigger user_skills_updated_at before update on public.user_skills
   for each row execute procedure public.update_updated_at();
 create trigger skill_gaps_updated_at before update on public.skill_gaps
   for each row execute procedure public.update_updated_at();
+
+-- ============================================
+-- VECTOR SIMILARITY SEARCH FUNCTION
+-- ============================================
+create or replace function public.match_resume_chunks(
+  query_embedding vector(1536),
+  match_user_id uuid,
+  match_count int default 5
+)
+returns table (
+  id uuid,
+  chunk_text text,
+  section_label text,
+  similarity float
+)
+language plpgsql
+as $$
+begin
+  return query
+  select
+    rc.id,
+    rc.chunk_text,
+    rc.section_label,
+    1 - (rc.embedding <=> query_embedding) as similarity
+  from public.resume_chunks rc
+  where rc.user_id = match_user_id
+  order by rc.embedding <=> query_embedding
+  limit match_count;
+end;
+$$;
