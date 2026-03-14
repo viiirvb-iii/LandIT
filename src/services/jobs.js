@@ -1,4 +1,4 @@
-import supabase from '../lib/supabase.js'
+import { supabase } from '../lib/supabase.js'
 
 // Swipe feed — active jobs with company info, newest first
 export async function getSwipeFeed({ limit = 20, offset = 0 } = {}) {

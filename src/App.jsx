@@ -1,13 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import Dashboard from './pages/Dashboard'
 import SwipeFeed from './pages/SwipeFeed'
 import './App.css'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
-
   if (loading) {
     return (
       <div className="loading-page">
@@ -16,14 +16,12 @@ function ProtectedRoute({ children }) {
       </div>
     )
   }
-
-  if (!user) return <Navigate to="/login" />
+  if (!user) return <Navigate to="/login" replace />
   return children
 }
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth()
-
   if (loading) {
     return (
       <div className="loading-page">
@@ -32,25 +30,18 @@ function PublicRoute({ children }) {
       </div>
     )
   }
-
-  if (user) return <Navigate to="/swipe" />
+  if (user) return <Navigate to="/swipe" replace />
   return children
 }
 
-function App() {
+export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-          <Route path="/swipe" element={<ProtectedRoute><SwipeFeed /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<Navigate to="/swipe" />} />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/login"     element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/signup"    element={<PublicRoute><Signup /></PublicRoute>} />
+      <Route path="/swipe"     element={<ProtectedRoute><SwipeFeed /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="*"          element={<Navigate to="/login" replace />} />
+    </Routes>
   )
 }
-
-export default App

@@ -1,4 +1,4 @@
-import supabase from '../lib/supabase.js'
+import { supabase } from '../lib/supabase.js'
 
 // Review screen — all boarding passes for a user
 export async function getUserApplications(userId) {

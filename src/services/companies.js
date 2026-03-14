@@ -1,4 +1,4 @@
-import supabase from '../lib/supabase.js'
+import { supabase } from '../lib/supabase.js'
 
 // Fetch all companies (for wishlist screen)
 export async function getCompanies() {

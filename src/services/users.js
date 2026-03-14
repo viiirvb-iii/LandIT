@@ -1,4 +1,4 @@
-import supabase from '../lib/supabase.js'
+import { supabase } from '../lib/supabase.js'
 
 // Fetch the current user's profile
 export async function getUserProfile(userId) {
