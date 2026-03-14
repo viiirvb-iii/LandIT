@@ -1,48 +1,49 @@
 import { useState, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import { JOBS } from '../data/jobs'
+import JobDetail from '../components/JobDetail'
+import AutoTailor from '../components/AutoTailor'
+import AICoach from '../components/AICoach'
 import './SwipeFeed.css'
 
-export default function SwipeFeed() {
+export default function SwipeFeed({ showToast }) {
   const [cardIdx, setCardIdx] = useState(0)
   const [swipeDir, setSwipeDir] = useState(null)
-  const [liked, setLiked] = useState([])
-  const [showDetail, setShowDetail] = useState(false)
   const [dragX, setDragX] = useState(0)
   const [dragging, setDragging] = useState(false)
+  const [showDetail, setShowDetail] = useState(false)
+  const [showTailor, setShowTailor] = useState(false)
+  const [showCoach, setShowCoach] = useState(false)
   const dragStart = useRef(null)
-  const { signOut } = useAuth()
-  const navigate = useNavigate()
 
   const job = JOBS[cardIdx % JOBS.length]
-  const next1 = JOBS[(cardIdx + 1) % JOBS.length]
-  const next2 = JOBS[(cardIdx + 2) % JOBS.length]
+
+  const toast = showToast || (() => {})
 
   const doSwipe = useCallback((dir) => {
     if (swipeDir) return
     setSwipeDir(dir)
     if (dir === 'right') {
-      setLiked(p => [...p, job])
+      toast('✈ Added to boarding passes')
+    } else if (dir === 'left') {
+      toast('Passed')
+    } else {
+      toast('★ Saved to wishlist')
     }
     setTimeout(() => {
       setSwipeDir(null)
       setDragX(0)
       setCardIdx(i => i + 1)
     }, 430)
-  }, [swipeDir, job])
+  }, [swipeDir, job, toast])
 
   const onPointerDown = (e) => {
-    dragStart.current = { x: e.clientX, y: e.clientY }
+    dragStart.current = { x: e.clientX }
     setDragging(true)
   }
-
   const onPointerMove = (e) => {
     if (!dragStart.current || !dragging) return
-    const dx = e.clientX - dragStart.current.x
-    setDragX(dx)
+    setDragX(e.clientX - dragStart.current.x)
   }
-
   const onPointerUp = () => {
     if (!dragging) return
     setDragging(false)
@@ -54,121 +55,20 @@ export default function SwipeFeed() {
     dragStart.current = null
   }
 
-  const handleSignOut = async () => {
-    await signOut()
-    navigate('/login')
-  }
-
   const cardRotation = dragging ? dragX * 0.08 : 0
   const cardOpacity = dragging ? Math.max(0.5, 1 - Math.abs(dragX) / 400) : 1
 
-  if (showDetail) {
-    return (
-      <div className="sf-page">
-        <div className="sf-glow" />
-        <div className="sf-detail">
-          <div className="sf-detail-hero" style={{ background: `linear-gradient(160deg, ${job.g[0]}33, ${job.g[1]}55)` }}>
-            <button className="sf-back-btn" onClick={() => setShowDetail(false)}>← Back</button>
-            <div className="sf-detail-hero-inner">
-              <div className="sf-logo-lg" style={{ background: `linear-gradient(135deg, ${job.g[0]}, ${job.g[1]})` }}>{job.logo}</div>
-              <div>
-                <h2 className="sf-detail-title">{job.role}</h2>
-                <p className="sf-detail-sub">{job.company} · {job.location}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="sf-detail-body">
-            <div className="sf-pills">
-              {[job.salary, job.type, job.posted, job.source].map(c => (
-                <span key={c} className="sf-pill">{c}</span>
-              ))}
-            </div>
-            <div className="sf-pills" style={{ marginBottom: 24 }}>
-              {job.tags.map(t => (
-                <span key={t} className="sf-pill sf-pill-pink">{t}</span>
-              ))}
-            </div>
-
-            <div className="sf-glass-box">
-              <div className="sf-label">About the role</div>
-              <p className="sf-detail-desc">{job.desc}</p>
-            </div>
-
-            <div className="sf-glass-box">
-              <div className="sf-label">Key responsibilities</div>
-              {job.bullets.map((b, i) => (
-                <div key={i} className="sf-bullet">
-                  <span className="sf-dot" />
-                  <span>{b}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="sf-glass-box">
-              <div className="sf-label">Required skills</div>
-              {job.skills.map((s, i) => (
-                <div key={i} className="sf-bullet">
-                  <span className="sf-dot sf-dot-blue" />
-                  <span>{s}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="sf-match-box">
-              <div className="sf-match-row">
-                <span className="sf-match-label">Your AI match score</span>
-                <span className="sf-match-value">{job.match}%</span>
-              </div>
-              <div className="sf-ats-bar">
-                <div className="sf-ats-fill" style={{ width: `${job.match}%` }} />
-              </div>
-              <p className="sf-match-hint">Based on your profile, skills, and swipe history</p>
-            </div>
-
-            <div className="sf-detail-actions">
-              <button className="sf-btn-ghost" onClick={() => { setShowDetail(false); doSwipe('left') }}>Skip ✕</button>
-              <button className="sf-btn-grad" onClick={() => { setLiked(p => [...p, job]); setShowDetail(false); doSwipe('right') }}>Save ♥</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="sf-page">
-      <div className="sf-glow" />
-
-      {/* Top bar */}
-      <div className="sf-topbar">
-        <div className="sf-brand">Land<span className="sf-brand-accent">It</span></div>
-        <div className="sf-topbar-right">
-          <span className="sf-liked-count">{liked.length} saved</span>
-          <button className="sf-signout" onClick={handleSignOut}>Sign Out</button>
-        </div>
-      </div>
-
-      {/* Card stack */}
-      <div className="sf-stack-area">
-        <div className="sf-stack">
+      <div className="sf-swipe-area">
+        <div className="sf-card-stack">
           {/* Background cards */}
-          {[next2, next1].map((j, si) => (
-            <div key={j.id + '-bg-' + si} className="sf-card-bg" style={{
-              transform: `scale(${0.88 + si * 0.06}) translateY(${(1 - si) * 12}px)`,
-              zIndex: si,
-              opacity: 0.4 + si * 0.2,
-            }}>
-              <div className="sf-card-bg-inner">
-                <div className="sf-logo-sm" style={{ background: `linear-gradient(135deg, ${j.g[0]}, ${j.g[1]})` }}>{j.logo}</div>
-                <div className="sf-card-bg-title">{j.role}</div>
-              </div>
-            </div>
-          ))}
+          <div className="sf-bg-card sf-bg3" />
+          <div className="sf-bg-card sf-bg2" />
 
           {/* Front card */}
           <div
-            className={`sf-card-front ${swipeDir === 'right' ? 'sf-swipe-r' : swipeDir === 'left' ? 'sf-swipe-l' : ''}`}
+            className={`sf-job-card ${swipeDir === 'right' ? 'sf-swipe-r' : swipeDir === 'left' ? 'sf-swipe-l' : swipeDir === 'up' ? 'sf-swipe-u' : ''}`}
             style={{
               transform: !swipeDir ? `translateX(${dragX}px) rotate(${cardRotation}deg)` : undefined,
               opacity: !swipeDir ? cardOpacity : undefined,
@@ -179,56 +79,107 @@ export default function SwipeFeed() {
             onPointerLeave={onPointerUp}
           >
             {/* Swipe indicators */}
-            {(dragX > 50 || swipeDir === 'right') && <div className="sf-stamp sf-stamp-yes">SAVE ♥</div>}
-            {(dragX < -50 || swipeDir === 'left') && <div className="sf-stamp sf-stamp-no">SKIP</div>}
+            {dragX > 50 && <div className="sf-stamp sf-stamp-yes">SAVE ♥</div>}
+            {dragX < -50 && <div className="sf-stamp sf-stamp-no">SKIP</div>}
 
-            <div className="sf-card-source">{job.source}</div>
-
-            {/* Card hero */}
-            <div className="sf-card-hero" style={{ background: `linear-gradient(135deg, ${job.g[0]}22, ${job.g[1]}44)` }}>
-              <div className="sf-logo-md" style={{ background: `linear-gradient(135deg, ${job.g[0]}, ${job.g[1]})`, boxShadow: `0 8px 24px ${job.g[0]}55` }}>{job.logo}</div>
-              <div>
+            {/* Hero */}
+            <div className="sf-card-hero" style={{ background: `linear-gradient(160deg, ${job.g[0]}15, ${job.g[1]}25, ${job.g[2]}18)` }}>
+              <div className="sf-card-hero-content">
+                <div className="sf-card-eyebrow">✈ {job.match}% match · {job.location}</div>
                 <div className="sf-card-role">{job.role}</div>
-                <div className="sf-card-company">{job.company} · {job.location}</div>
+                <div className="sf-card-co-row">
+                  <div className="sf-card-co-badge" style={{ background: job.color }}>{job.logo}</div>
+                  <div className="sf-card-co-name">{job.company} · {job.location}</div>
+                  <div className="sf-card-pay">{job.salary}</div>
+                </div>
               </div>
             </div>
 
-            <div className="sf-pills sf-card-tags">
-              {job.tags.slice(0, 4).map(t => <span key={t} className="sf-pill">{t}</span>)}
-            </div>
-
-            <div className="sf-card-salary-row">
-              <div className="sf-card-salary">{job.salary}</div>
-              <div className="sf-card-type">{job.type}</div>
-            </div>
-
-            <div className="sf-card-match">
-              <div className="sf-card-match-row">
-                <span>AI match</span>
-                <span className="sf-card-match-pct">{job.match}%</span>
+            {/* Body */}
+            <div className="sf-card-body">
+              <div className="sf-chips">
+                {job.tags.slice(0, 4).map(t => (
+                  <span key={t} className="sf-chip">{t}</span>
+                ))}
               </div>
-              <div className="sf-ats-bar"><div className="sf-ats-fill" style={{ width: `${job.match}%` }} /></div>
+
+              <div className="sf-fit-row">
+                <span className="sf-fit-label">Flight match</span>
+                <div className="sf-fit-bar">
+                  <div className="sf-fit-fill" style={{ width: `${job.match}%` }} />
+                </div>
+                <span className="sf-fit-pct">{job.match}%</span>
+              </div>
+
+              <div className="sf-card-desc">{job.desc}</div>
             </div>
 
-            <button className="sf-card-detail-btn" onClick={(e) => { e.stopPropagation(); setShowDetail(true) }}>
-              View full description →
-            </button>
+            {/* Actions */}
+            <div className="sf-card-actions">
+              <button className="sf-act-btn" onClick={(e) => { e.stopPropagation(); setShowDetail(true) }}>
+                <span className="sf-act-icon">ℹ</span>
+                <span className="sf-act-lbl">Company</span>
+              </button>
+              <button className="sf-act-btn sf-act-primary" onClick={(e) => { e.stopPropagation(); setShowCoach(true) }}>
+                <span className="sf-act-icon">✦</span>
+                <span className="sf-act-lbl">AI Coach</span>
+              </button>
+              <button className="sf-act-btn" onClick={(e) => { e.stopPropagation(); setShowTailor(true) }}>
+                <span className="sf-act-icon">⚡</span>
+                <span className="sf-act-lbl">Auto-tailor</span>
+              </button>
+              <button className="sf-act-btn sf-act-star" onClick={(e) => { e.stopPropagation(); doSwipe('up') }}>
+                <span className="sf-act-icon">★</span>
+                <span className="sf-act-lbl">Save</span>
+              </button>
+            </div>
           </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="sf-actions">
-          <button className="sf-action-btn sf-action-no" onClick={() => doSwipe('left')}>✕</button>
-          <div className="sf-action-divider">
-            <span className="sf-action-label">SWIPE</span>
-            <div className="sf-action-line" />
-          </div>
-          <button className="sf-action-btn sf-action-yes" onClick={() => doSwipe('right')}>♥</button>
-        </div>
-        <div className="sf-hint">
-          {liked.length > 0 ? `${liked.length} saved · swipe right to save more` : 'swipe right to save · left to skip'}
         </div>
       </div>
+
+      {/* Swipe buttons */}
+      <div className="sf-swipe-btns">
+        <button className="sf-sw-btn sf-sw-pass" onClick={() => doSwipe('left')}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+        <button className="sf-sw-btn sf-sw-love" onClick={() => doSwipe('right')}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="#fff"/>
+          </svg>
+        </button>
+        <button className="sf-sw-btn sf-sw-save" onClick={() => doSwipe('up')}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round">
+            <polyline points="12 2 12 22"/><polyline points="6 8 12 2 18 8"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* Overlays */}
+      <JobDetail
+        job={job}
+        open={showDetail}
+        onClose={() => setShowDetail(false)}
+        onApply={() => { toast('✈ Added to boarding passes'); setShowDetail(false) }}
+        onSave={() => { toast('★ Saved to wishlist'); setShowDetail(false) }}
+        onOpenTailor={() => { setShowDetail(false); setShowTailor(true) }}
+        onOpenCoach={() => { setShowDetail(false); setShowCoach(true) }}
+      />
+
+      <AutoTailor
+        job={job}
+        open={showTailor}
+        onClose={() => setShowTailor(false)}
+        onToast={toast}
+      />
+
+      <AICoach
+        job={job}
+        open={showCoach}
+        onClose={() => setShowCoach(false)}
+        onToast={toast}
+      />
     </div>
   )
 }

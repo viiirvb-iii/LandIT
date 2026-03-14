@@ -1,0 +1,724 @@
+/* ============================================================
+   AICoach.css  --  Light-mode, Apple-inspired overlay
+   ============================================================ */
+
+/* ---------- overlay shell ---------- */
+.coach-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(248, 250, 252, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transform: translateY(100%);
+  transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.coach-overlay.coach-open {
+  transform: translateY(0);
+}
+
+/* ---------- header ---------- */
+.coach-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+.coach-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.coach-job-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+.coach-job-logo-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+}
+.coach-header-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+.coach-header-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 1px;
+}
+.coach-close-btn {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: #64748b;
+  transition: background 0.2s;
+}
+.coach-close-btn:hover {
+  background: #e2e8f0;
+}
+
+/* ---------- body container ---------- */
+.coach-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  overflow-y: auto;
+}
+
+/* ============================================================
+   Phase 1 -- Choice
+   ============================================================ */
+.coach-choice-wrap {
+  text-align: center;
+  max-width: 520px;
+  width: 100%;
+}
+.coach-choice-heading {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+.coach-choice-sub {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 28px;
+}
+.coach-choice-cards {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+.coach-choice-card {
+  flex: 1;
+  max-width: 240px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 28px 20px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  text-align: center;
+}
+.coach-choice-card:hover {
+  border-color: #a855f7;
+  box-shadow: 0 4px 24px rgba(168, 85, 247, 0.10);
+  transform: translateY(-2px);
+}
+.coach-choice-icon {
+  font-size: 32px;
+  margin-bottom: 14px;
+}
+.coach-choice-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+.coach-choice-card p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ============================================================
+   Phase 2 -- Q&A chat
+   ============================================================ */
+.coach-qa-wrap {
+  max-width: 560px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.coach-qa-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* coach bubble */
+.coach-bubble-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.coach-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #a855f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.coach-bubble {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #0f172a;
+  line-height: 1.55;
+  max-width: 420px;
+}
+
+/* user bubble */
+.coach-user-row {
+  display: flex;
+  justify-content: flex-end;
+}
+.coach-user-bubble {
+  background: #a855f7;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.45;
+  max-width: 380px;
+}
+
+/* typing dots */
+.coach-dots {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+.coach-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a855f7;
+  animation: coachDot 1.2s infinite;
+}
+.coach-dots span:nth-child(2) { animation-delay: 0.2s; }
+.coach-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes coachDot {
+  0%, 60%, 100% { opacity: 0.25; transform: scale(0.85); }
+  30% { opacity: 1; transform: scale(1); }
+}
+
+/* input bar */
+.coach-qa-input-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+  margin-top: auto;
+}
+.coach-qa-input {
+  flex: 1;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  outline: none;
+  color: #0f172a;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+.coach-qa-input:focus {
+  border-color: #a855f7;
+}
+.coach-qa-input::placeholder {
+  color: #94a3b8;
+}
+.coach-send-btn {
+  background: #a855f7;
+  border: none;
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  font-size: 18px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.coach-send-btn:hover {
+  background: #9333ea;
+}
+.coach-qa-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+}
+.coach-skip-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.coach-q-counter {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* ============================================================
+   Phase 3 -- Loading / Analysis
+   ============================================================ */
+.coach-loading-wrap {
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+.coach-progress-ring-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 24px;
+}
+.coach-progress-ring {
+  transform: rotate(-90deg);
+}
+.coach-progress-ring circle {
+  fill: none;
+  stroke-width: 6;
+}
+.coach-progress-ring .ring-bg {
+  stroke: #e2e8f0;
+}
+.coach-progress-ring .ring-fg {
+  stroke: #a855f7;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s ease;
+}
+.coach-countdown-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #a855f7;
+}
+.coach-loading-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 20px;
+}
+.coach-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  margin-bottom: 24px;
+}
+.coach-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  transition: color 0.3s;
+}
+.coach-step.active {
+  color: #a855f7;
+  font-weight: 600;
+}
+.coach-step.done {
+  color: #22c55e;
+}
+.coach-step-icon {
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.coach-bar-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+.coach-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #a855f7, #3b82f6);
+  transition: width 0.4s ease;
+}
+
+/* ============================================================
+   Phase 4 -- Live Coaching cards
+   ============================================================ */
+.coach-live-wrap {
+  max-width: 560px;
+  width: 100%;
+}
+.coach-ats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+.coach-ats-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+.coach-ats-score {
+  font-size: 22px;
+  font-weight: 700;
+  color: #a855f7;
+  transition: color 0.3s;
+}
+.coach-ats-track {
+  flex: 1;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  margin: 0 14px;
+  overflow: hidden;
+}
+.coach-ats-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #a855f7, #22c55e);
+  transition: width 0.5s ease;
+}
+
+/* suggestion card */
+.coach-suggestion-card {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  animation: coachCardIn 0.35s ease;
+}
+@keyframes coachCardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.coach-sug-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.coach-sug-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.coach-sug-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+}
+.coach-sug-insight {
+  font-size: 14px;
+  color: #0f172a;
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+.coach-sug-why {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+.coach-diff {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.coach-diff-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.coach-diff-before {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #991b1b;
+  line-height: 1.5;
+}
+.coach-diff-before .coach-diff-label {
+  color: #ef4444;
+}
+.coach-diff-after {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.5;
+}
+.coach-diff-after .coach-diff-label {
+  color: #22c55e;
+}
+.coach-sug-actions {
+  display: flex;
+  gap: 10px;
+}
+.coach-btn-approve {
+  flex: 1;
+  padding: 11px 0;
+  border-radius: 12px;
+  border: none;
+  background: #22c55e;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.coach-btn-approve:hover {
+  background: #16a34a;
+}
+.coach-btn-edit {
+  padding: 11px 18px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.coach-btn-edit:hover {
+  border-color: #a855f7;
+}
+.coach-btn-skip {
+  padding: 11px 18px;
+  border-radius: 12px;
+  border: 1.5px solid #fecaca;
+  background: #fff;
+  color: #ef4444;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.coach-btn-skip:hover {
+  background: #fef2f2;
+}
+.coach-card-counter {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* collapsed card */
+.coach-card-collapsed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  animation: coachCardIn 0.3s ease;
+}
+.coach-card-collapsed.skipped {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+.coach-collapsed-icon {
+  font-size: 16px;
+}
+.coach-collapsed-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0f172a;
+  flex: 1;
+}
+.coach-collapsed-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.coach-collapsed-badge.approved {
+  background: #dcfce7;
+  color: #166534;
+}
+.coach-collapsed-badge.skipped {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ============================================================
+   Phase 5 -- Complete
+   ============================================================ */
+.coach-complete-wrap {
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+}
+.coach-complete-check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #dcfce7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  font-size: 30px;
+}
+.coach-complete-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+.coach-complete-sub {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+.coach-score-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #64748b;
+}
+.coach-score-old {
+  font-size: 28px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+.coach-score-arrow {
+  font-size: 20px;
+  color: #a855f7;
+}
+.coach-score-new {
+  font-size: 28px;
+  font-weight: 700;
+  color: #22c55e;
+}
+.coach-lesson-box {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+  text-align: left;
+  margin-bottom: 24px;
+}
+.coach-lesson-heading {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+.coach-lesson-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.coach-lesson-box li {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+  padding-left: 18px;
+  position: relative;
+}
+.coach-lesson-box li::before {
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  color: #22c55e;
+  font-weight: 700;
+}
+.coach-complete-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.coach-btn-export {
+  padding: 12px 28px;
+  border-radius: 12px;
+  border: none;
+  background: #a855f7;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.coach-btn-export:hover {
+  background: #9333ea;
+}
+.coach-btn-restart {
+  padding: 12px 28px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.coach-btn-restart:hover {
+  border-color: #a855f7;
+}

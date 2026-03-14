@@ -1,0 +1,543 @@
+/* ============================================
+   JobDetail Overlay - Light Mode (Apple-inspired)
+   ============================================ */
+
+/* --- Overlay --- */
+.jd-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(248, 250, 252, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transform: translateY(100%);
+  transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.jd-overlay.open {
+  transform: translateY(0);
+}
+
+/* --- Inner container --- */
+.jd-inner {
+  max-width: 600px;
+  margin: 0 auto;
+  padding-bottom: 120px;
+}
+
+/* ============================================
+   Hero
+   ============================================ */
+.jd-hero {
+  position: relative;
+  padding: 56px 24px 32px;
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
+}
+
+.jd-hero-gradient {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  z-index: 0;
+}
+
+.jd-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.jd-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 20px;
+}
+
+.jd-back-btn:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.jd-back-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.jd-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3b82f6;
+  margin-bottom: 8px;
+}
+
+.jd-role-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 0 0 14px;
+}
+
+.jd-company-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 8px 16px 8px 8px;
+}
+
+.jd-company-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.jd-company-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.jd-company-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.jd-company-loc {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ============================================
+   Quick Stats Row
+   ============================================ */
+.jd-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 20px 24px 0;
+}
+
+.jd-stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px 12px;
+  text-align: center;
+}
+
+.jd-stat-icon {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.jd-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.jd-stat-label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* ============================================
+   Sections (shared)
+   ============================================ */
+.jd-sections {
+  padding: 20px 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.jd-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 22px 20px;
+}
+
+.jd-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.jd-section-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.jd-section-icon.blue   { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.jd-section-icon.green  { background: rgba(34, 197, 94, 0.1);  color: #22c55e; }
+.jd-section-icon.amber  { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.jd-section-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+.jd-section-icon.gray   { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+
+.jd-section-title {
+  font-size: 17px;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+.jd-section-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #64748b;
+}
+
+/* ============================================
+   Requirements list
+   ============================================ */
+.jd-reqs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jd-req-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #0f172a;
+}
+
+.jd-req-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.jd-req-dot.met   { background: #22c55e; }
+.jd-req-dot.unmet { background: #cbd5e1; }
+
+/* ============================================
+   Skill chips
+   ============================================ */
+.jd-skills-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.jd-skill-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.jd-skill-chip.have {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.jd-skill-chip.ok {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.jd-skill-chip.miss {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ============================================
+   Documents checklist
+   ============================================ */
+.jd-docs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jd-doc-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.jd-doc-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.jd-doc-icon {
+  font-size: 18px;
+}
+
+.jd-doc-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.jd-doc-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.jd-doc-badge.ready {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.jd-doc-badge.required {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.jd-doc-badge.ai-draft {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+/* ============================================
+   Timeline
+   ============================================ */
+.jd-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  padding-left: 20px;
+}
+
+.jd-timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  position: relative;
+  padding-bottom: 22px;
+}
+
+.jd-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+/* vertical line */
+.jd-timeline-item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 14px;
+  bottom: -4px;
+  width: 2px;
+  background: #e2e8f0;
+}
+
+.jd-timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+  z-index: 1;
+}
+
+.jd-timeline-dot.blue   { background: #3b82f6; }
+.jd-timeline-dot.green  { background: #22c55e; }
+.jd-timeline-dot.amber  { background: #f59e0b; }
+.jd-timeline-dot.gray   { background: #cbd5e1; }
+
+.jd-timeline-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.jd-timeline-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.jd-timeline-date {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* ============================================
+   CTA Footer
+   ============================================ */
+.jd-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 910;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid #e2e8f0;
+  padding: 16px 24px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.jd-overlay.open .jd-cta {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition-delay: 0.15s;
+}
+
+.jd-cta-inner {
+  max-width: 600px;
+  width: 100%;
+  display: flex;
+  gap: 12px;
+}
+
+.jd-btn-apply {
+  flex: 1;
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: none;
+  background: #3b82f6;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.jd-btn-apply:hover {
+  background: #2563eb;
+}
+
+.jd-btn-apply:active {
+  transform: scale(0.97);
+}
+
+.jd-btn-save {
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.jd-btn-save:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.jd-btn-save:active {
+  transform: scale(0.97);
+}
+
+/* ============================================
+   AI Action Links (Tailor / Coach)
+   ============================================ */
+.jd-ai-actions {
+  display: flex;
+  gap: 10px;
+  padding: 8px 24px 0;
+}
+
+.jd-ai-action {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #3b82f6;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.jd-ai-action:hover {
+  background: rgba(59, 130, 246, 0.04);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.jd-ai-action svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 480px) {
+  .jd-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .jd-role-title {
+    font-size: 24px;
+  }
+}
