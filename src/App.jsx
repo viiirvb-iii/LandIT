@@ -11,7 +11,6 @@ import './App.css'
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState('swipe')
-
   return (
     <AppLayout activeTab={activeTab} onTabChange={setActiveTab}>
       {({ showToast }) => (
@@ -27,7 +26,6 @@ function MainApp() {
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
-
   if (loading) {
     return (
       <div className="loading-page">
@@ -36,14 +34,12 @@ function ProtectedRoute({ children }) {
       </div>
     )
   }
-
-  if (!user) return <Navigate to="/login" />
+  if (!user) return <Navigate to="/login" replace />
   return children
 }
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth()
-
   if (loading) {
     return (
       <div className="loading-page">
@@ -52,12 +48,11 @@ function PublicRoute({ children }) {
       </div>
     )
   }
-
-  if (user) return <Navigate to="/app" />
+  if (user) return <Navigate to="/app" replace />
   return children
 }
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
@@ -65,13 +60,11 @@ function App() {
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
           <Route path="/app" element={<ProtectedRoute><MainApp /></ProtectedRoute>} />
-          <Route path="/swipe" element={<Navigate to="/app" />} />
-          <Route path="/dashboard" element={<Navigate to="/app" />} />
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="/swipe" element={<Navigate to="/app" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/app" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
   )
 }
-
-export default App
