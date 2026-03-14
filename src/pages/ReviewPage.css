@@ -1,328 +1,264 @@
-/* ── ReviewPage – Light Mode ── */
+/* ── ReviewPage – Dark Mode ── */
 
 .review-page {
-  min-height: 100vh;
-  background: #f1f5f9;
-  padding: 0 0 100px;
-  color: #0f172a;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
 }
 
 /* ── Globe Section ── */
 
-.review-globe-section {
-  position: relative;
-  width: 100%;
+.review-top {
   height: 260px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 100%);
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.review-globe-section canvas {
-  display: block;
-}
-
-.review-globe-title {
-  position: absolute;
-  bottom: 16px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-/* ── Legend Bar ── */
-
-.review-legend-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  padding: 14px 20px;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.review-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #64748b;
-}
-
-.review-legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
   flex-shrink: 0;
-}
-
-.review-legend-dot.landed { background: #22c55e; }
-.review-legend-dot.inflight { background: #f59e0b; }
-.review-legend-dot.departed { background: #ef4444; }
-.review-legend-dot.wishlist { background: #94a3b8; }
-
-/* ── Cards List ── */
-
-.review-cards-list {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-width: 480px;
-  margin: 0 auto;
-}
-
-/* ── Boarding Pass Card ── */
-
-.review-card {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
-  transition: box-shadow 0.2s ease;
-}
-
-.review-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
-}
-
-/* ── Card Top Section ── */
-
-.review-card-top {
-  padding: 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
   position: relative;
+  overflow: hidden;
+  background: #060910;
 }
 
-.review-card-logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+.globe-legend {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 700;
-  color: #ffffff;
-  flex-shrink: 0;
+  gap: 10px;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: 0.5px solid var(--border);
 }
 
-.review-card-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.review-card-company {
-  font-size: 15px;
-  font-weight: 600;
-  color: #0f172a;
-  margin-bottom: 2px;
-}
-
-.review-card-location {
-  font-size: 12px;
-  color: #94a3b8;
-  margin-bottom: 4px;
-}
-
-.review-card-role {
-  font-size: 13px;
-  font-weight: 500;
-  color: #64748b;
-}
-
-.review-card-status-area {
+.leg-item {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.review-unread-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #3b82f6;
-  flex-shrink: 0;
-  animation: review-pulse 2s ease-in-out infinite;
-}
-
-@keyframes review-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-/* ── Status Badge ── */
-
-.review-status-badge {
-  display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
+  font-size: 9px;
+  color: var(--t2);
+  font-weight: 400;
 }
 
-.review-status-badge.landed {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
-}
-
-.review-status-badge.inflight {
-  background: rgba(245, 158, 11, 0.1);
-  color: #d97706;
-}
-
-.review-status-badge.departed {
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
-}
-
-/* ── Perforation Divider ── */
-
-.review-perforation {
-  position: relative;
-  height: 1px;
-  margin: 0;
-}
-
-.review-perforation-line {
-  position: absolute;
-  top: 0;
-  left: 20px;
-  right: 20px;
-  height: 1px;
-  border: none;
-  border-top: 2px dashed #e2e8f0;
-}
-
-.review-perforation-notch {
-  position: absolute;
-  top: -10px;
-  width: 20px;
-  height: 20px;
+.leg-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #f1f5f9;
+  flex-shrink: 0;
 }
 
-.review-perforation-notch.left {
-  left: -10px;
-  border-right: 1px solid #e2e8f0;
-}
+/* ── Bottom scrollable area ── */
 
-.review-perforation-notch.right {
-  right: -10px;
-  border-left: 1px solid #e2e8f0;
-}
-
-/* ── Stats Strip ── */
-
-.review-stats-strip {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  padding: 12px 16px;
-}
-
-.review-stat {
-  text-align: center;
-}
-
-.review-stat-label {
-  font-size: 10px;
-  font-weight: 500;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
-}
-
-.review-stat-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-/* ── Action Buttons ── */
-
-.review-actions {
-  display: flex;
-  gap: 8px;
-  padding: 0 16px 16px;
-}
-
-.review-action-btn {
+.review-bottom {
   flex: 1;
-  padding: 9px 0;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-align: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  background: #080c14;
+  padding-bottom: 20px;
+}
+.review-bottom::-webkit-scrollbar { display: none; }
+
+/* ── Header ── */
+
+.passes-header {
+  padding: 14px 16px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.review-action-btn.coach {
-  background: #3b82f6;
-  color: #ffffff;
+.passes-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.02em;
 }
 
-.review-action-btn.coach:active {
-  background: #2563eb;
+.passes-count {
+  font-size: 11px;
+  color: var(--t3);
+  font-weight: 400;
 }
 
-.review-action-btn.details {
-  background: #f1f5f9;
-  color: #0f172a;
-  border: 1px solid #e2e8f0;
-}
-
-.review-action-btn.details:active {
-  background: #e2e8f0;
-}
-
-.review-action-btn.export {
-  background: #f1f5f9;
-  color: #0f172a;
-  border: 1px solid #e2e8f0;
-}
-
-.review-action-btn.export:active {
-  background: #e2e8f0;
-}
-
-/* ── Empty State ── */
+/* ── Empty state ── */
 
 .review-empty {
   text-align: center;
   padding: 60px 20px;
-  color: #94a3b8;
 }
 
-.review-empty-icon {
-  font-size: 40px;
-  margin-bottom: 12px;
+/* ── Boarding Pass Card ── */
+
+.pass-card {
+  margin: 0 12px 10px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: relative;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.pass-card:active { transform: scale(0.98); }
+
+/* unread dot */
+.unread-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 6px rgba(58,130,246,0.6);
+  z-index: 2;
 }
 
-.review-empty-text {
-  font-size: 15px;
+/* pass top */
+.pass-top {
+  padding: 12px 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pass-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.pass-info { flex: 1; min-width: 0; }
+
+.pass-co {
+  font-size: 10px;
+  color: var(--t3);
+  font-weight: 400;
+}
+
+.pass-role {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.02em;
+}
+
+/* status badges */
+.pass-status {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+.ps-green   { background: rgba(48,209,88,0.15);  color: var(--green); border: 1px solid rgba(48,209,88,0.25); }
+.ps-amber   { background: rgba(255,214,10,0.12); color: var(--amber); border: 1px solid rgba(255,214,10,0.2); }
+.ps-red     { background: rgba(255,69,58,0.12);  color: var(--red);   border: 1px solid rgba(255,69,58,0.2); }
+
+/* perforation */
+.pass-perf {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin: 0 13px;
+}
+
+.perf-line {
+  flex: 1;
+  height: 0;
+  border: none;
+  border-top: 0.5px dashed rgba(255,255,255,0.12);
+}
+
+.perf-dot-l,
+.perf-dot-r {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #080c14;
+  border: 0.5px solid var(--border);
+  flex-shrink: 0;
+  margin: 0 -7px;
+  z-index: 2;
+}
+
+/* stats strip */
+.pass-strip {
+  padding: 10px 13px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.ps-field { display: flex; flex-direction: column; flex: 1; }
+.ps-lbl {
+  font-size: 8px;
   font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t4);
 }
+.ps-val {
+  font-size: 12px;
+  color: var(--t1);
+  font-weight: 500;
+  margin-top: 2px;
+  letter-spacing: -0.01em;
+}
+.ps-div {
+  width: 0.5px;
+  height: 28px;
+  background: var(--border);
+  margin: 0 10px;
+}
+.ps-match {
+  margin-left: auto;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.04em;
+}
+
+/* action buttons */
+.pass-actions {
+  padding: 8px 13px 12px;
+  display: flex;
+  gap: 7px;
+}
+
+.pa-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: var(--r-sm);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid;
+  text-align: center;
+  transition: all 0.15s;
+  letter-spacing: -0.01em;
+  font-family: inherit;
+}
+
+.pa-coach  { background: var(--blue);    color: #fff;         border-color: var(--blue); }
+.pa-coach:hover  { background: #2563eb; }
+.pa-detail { background: var(--surface); color: var(--t2);    border-color: var(--border); }
+.pa-detail:hover { background: var(--surface2); }
+.pa-dl     { background: var(--surface); color: var(--t2);    border-color: var(--border); }
+.pa-dl:hover     { background: var(--surface2); }

@@ -5,237 +5,345 @@
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  background: var(--bg);
 }
 
-/* ===== Swipe Area ===== */
-.sf-swipe-area {
+.sf-glow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(58,130,246,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== Stack Area ===== */
+.sf-stack-area {
   flex: 1;
   padding: 8px 14px 6px;
   position: relative;
   overflow: hidden;
-}
-
-.sf-card-stack {
-  position: relative;
-  height: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-}
-
-/* Background cards */
-.sf-bg-card {
-  position: absolute;
-  inset: 0;
-  border-radius: 22px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-.sf-bg-card.sf-bg2 { transform: scale(0.94) translateY(10px); z-index: 1; opacity: 0.5; }
-.sf-bg-card.sf-bg3 { transform: scale(0.88) translateY(20px); z-index: 0; opacity: 0.25; }
-
-/* ===== Job Card ===== */
-.sf-job-card {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: 22px;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  transition: transform 0.36s cubic-bezier(0.34,1.1,0.64,1), opacity 0.3s ease;
-  background: #fff;
-  box-shadow: 0 8px 30px rgba(59,130,246,0.08), 0 2px 8px rgba(0,0,0,0.04);
-  cursor: grab;
-  user-select: none;
-  touch-action: pan-y;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
 }
-.sf-job-card:active { cursor: grabbing; }
 
-/* Swipe animations */
-@keyframes swipeR { to { transform: translateX(360px) rotate(16deg); opacity: 0; } }
-@keyframes swipeL { to { transform: translateX(-360px) rotate(-16deg); opacity: 0; } }
-@keyframes swipeU { to { transform: translateY(-320px) scale(0.8); opacity: 0; } }
-.sf-swipe-r { animation: swipeR 0.43s cubic-bezier(0.55,0,1,0.45) forwards; }
-.sf-swipe-l { animation: swipeL 0.43s cubic-bezier(0.55,0,1,0.45) forwards; }
-.sf-swipe-u { animation: swipeU 0.43s cubic-bezier(0.55,0,1,0.45) forwards; }
-
-/* Stamps */
-.sf-stamp {
-  position: absolute;
-  top: 20px;
-  font-weight: 800;
-  font-size: 20px;
-  padding: 4px 14px;
-  border-radius: 8px;
-  border: 3px solid;
-  z-index: 10;
-  letter-spacing: 2px;
-}
-.sf-stamp-yes { right: 16px; color: #22c55e; border-color: #22c55e; background: rgba(34,197,94,0.08); transform: rotate(8deg); }
-.sf-stamp-no { left: 16px; color: #ef4444; border-color: #ef4444; background: rgba(239,68,68,0.08); transform: rotate(-8deg); }
-
-/* Card hero */
-.sf-card-hero {
-  height: 155px;
-  flex-shrink: 0;
+.sf-stack {
   position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-}
-.sf-card-hero-content {
-  padding: 14px 15px;
   width: 100%;
+  max-width: 420px;
+  height: 440px;
 }
-.sf-card-eyebrow {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #64748b;
-  margin-bottom: 5px;
+
+/* ===== Background Cards ===== */
+.sf-card-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: transform 0.3s ease;
 }
-.sf-card-role {
-  font-size: 19px;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-.sf-card-co-row {
+
+.sf-card-bg-inner {
+  padding: 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 7px;
+  gap: 10px;
 }
-.sf-card-co-badge {
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
+
+.sf-logo-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: #fff;
   flex-shrink: 0;
 }
-.sf-card-co-name { font-size: 11px; color: #64748b; font-weight: 400; }
-.sf-card-pay {
-  margin-left: auto;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 3px 9px;
-  font-size: 10px;
-  color: #0f172a;
-  font-weight: 500;
+
+.sf-card-bg-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t2);
+  letter-spacing: -0.01em;
 }
 
-/* Card body */
-.sf-card-body {
-  flex: 1;
-  padding: 12px 15px;
+/* ===== Front Card ===== */
+.sf-card-front {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--border2);
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  overflow: hidden;
+  background: #0d1220;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 4px 16px rgba(58,130,246,0.1);
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+  transition: transform 0.36s cubic-bezier(0.34,1.1,0.64,1), opacity 0.3s ease;
+}
+.sf-card-front:active { cursor: grabbing; }
+
+/* Swipe animations */
+@keyframes swipeR { to { transform: translateX(360px) rotate(16deg); opacity: 0; } }
+@keyframes swipeL { to { transform: translateX(-360px) rotate(-16deg); opacity: 0; } }
+.sf-swipe-r { animation: swipeR 0.43s cubic-bezier(0.55,0,1,0.45) forwards; }
+.sf-swipe-l { animation: swipeL 0.43s cubic-bezier(0.55,0,1,0.45) forwards; }
+
+/* ===== Stamps ===== */
+.sf-stamp {
+  position: absolute;
+  top: 20px;
+  font-weight: 800;
+  font-size: 18px;
+  padding: 4px 14px;
+  border-radius: 8px;
+  border: 2.5px solid;
+  z-index: 10;
+  letter-spacing: 2px;
+}
+.sf-stamp-yes { right: 16px; color: var(--green); border-color: var(--green); background: rgba(48,209,88,0.1); transform: rotate(8deg); }
+.sf-stamp-no  { left: 16px;  color: var(--red);   border-color: var(--red);   background: rgba(255,69,58,0.1);  transform: rotate(-8deg); }
+
+/* ===== Card Source Badge ===== */
+.sf-card-source {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t3);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
 }
 
-.sf-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.sf-chip {
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  font-size: 10px;
-  color: #64748b;
+/* ===== Card Hero ===== */
+.sf-card-hero {
+  height: 150px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 14px 15px;
+  gap: 12px;
+}
+
+.sf-logo-md {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.sf-card-role {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--t1);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.sf-card-company {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 3px;
   font-weight: 400;
 }
 
-.sf-fit-row { display: flex; align-items: center; gap: 8px; }
-.sf-fit-label { font-size: 10px; color: #94a3b8; font-weight: 400; }
-.sf-fit-bar { flex: 1; height: 3px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
-.sf-fit-fill { height: 100%; background: #3b82f6; border-radius: 3px; transition: width 0.5s ease; }
-.sf-fit-pct { font-size: 11px; color: #3b82f6; font-weight: 600; min-width: 28px; text-align: right; }
-
-.sf-card-desc { font-size: 11px; color: #64748b; line-height: 1.55; font-weight: 300; }
-
-/* Card actions */
-.sf-card-actions {
-  flex-shrink: 0;
-  padding: 8px 12px 10px;
+/* ===== Pills / Tags ===== */
+.sf-pills {
   display: flex;
-  gap: 6px;
-  background: #fafbfc;
-  border-top: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
-.sf-act-btn {
-  flex: 1;
-  padding: 9px 4px 8px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  font-size: 9px;
+.sf-card-tags {
+  padding: 10px 14px 0;
+}
+
+.sf-pill {
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--t2);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* ===== Salary Row ===== */
+.sf-card-salary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 0;
+}
+
+.sf-card-salary {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+}
+
+.sf-card-type {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 10px;
+  color: var(--t2);
+  font-weight: 400;
+}
+
+/* ===== AI Match ===== */
+.sf-card-match {
+  padding: 10px 14px 0;
+}
+
+.sf-card-match-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 10px;
+  color: var(--t3);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sf-card-match-pct {
+  color: var(--blue);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.sf-ats-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sf-ats-fill {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+/* ===== Detail Button ===== */
+.sf-card-detail-btn {
+  margin: 10px 14px;
+  padding: 10px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--t2);
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  color: #64748b;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  transition: all 0.15s;
   font-family: inherit;
+  text-align: center;
+  transition: background 0.15s;
   -webkit-tap-highlight-color: transparent;
+  letter-spacing: -0.01em;
 }
-.sf-act-btn:hover { background: #f1f5f9; }
-.sf-act-btn.sf-act-primary { background: #3b82f6; color: #fff; border-color: #3b82f6; }
-.sf-act-btn.sf-act-primary:hover { background: #2563eb; }
-.sf-act-btn.sf-act-star { background: #fffbeb; border-color: #fde68a; color: #f59e0b; }
-.sf-act-icon { font-size: 14px; line-height: 1; }
-.sf-act-lbl { font-size: 8px; line-height: 1.2; text-align: center; }
+.sf-card-detail-btn:hover { background: var(--surface2); }
 
-/* ===== Swipe Buttons ===== */
-.sf-swipe-btns {
+/* ===== Action Buttons Row ===== */
+.sf-actions {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 14px;
-  padding: 8px 0 6px;
+  padding: 12px 0 6px;
   flex-shrink: 0;
 }
 
-.sf-sw-btn {
-  width: 48px;
-  height: 48px;
+.sf-action-btn {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 20px;
   transition: transform 0.15s, opacity 0.15s;
   -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(20px);
 }
-.sf-sw-btn:hover { transform: scale(1.08); }
-.sf-sw-btn:active { transform: scale(0.94); opacity: 0.8; }
+.sf-action-btn:hover { transform: scale(1.08); }
+.sf-action-btn:active { transform: scale(0.92); opacity: 0.8; }
 
-.sf-sw-pass { background: #fef2f2; border: 1.5px solid #fecaca; }
-.sf-sw-love {
-  width: 58px;
-  height: 58px;
-  background: #3b82f6;
-  border: none;
-  box-shadow: 0 6px 20px rgba(59,130,246,0.35), 0 2px 6px rgba(0,0,0,0.1);
+.sf-action-no {
+  background: rgba(255,69,58,0.12);
+  border: 1.5px solid rgba(255,69,58,0.3);
+  color: var(--red);
 }
-.sf-sw-save { background: #fffbeb; border: 1.5px solid #fde68a; }
 
-/* ===== Desktop ===== */
-@media (min-width: 481px) {
-  .sf-card-stack { max-width: 400px; }
-  .sf-card-role { font-size: 20px; }
-  .sf-sw-btn:hover { transform: scale(1.12); }
+.sf-action-yes {
+  width: 62px;
+  height: 62px;
+  background: var(--blue);
+  box-shadow: 0 6px 20px rgba(58,130,246,0.45), 0 2px 6px rgba(0,0,0,0.3);
+  color: #fff;
+}
+
+.sf-action-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sf-action-label {
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--t4);
+  letter-spacing: 0.1em;
+}
+
+.sf-action-line {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+
+/* ===== Hint ===== */
+.sf-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--t3);
+  padding: 4px 0 10px;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
 }

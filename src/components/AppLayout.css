@@ -4,8 +4,8 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: #f1f5f9;
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  background: var(--bg);
+  font-family: var(--sans);
   position: relative;
 }
 
@@ -15,10 +15,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 18px;
-  background: rgba(255,255,255,0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid #e2e8f0;
+  background: rgba(8,12,20,0.85);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-bottom: 0.5px solid var(--border);
   flex-shrink: 0;
   z-index: 20;
   position: sticky;
@@ -28,7 +28,7 @@
 .app-brand {
   font-size: 20px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--t1);
   letter-spacing: -0.03em;
   display: flex;
   align-items: center;
@@ -47,23 +47,26 @@
   gap: 5px;
   padding: 6px 13px;
   border-radius: 20px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #0f172a;
+  background: var(--glass);
+  border: 1px solid var(--border2);
+  color: var(--t1);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.2s;
+  letter-spacing: -0.01em;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: background 0.2s;
 }
-.app-passport-btn:hover { background: #e2e8f0; }
+.app-passport-btn:hover { background: var(--surface2); }
 
 .app-signout-btn {
   padding: 6px 13px;
   border-radius: 20px;
   background: transparent;
-  border: 1px solid #e2e8f0;
-  color: #94a3b8;
+  border: 1px solid var(--border);
+  color: var(--t3);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -71,9 +74,9 @@
   transition: all 0.2s;
 }
 .app-signout-btn:hover {
-  border-color: #fecaca;
-  color: #ef4444;
-  background: #fef2f2;
+  border-color: rgba(255,69,58,0.4);
+  color: var(--red);
+  background: rgba(255,69,58,0.08);
 }
 
 /* ===== Content ===== */
@@ -89,11 +92,11 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 8px 8px 20px;
-  background: rgba(255,255,255,0.92);
+  padding: 10px 8px 18px;
+  background: rgba(10,14,22,0.85);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border-top: 1px solid #e2e8f0;
+  border-top: 0.5px solid var(--border);
   flex-shrink: 0;
   z-index: 20;
   position: sticky;
@@ -107,10 +110,10 @@
   gap: 4px;
   font-size: 9px;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--t3);
   cursor: pointer;
   letter-spacing: 0.02em;
-  padding: 4px 16px;
+  padding: 4px 12px;
   border-radius: 14px;
   transition: all 0.2s;
   border: none;
@@ -119,11 +122,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 .app-bnav-item.active {
-  color: #3b82f6;
-  background: rgba(59,130,246,0.08);
+  color: var(--blue);
+  background: rgba(58,130,246,0.12);
 }
 .app-bnav-item:hover:not(.active) {
-  color: #64748b;
+  color: var(--t2);
 }
 
 /* ===== Toast ===== */
@@ -132,17 +135,19 @@
   bottom: 90px;
   left: 50%;
   transform: translateX(-50%);
-  background: #0f172a;
-  border: 1px solid #1e293b;
-  border-radius: 12px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
   padding: 9px 18px;
   font-size: 12px;
   font-weight: 500;
-  color: #fff;
+  color: var(--t1);
   white-space: nowrap;
   z-index: 9999;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   animation: toastIn 0.28s cubic-bezier(0.34,1.1,0.64,1);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
 @keyframes toastIn {
@@ -150,9 +155,8 @@
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* ===== Safe area for mobile ===== */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .app-bnav {
-    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
   }
 }

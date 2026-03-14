@@ -1,5 +1,5 @@
 /* ============================================
-   JobDetail Overlay - Light Mode (Apple-inspired)
+   JobDetail Overlay - Dark Mode
    ============================================ */
 
 /* --- Overlay --- */
@@ -7,9 +7,9 @@
   position: fixed;
   inset: 0;
   z-index: 900;
-  background: rgba(248, 250, 252, 0.97);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(6,9,15,0.96);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
   transform: translateY(100%);
   transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
   overflow-y: auto;
@@ -54,22 +54,20 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(8px);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 8px 14px;
   font-size: 14px;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--t1);
   cursor: pointer;
   transition: background 0.2s;
   margin-bottom: 20px;
+  font-family: inherit;
 }
-
-.jd-back-btn:hover {
-  background: rgba(255, 255, 255, 0.95);
-}
+.jd-back-btn:hover { background: rgba(255,255,255,0.14); }
 
 .jd-back-btn svg {
   width: 16px;
@@ -81,14 +79,14 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #3b82f6;
+  color: var(--blue);
   margin-bottom: 8px;
 }
 
 .jd-role-title {
   font-size: 28px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--t1);
   line-height: 1.2;
   letter-spacing: -0.02em;
   margin: 0 0 14px;
@@ -98,8 +96,8 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 8px 16px 8px 8px;
 }
@@ -117,21 +115,9 @@
   flex-shrink: 0;
 }
 
-.jd-company-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.jd-company-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.jd-company-loc {
-  font-size: 12px;
-  color: #64748b;
-}
+.jd-company-info { display: flex; flex-direction: column; }
+.jd-company-name { font-size: 14px; font-weight: 600; color: var(--t1); }
+.jd-company-loc  { font-size: 12px; color: var(--t3); }
 
 /* ============================================
    Quick Stats Row
@@ -144,30 +130,16 @@
 }
 
 .jd-stat-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 14px 12px;
   text-align: center;
 }
 
-.jd-stat-icon {
-  font-size: 18px;
-  margin-bottom: 4px;
-}
-
-.jd-stat-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1.3;
-}
-
-.jd-stat-label {
-  font-size: 11px;
-  color: #94a3b8;
-  margin-top: 2px;
-}
+.jd-stat-icon { font-size: 18px; margin-bottom: 4px; }
+.jd-stat-value { font-size: 16px; font-weight: 700; color: var(--t1); line-height: 1.3; }
+.jd-stat-label { font-size: 11px; color: var(--t3); margin-top: 2px; }
 
 /* ============================================
    Sections (shared)
@@ -180,8 +152,8 @@
 }
 
 .jd-section {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 22px 20px;
 }
@@ -204,23 +176,14 @@
   flex-shrink: 0;
 }
 
-.jd-section-icon.blue   { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-.jd-section-icon.green  { background: rgba(34, 197, 94, 0.1);  color: #22c55e; }
-.jd-section-icon.amber  { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-.jd-section-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
-.jd-section-icon.gray   { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+.jd-section-icon.blue   { background: rgba(58,130,246,0.15);  color: var(--blue); }
+.jd-section-icon.green  { background: rgba(48,209,88,0.12);   color: var(--green); }
+.jd-section-icon.amber  { background: rgba(255,214,10,0.1);   color: var(--amber); }
+.jd-section-icon.purple { background: rgba(168,85,247,0.12);  color: #a855f7; }
+.jd-section-icon.gray   { background: rgba(255,255,255,0.06); color: var(--t2); }
 
-.jd-section-title {
-  font-size: 17px;
-  font-weight: 650;
-  color: #0f172a;
-}
-
-.jd-section-body {
-  font-size: 14px;
-  line-height: 1.7;
-  color: #64748b;
-}
+.jd-section-title { font-size: 17px; font-weight: 650; color: var(--t1); }
+.jd-section-body  { font-size: 14px; line-height: 1.7; color: var(--t2); }
 
 /* ============================================
    Requirements list
@@ -240,28 +203,17 @@
   gap: 10px;
   font-size: 14px;
   line-height: 1.5;
-  color: #0f172a;
+  color: var(--t1);
 }
 
-.jd-req-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 6px;
-}
-
-.jd-req-dot.met   { background: #22c55e; }
-.jd-req-dot.unmet { background: #cbd5e1; }
+.jd-req-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.jd-req-dot.met   { background: var(--green); }
+.jd-req-dot.unmet { background: var(--t4); }
 
 /* ============================================
    Skill chips
    ============================================ */
-.jd-skills-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+.jd-skills-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .jd-skill-chip {
   padding: 6px 14px;
@@ -271,58 +223,28 @@
   border: 1px solid transparent;
 }
 
-.jd-skill-chip.have {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
-  border-color: rgba(34, 197, 94, 0.2);
-}
-
-.jd-skill-chip.ok {
-  background: rgba(245, 158, 11, 0.1);
-  color: #d97706;
-  border-color: rgba(245, 158, 11, 0.2);
-}
-
-.jd-skill-chip.miss {
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
-  border-color: rgba(239, 68, 68, 0.2);
-}
+.jd-skill-chip.have { background: rgba(48,209,88,0.1);  color: var(--green); border-color: rgba(48,209,88,0.2); }
+.jd-skill-chip.ok   { background: rgba(255,214,10,0.1); color: var(--amber); border-color: rgba(255,214,10,0.2); }
+.jd-skill-chip.miss { background: rgba(255,69,58,0.1);  color: var(--red);   border-color: rgba(255,69,58,0.2); }
 
 /* ============================================
    Documents checklist
    ============================================ */
-.jd-docs-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+.jd-docs-list { display: flex; flex-direction: column; gap: 10px; }
 
 .jd-doc-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 14px 16px;
 }
 
-.jd-doc-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.jd-doc-icon {
-  font-size: 18px;
-}
-
-.jd-doc-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: #0f172a;
-}
+.jd-doc-left { display: flex; align-items: center; gap: 10px; }
+.jd-doc-icon { font-size: 18px; }
+.jd-doc-name { font-size: 14px; font-weight: 500; color: var(--t1); }
 
 .jd-doc-badge {
   font-size: 11px;
@@ -333,20 +255,9 @@
   letter-spacing: 0.03em;
 }
 
-.jd-doc-badge.ready {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
-}
-
-.jd-doc-badge.required {
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
-}
-
-.jd-doc-badge.ai-draft {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-}
+.jd-doc-badge.ready    { background: rgba(48,209,88,0.1);  color: var(--green); }
+.jd-doc-badge.required { background: rgba(255,69,58,0.1);  color: var(--red); }
+.jd-doc-badge.ai-draft { background: rgba(58,130,246,0.1); color: var(--blue); }
 
 /* ============================================
    Timeline
@@ -366,12 +277,8 @@
   position: relative;
   padding-bottom: 22px;
 }
+.jd-timeline-item:last-child { padding-bottom: 0; }
 
-.jd-timeline-item:last-child {
-  padding-bottom: 0;
-}
-
-/* vertical line */
 .jd-timeline-item:not(:last-child)::before {
   content: "";
   position: absolute;
@@ -379,39 +286,18 @@
   top: 14px;
   bottom: -4px;
   width: 2px;
-  background: #e2e8f0;
+  background: var(--border);
 }
 
-.jd-timeline-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 3px;
-  z-index: 1;
-}
+.jd-timeline-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; z-index: 1; }
+.jd-timeline-dot.blue  { background: var(--blue); }
+.jd-timeline-dot.green { background: var(--green); }
+.jd-timeline-dot.amber { background: var(--amber); }
+.jd-timeline-dot.gray  { background: var(--t4); }
 
-.jd-timeline-dot.blue   { background: #3b82f6; }
-.jd-timeline-dot.green  { background: #22c55e; }
-.jd-timeline-dot.amber  { background: #f59e0b; }
-.jd-timeline-dot.gray   { background: #cbd5e1; }
-
-.jd-timeline-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.jd-timeline-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.jd-timeline-date {
-  font-size: 12px;
-  color: #94a3b8;
-  margin-top: 2px;
-}
+.jd-timeline-content { display: flex; flex-direction: column; }
+.jd-timeline-label   { font-size: 14px; font-weight: 600; color: var(--t1); }
+.jd-timeline-date    { font-size: 12px; color: var(--t3); margin-top: 2px; }
 
 /* ============================================
    CTA Footer
@@ -422,10 +308,10 @@
   left: 0;
   right: 0;
   z-index: 910;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(8,12,20,0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid #e2e8f0;
+  border-top: 0.5px solid var(--border);
   padding: 16px 24px;
   padding-bottom: max(16px, env(safe-area-inset-bottom));
   display: flex;
@@ -444,54 +330,38 @@
   transition-delay: 0.15s;
 }
 
-.jd-cta-inner {
-  max-width: 600px;
-  width: 100%;
-  display: flex;
-  gap: 12px;
-}
+.jd-cta-inner { max-width: 600px; width: 100%; display: flex; gap: 12px; }
 
 .jd-btn-apply {
   flex: 1;
   padding: 16px 24px;
   border-radius: 16px;
   border: none;
-  background: #3b82f6;
-  color: #ffffff;
+  background: var(--blue);
+  color: #fff;
   font-size: 16px;
   font-weight: 650;
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
+  font-family: inherit;
 }
-
-.jd-btn-apply:hover {
-  background: #2563eb;
-}
-
-.jd-btn-apply:active {
-  transform: scale(0.97);
-}
+.jd-btn-apply:hover  { background: #2563eb; }
+.jd-btn-apply:active { transform: scale(0.97); }
 
 .jd-btn-save {
   padding: 16px 24px;
   border-radius: 16px;
-  border: 1.5px solid #e2e8f0;
-  background: #ffffff;
-  color: #0f172a;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--t1);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  transition: background 0.2s, transform 0.15s;
+  font-family: inherit;
 }
-
-.jd-btn-save:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-}
-
-.jd-btn-save:active {
-  transform: scale(0.97);
-}
+.jd-btn-save:hover  { background: var(--surface2); }
+.jd-btn-save:active { transform: scale(0.97); }
 
 /* ============================================
    AI Action Links (Tailor / Coach)
@@ -509,35 +379,26 @@
   justify-content: center;
   gap: 8px;
   padding: 14px 16px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   font-size: 14px;
   font-weight: 600;
-  color: #3b82f6;
+  color: var(--blue);
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
+  font-family: inherit;
 }
-
 .jd-ai-action:hover {
-  background: rgba(59, 130, 246, 0.04);
-  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(58,130,246,0.08);
+  border-color: rgba(58,130,246,0.3);
 }
-
-.jd-ai-action svg {
-  width: 18px;
-  height: 18px;
-}
+.jd-ai-action svg { width: 18px; height: 18px; }
 
 /* ============================================
    Responsive
    ============================================ */
 @media (max-width: 480px) {
-  .jd-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .jd-role-title {
-    font-size: 24px;
-  }
+  .jd-stats { grid-template-columns: repeat(2, 1fr); }
+  .jd-role-title { font-size: 24px; }
 }

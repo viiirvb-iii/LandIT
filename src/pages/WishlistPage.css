@@ -1,259 +1,248 @@
-/* ── WishlistPage · Light Mode ── */
+/* ── WishlistPage – Dark Mode ── */
 
 .wishlist-page {
-  min-height: 100vh;
-  background: #f1f5f9;
-  padding: 24px 16px 100px;
-  max-width: 480px;
-  margin: 0 auto;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  background: #080c14;
+  padding: 0 0 40px;
 }
+.wishlist-page::-webkit-scrollbar { display: none; }
 
 /* ── Section Headers ── */
 
 .wishlist-section-title {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 16px;
-  letter-spacing: -0.3px;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+  padding: 16px 16px 10px;
+  margin: 0;
 }
 
 /* ── Skill Radar Card ── */
 
 .skill-radar-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
+  margin: 0 14px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px;
 }
 
 .skill-bar-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
-
-.skill-bar-row:last-child {
-  margin-bottom: 0;
-}
+.skill-bar-row:last-child { margin-bottom: 0; }
 
 .skill-bar-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #0f172a;
-  min-width: 90px;
+  font-size: 11px;
+  color: var(--t1);
+  font-weight: 500;
+  min-width: 72px;
   flex-shrink: 0;
+  letter-spacing: -0.01em;
 }
 
 .skill-bar-track {
   flex: 1;
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 99px;
+  height: 4px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .skill-bar-fill {
   height: 100%;
-  border-radius: 99px;
-  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
 }
-
-.skill-bar-fill.strong {
-  background: #22c55e;
-}
-
-.skill-bar-fill.ok {
-  background: #f59e0b;
-}
-
-.skill-bar-fill.gap {
-  background: #ef4444;
-}
+.skill-bar-fill.strong { background: var(--green); }
+.skill-bar-fill.ok     { background: var(--amber); }
+.skill-bar-fill.gap    { background: var(--red); }
 
 .skill-tag-pill {
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 99px;
-  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 20px;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 0.01em;
   flex-shrink: 0;
 }
+.skill-tag-pill.strong { background: rgba(48,209,88,0.12);  color: var(--green); border: 1px solid rgba(48,209,88,0.2); }
+.skill-tag-pill.ok     { background: rgba(255,214,10,0.1);  color: var(--amber); border: 1px solid rgba(255,214,10,0.18); }
+.skill-tag-pill.gap    { background: rgba(255,69,58,0.1);   color: var(--red);   border: 1px solid rgba(255,69,58,0.18); }
 
-.skill-tag-pill.strong {
-  background: rgba(34, 197, 94, 0.12);
-  color: #16a34a;
-}
-
-.skill-tag-pill.ok {
-  background: rgba(245, 158, 11, 0.12);
-  color: #d97706;
-}
-
-.skill-tag-pill.gap {
-  background: rgba(239, 68, 68, 0.12);
-  color: #dc2626;
-}
-
-/* ── Gap Chips ── */
+/* ── Gap Section ── */
 
 .gap-section {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
+  margin: 0 14px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px;
 }
 
 .gap-section-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #64748b;
-  margin: 0 0 12px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--t3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
 }
 
 .gap-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .gap-chip {
-  display: inline-flex;
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 500;
+  background: rgba(255,69,58,0.08);
+  border: 1px solid rgba(255,69,58,0.18);
+  color: var(--red);
+  display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 99px;
-  padding: 6px 14px;
+  gap: 5px;
 }
 
 .gap-chip-freq {
-  color: #94a3b8;
-  font-weight: 500;
+  font-size: 9px;
+  opacity: 0.65;
 }
 
 /* ── Divider ── */
 
 .wishlist-divider {
-  height: 1px;
-  background: #e2e8f0;
-  margin: 8px 0 24px;
+  height: 0.5px;
+  background: var(--border);
+  margin: 6px 14px 14px;
   border: none;
 }
 
-/* ── Company Suggestion Cards ── */
+/* ── Company Cards ── */
 
 .company-cards {
+  padding: 0 14px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .company-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  border-radius: var(--r-md);
   overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .company-card-hero {
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 90px;
   position: relative;
+  overflow: hidden;
 }
 
 .company-card-logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  position: absolute;
+  bottom: 10px;
+  left: 13px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 15px;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 2;
 }
 
 .company-card-body {
-  padding: 16px 20px 20px;
+  padding: 10px 13px;
 }
 
 .company-card-name {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--t1);
   margin: 0 0 2px;
+  letter-spacing: -0.02em;
 }
 
 .company-card-sector {
-  font-size: 13px;
-  color: #94a3b8;
-  margin: 0 0 10px;
+  font-size: 10px;
+  color: var(--t3);
+  margin: 0 0 8px;
 }
 
 .company-card-desc {
-  font-size: 14px;
-  color: #64748b;
-  line-height: 1.5;
-  margin: 0 0 14px;
+  font-size: 11px;
+  color: var(--t2);
+  line-height: 1.55;
+  margin: 0 0 9px;
+  font-weight: 300;
 }
 
 .company-card-roles {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 16px;
+  gap: 5px;
+  margin-bottom: 10px;
 }
 
 .company-role-pill {
-  font-size: 12px;
-  font-weight: 500;
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.18);
-  border-radius: 99px;
-  padding: 5px 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 400;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--t2);
 }
 
 .company-card-actions {
   display: flex;
-  gap: 10px;
+  gap: 7px;
 }
 
 .company-btn {
   flex: 1;
-  padding: 10px 0;
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 9px;
+  border-radius: var(--r-sm);
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s;
-  border: none;
+  transition: all 0.15s;
+  border: 1px solid;
   text-align: center;
+  font-family: inherit;
+  letter-spacing: -0.01em;
 }
-
-.company-btn:active {
-  opacity: 0.75;
-}
+.company-btn:active { opacity: 0.75; }
 
 .company-btn.primary {
-  background: #3b82f6;
-  color: #ffffff;
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+  flex: 2;
 }
+.company-btn.primary:hover { background: #2563eb; }
 
 .company-btn.outline {
-  background: transparent;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  color: var(--t3);
+  border-color: var(--border);
 }
+.company-btn.outline:hover { background: var(--surface2); }
