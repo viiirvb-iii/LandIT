@@ -1,6 +1,5 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import AppLayout from './components/AppLayout'
@@ -9,62 +8,37 @@ import ReviewPage from './pages/ReviewPage'
 import WishlistPage from './pages/WishlistPage'
 import './App.css'
 
-function MainApp() {
-  const [activeTab, setActiveTab] = useState('swipe')
+function WrappedPage({ Component, propName = 'showToast' }) {
+  const location = useLocation()
+  const path = location.pathname
+  const activeTab = path.includes('/review') ? 'review' : path.includes('/wishlist') ? 'wishlist' : 'swipe'
+
   return (
-    <AppLayout activeTab={activeTab} onTabChange={setActiveTab}>
-      {({ showToast }) => (
-        <>
-          {activeTab === 'swipe' && <SwipeFeed showToast={showToast} />}
-          {activeTab === 'review' && <ReviewPage onToast={showToast} />}
-          {activeTab === 'wishlist' && <WishlistPage onToast={showToast} />}
-        </>
-      )}
+    <AppLayout activeTab={activeTab}>
+      {({ showToast }) => {
+        const props = { [propName]: showToast }
+        return <Component {...props} />
+      }}
     </AppLayout>
   )
 }
 
-function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth()
-  if (loading) {
-    return (
-      <div className="loading-page">
-        <div className="loading-plane">✈</div>
-        <p>Preparing for takeoff...</p>
-      </div>
-    )
-  }
-  if (!user) return <Navigate to="/login" replace />
-  return children
-}
-
-function PublicRoute({ children }) {
-  const { user, loading } = useAuth()
-  if (loading) {
-    return (
-      <div className="loading-page">
-        <div className="loading-plane">✈</div>
-        <p>Preparing for takeoff...</p>
-      </div>
-    )
-  }
-  if (user) return <Navigate to="/app" replace />
-  return children
-}
-
-export default function App() {
+function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-          <Route path="/app" element={<ProtectedRoute><MainApp /></ProtectedRoute>} />
-          <Route path="/swipe" element={<Navigate to="/app" replace />} />
-          <Route path="/dashboard" element={<Navigate to="/app" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/app" element={<WrappedPage Component={SwipeFeed} />} />
+          <Route path="/app/swipe" element={<WrappedPage Component={SwipeFeed} />} />
+          <Route path="/app/review" element={<WrappedPage Component={ReviewPage} propName="onToast" />} />
+          <Route path="/app/wishlist" element={<WrappedPage Component={WishlistPage} propName="onToast" />} />
+          <Route path="*" element={<Navigate to="/app" />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
   )
 }
+
+export default App

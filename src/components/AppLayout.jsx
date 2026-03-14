@@ -5,7 +5,7 @@ import { PASSPORT_DATA } from '../data/jobs'
 import Passport from './Passport'
 import './AppLayout.css'
 
-export default function AppLayout({ children, activeTab, onTabChange }) {
+export default function AppLayout({ children, activeTab }) {
   const [showPassport, setShowPassport] = useState(false)
   const [toast, setToast] = useState(null)
   const { signOut } = useAuth()
@@ -56,7 +56,7 @@ export default function AppLayout({ children, activeTab, onTabChange }) {
       <div className="app-bnav">
         <button
           className={`app-bnav-item ${activeTab === 'swipe' ? 'active' : ''}`}
-          onClick={() => onTabChange('swipe')}
+          onClick={() => navigate('/app/swipe')}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor"/>
@@ -65,7 +65,7 @@ export default function AppLayout({ children, activeTab, onTabChange }) {
         </button>
         <button
           className={`app-bnav-item ${activeTab === 'review' ? 'active' : ''}`}
-          onClick={() => onTabChange('review')}
+          onClick={() => navigate('/app/review')}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
             <circle cx="12" cy="12" r="10"/>
@@ -76,7 +76,7 @@ export default function AppLayout({ children, activeTab, onTabChange }) {
         </button>
         <button
           className={`app-bnav-item ${activeTab === 'wishlist' ? 'active' : ''}`}
-          onClick={() => onTabChange('wishlist')}
+          onClick={() => navigate('/app/wishlist')}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
