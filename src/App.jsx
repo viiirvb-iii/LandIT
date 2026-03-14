@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
-import Dashboard from './pages/Dashboard'
+import SwipeFeed from './pages/SwipeFeed'
 import './App.css'
 
 function ProtectedRoute({ children }) {
@@ -33,7 +33,7 @@ function PublicRoute({ children }) {
     )
   }
 
-  if (user) return <Navigate to="/dashboard" />
+  if (user) return <Navigate to="/swipe" />
   return children
 }
 
@@ -44,7 +44,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/swipe" element={<ProtectedRoute><SwipeFeed /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<Navigate to="/swipe" />} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </AuthProvider>
