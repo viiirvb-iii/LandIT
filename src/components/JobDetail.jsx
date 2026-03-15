@@ -160,6 +160,9 @@ export default function JobDetail({
 
       {/* ---- AI Actions ---- */}
       <div className="jd-ai-actions">
+        <button className="jd-ai-action" onClick={() => window.open(job.url || `https://www.linkedin.com/company/${encodeURIComponent(company)}`, '_blank')}>
+          Company
+        </button>
         <button className="jd-ai-action" onClick={onOpenCoach}>
           AI Coach
         </button>

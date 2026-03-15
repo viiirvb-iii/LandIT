@@ -25,14 +25,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 28px;
+  padding: 16px 22px;
   border-bottom: 1px solid rgba(0,0,0,0.06);
   flex-shrink: 0;
 }
 .coach-header-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 .coach-job-logo {
   width: 36px;
@@ -48,22 +48,23 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15px;
   color: #fff;
 }
 .coach-header-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: rgba(0,0,0,0.85);
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.88);
+  letter-spacing: -0.01em;
 }
 .coach-header-sub {
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(0,0,0,0.45);
   margin-top: 1px;
 }
 .coach-close-btn {
   background: rgba(0,0,0,0.04);
-  border: none;
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: 50%;
   width: 34px;
   height: 34px;
@@ -86,7 +87,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 20px;
+  padding: 28px 20px;
   overflow-y: auto;
 }
 
@@ -95,19 +96,21 @@
    ============================================================ */
 .coach-choice-wrap {
   text-align: center;
-  max-width: 520px;
+  max-width: 600px;
   width: 100%;
 }
 .coach-choice-heading {
-  font-size: 22px;
-  font-weight: 700;
-  color: rgba(0,0,0,0.85);
+  font-size: 20px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.88);
   margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 .coach-choice-sub {
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(0,0,0,0.50);
   margin-bottom: 28px;
+  line-height: 1.5;
 }
 .coach-choice-cards {
   display: flex;
@@ -116,43 +119,43 @@
 }
 .coach-choice-card {
   flex: 1;
-  max-width: 240px;
-  background: rgba(255,255,255,0.80);
+  max-width: 260px;
+  background: #fff;
   border: 1.5px solid rgba(0,0,0,0.06);
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 28px 20px;
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .coach-choice-card:hover {
   border-color: #a855f7;
-  box-shadow: 0 4px 24px rgba(168, 85, 247, 0.10);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.12);
+  transform: translateY(-3px);
 }
 .coach-choice-icon {
   font-size: 32px;
   margin-bottom: 14px;
 }
 .coach-choice-card h3 {
-  font-size: 15px;
-  font-weight: 600;
-  color: rgba(0,0,0,0.85);
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.88);
   margin: 0 0 6px;
 }
 .coach-choice-card p {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(0,0,0,0.50);
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 /* ============================================================
    Phase 2 -- Q&A chat
    ============================================================ */
 .coach-qa-wrap {
-  max-width: 560px;
+  max-width: 640px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -161,40 +164,40 @@
 .coach-qa-messages {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 16px;
+  padding-bottom: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 /* coach bubble */
 .coach-bubble-row {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
 }
 .coach-avatar {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #a855f7;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   flex-shrink: 0;
 }
 .coach-bubble {
-  background: rgba(255,255,255,0.80);
+  background: #fff;
   border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 14px 16px;
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(0,0,0,0.85);
   line-height: 1.55;
-  max-width: 420px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  max-width: 440px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 /* user bubble */
@@ -205,22 +208,22 @@
 .coach-user-bubble {
   background: #a855f7;
   color: #fff;
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 12px 16px;
-  font-size: 14px;
-  line-height: 1.45;
-  max-width: 380px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 400px;
 }
 
 /* typing dots */
 .coach-dots {
   display: inline-flex;
-  gap: 4px;
-  padding: 4px 0;
+  gap: 5px;
+  padding: 6px 0;
 }
 .coach-dots span {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #a855f7;
   animation: coachDot 1.2s infinite;
@@ -235,9 +238,9 @@
 /* input bar */
 .coach-qa-input-bar {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
-  padding-top: 12px;
+  padding-top: 16px;
   border-top: 1px solid rgba(0,0,0,0.06);
   margin-top: auto;
 }
@@ -245,12 +248,13 @@
   flex: 1;
   border: 1.5px solid rgba(0,0,0,0.10);
   border-radius: 12px;
-  padding: 12px 14px;
-  font-size: 14px;
+  padding: 11px 14px;
+  font-size: 13px;
   outline: none;
   color: rgba(0,0,0,0.85);
-  background: rgba(255,255,255,0.80);
+  background: #fff;
   transition: border-color 0.2s;
+  font-family: inherit;
 }
 .coach-qa-input:focus {
   border-color: #a855f7;
@@ -262,14 +266,14 @@
   background: #a855f7;
   border: none;
   border-radius: 12px;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: #fff;
-  font-size: 18px;
+  font-size: 16px;
   transition: background 0.2s;
   flex-shrink: 0;
 }
@@ -280,18 +284,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 10px;
+  padding-top: 12px;
 }
 .coach-skip-btn {
   background: none;
   border: none;
   color: rgba(0,0,0,0.45);
-  font-size: 13px;
+  font-size: 11px;
   cursor: pointer;
   text-decoration: underline;
+  font-family: inherit;
 }
 .coach-q-counter {
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(0,0,0,0.35);
 }
 
@@ -300,14 +305,14 @@
    ============================================================ */
 .coach-loading-wrap {
   text-align: center;
-  max-width: 400px;
+  max-width: 460px;
   width: 100%;
 }
 .coach-progress-ring-container {
   position: relative;
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 24px;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 28px;
 }
 .coach-progress-ring {
   transform: rotate(-90deg);
@@ -335,23 +340,23 @@
   color: #a855f7;
 }
 .coach-loading-title {
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   color: rgba(0,0,0,0.85);
   margin-bottom: 20px;
 }
 .coach-steps {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   text-align: left;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 .coach-step {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(0,0,0,0.30);
   transition: color 0.3s;
 }
@@ -363,19 +368,20 @@
   color: #16a34a;
 }
 .coach-step-icon {
-  width: 20px;
+  width: 22px;
   text-align: center;
   flex-shrink: 0;
+  font-size: 16px;
 }
 .coach-bar-track {
-  height: 6px;
-  border-radius: 3px;
+  height: 8px;
+  border-radius: 4px;
   background: rgba(0,0,0,0.06);
   overflow: hidden;
 }
 .coach-bar-fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 4px;
   background: linear-gradient(90deg, #a855f7, #2563eb);
   transition: width 0.4s ease;
 }
@@ -384,54 +390,54 @@
    Phase 4 -- Live Coaching cards
    ============================================================ */
 .coach-live-wrap {
-  max-width: 560px;
+  max-width: 640px;
   width: 100%;
 }
 .coach-ats-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  padding: 14px 18px;
-  background: rgba(255,255,255,0.80);
+  margin-bottom: 24px;
+  padding: 18px 22px;
+  background: #fff;
   border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .coach-ats-label {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(0,0,0,0.50);
   font-weight: 500;
 }
 .coach-ats-score {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: #a855f7;
   transition: color 0.3s;
 }
 .coach-ats-track {
   flex: 1;
-  height: 6px;
+  height: 8px;
   background: rgba(0,0,0,0.06);
-  border-radius: 3px;
-  margin: 0 14px;
+  border-radius: 4px;
+  margin: 0 18px;
   overflow: hidden;
 }
 .coach-ats-fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 4px;
   background: linear-gradient(90deg, #a855f7, #16a34a);
   transition: width 0.5s ease;
 }
 
 /* suggestion card */
 .coach-suggestion-card {
-  background: rgba(255,255,255,0.80);
+  background: #fff;
   border: 1.5px solid rgba(0,0,0,0.06);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 18px;
+  padding: 20px;
   animation: coachCardIn 0.35s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 @keyframes coachCardIn {
   from { opacity: 0; transform: translateY(16px); }
@@ -440,8 +446,8 @@
 .coach-sug-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 .coach-sug-icon {
   width: 36px;
@@ -454,44 +460,45 @@
   flex-shrink: 0;
 }
 .coach-sug-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: rgba(0,0,0,0.85);
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.88);
+  letter-spacing: -0.01em;
 }
 .coach-sug-insight {
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(0,0,0,0.80);
   line-height: 1.55;
   margin-bottom: 10px;
 }
 .coach-sug-why {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(0,0,0,0.50);
   line-height: 1.5;
   margin-bottom: 18px;
-  padding: 10px 14px;
-  background: rgba(0,0,0,0.03);
-  border-radius: 10px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.025);
+  border-radius: 12px;
 }
 .coach-diff {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 24px;
 }
 .coach-diff-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
+  letter-spacing: 0.6px;
+  margin-bottom: 3px;
 }
 .coach-diff-before {
-  background: rgba(220,38,38,0.06);
+  background: rgba(220,38,38,0.05);
   border: 1px solid rgba(220,38,38,0.15);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 12px 14px;
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(220,38,38,0.85);
   line-height: 1.5;
 }
@@ -499,11 +506,11 @@
   color: #dc2626;
 }
 .coach-diff-after {
-  background: rgba(22,163,74,0.06);
+  background: rgba(22,163,74,0.05);
   border: 1px solid rgba(22,163,74,0.15);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 12px 14px;
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(22,163,74,0.85);
   line-height: 1.5;
 }
@@ -512,7 +519,7 @@
 }
 .coach-sug-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 .coach-btn-approve {
   flex: 1;
@@ -521,10 +528,11 @@
   border: none;
   background: #16a34a;
   color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
+  font-family: inherit;
 }
 .coach-btn-approve:hover {
   background: #15803d;
@@ -533,12 +541,13 @@
   padding: 11px 18px;
   border-radius: 12px;
   border: 1.5px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.80);
+  background: #fff;
   color: rgba(0,0,0,0.80);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: border-color 0.2s;
+  font-family: inherit;
 }
 .coach-btn-edit:hover {
   border-color: #a855f7;
@@ -547,20 +556,21 @@
   padding: 11px 18px;
   border-radius: 12px;
   border: 1.5px solid rgba(220,38,38,0.15);
-  background: rgba(255,255,255,0.80);
+  background: #fff;
   color: #dc2626;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
+  font-family: inherit;
 }
 .coach-btn-skip:hover {
-  background: rgba(220,38,38,0.06);
+  background: rgba(220,38,38,0.04);
 }
 .coach-card-counter {
   text-align: center;
   margin-top: 14px;
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(0,0,0,0.35);
 }
 
@@ -568,30 +578,30 @@
 .coach-card-collapsed {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: rgba(22,163,74,0.08);
-  border: 1px solid rgba(22,163,74,0.18);
-  border-radius: 12px;
-  margin-bottom: 12px;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(22,163,74,0.06);
+  border: 1px solid rgba(22,163,74,0.15);
+  border-radius: 14px;
+  margin-bottom: 14px;
   animation: coachCardIn 0.3s ease;
 }
 .coach-card-collapsed.skipped {
-  background: rgba(220,38,38,0.06);
-  border-color: rgba(220,38,38,0.15);
+  background: rgba(220,38,38,0.05);
+  border-color: rgba(220,38,38,0.12);
 }
 .coach-collapsed-icon {
-  font-size: 16px;
+  font-size: 14px;
 }
 .coach-collapsed-title {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   color: rgba(0,0,0,0.80);
   flex: 1;
 }
 .coach-collapsed-badge {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   padding: 3px 8px;
   border-radius: 6px;
 }
@@ -609,68 +619,70 @@
    ============================================================ */
 .coach-complete-wrap {
   text-align: center;
-  max-width: 480px;
+  max-width: 560px;
   width: 100%;
 }
 .coach-complete-check {
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: rgba(22,163,74,0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 18px;
-  font-size: 30px;
+  font-size: 28px;
 }
 .coach-complete-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: rgba(0,0,0,0.85);
+  font-size: 20px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.88);
   margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 .coach-complete-sub {
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(0,0,0,0.50);
-  margin-bottom: 24px;
+  margin-bottom: 22px;
+  line-height: 1.5;
 }
 .coach-score-summary {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 24px;
-  font-size: 14px;
+  margin-bottom: 22px;
+  font-size: 13px;
   color: rgba(0,0,0,0.50);
 }
 .coach-score-old {
   font-size: 28px;
-  font-weight: 700;
-  color: rgba(0,0,0,0.30);
+  font-weight: 800;
+  color: rgba(0,0,0,0.25);
 }
 .coach-score-arrow {
-  font-size: 20px;
+  font-size: 18px;
   color: #a855f7;
 }
 .coach-score-new {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 800;
   color: #16a34a;
 }
 .coach-lesson-box {
-  background: rgba(255,255,255,0.80);
+  background: #fff;
   border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 14px;
-  padding: 20px;
+  border-radius: 18px;
+  padding: 24px;
   text-align: left;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  margin-bottom: 28px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .coach-lesson-heading {
-  font-size: 14px;
-  font-weight: 600;
-  color: rgba(0,0,0,0.85);
-  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.88);
+  margin-bottom: 10px;
 }
 .coach-lesson-box ul {
   list-style: none;
@@ -681,7 +693,7 @@
   gap: 8px;
 }
 .coach-lesson-box li {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(0,0,0,0.60);
   line-height: 1.5;
   padding-left: 18px;
@@ -696,33 +708,35 @@
 }
 .coach-complete-actions {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   justify-content: center;
 }
 .coach-btn-export {
-  padding: 12px 28px;
+  padding: 11px 24px;
   border-radius: 12px;
   border: none;
   background: #a855f7;
   color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
+  font-family: inherit;
 }
 .coach-btn-export:hover {
   background: #9333ea;
 }
 .coach-btn-restart {
-  padding: 12px 28px;
+  padding: 11px 24px;
   border-radius: 12px;
   border: 1.5px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.80);
+  background: #fff;
   color: rgba(0,0,0,0.80);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: border-color 0.2s;
+  font-family: inherit;
 }
 .coach-btn-restart:hover {
   border-color: #a855f7;
@@ -732,52 +746,60 @@
    Phase 5 -- Comparison Layout
    ============================================================ */
 .coach-compare-layout {
-  max-width: 900px;
+  max-width: 960px;
 }
 .coach-compare-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 20px;
+  margin-bottom: 28px;
   width: 100%;
 }
 .coach-compare-panel {
-  background: rgba(255,255,255,0.70);
+  background: #fff;
   border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 14px;
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .coach-compare-panel-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  font-size: 12px;
-  font-weight: 600;
+  gap: 10px;
+  padding: 14px 20px;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   color: rgba(0,0,0,0.55);
   border-bottom: 1px solid rgba(0,0,0,0.04);
   background: rgba(0,0,0,0.02);
 }
 .coach-compare-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
+.coach-compare-pdf {
+  width: 100%;
+  height: 500px;
+  border: none;
+  border-radius: 0 0 18px 18px;
+  background: #f5f5f7;
+}
 .coach-compare-content {
-  padding: 16px;
-  font-size: 12px;
-  line-height: 1.65;
-  color: rgba(0,0,0,0.70);
-  white-space: pre-wrap;
-  word-break: break-word;
-  max-height: 400px;
-  overflow-y: auto;
+  padding: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(0,0,0,0.45);
+  text-align: center;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .coach-compare-original {
   border-color: rgba(220,38,38,0.12);
@@ -788,14 +810,84 @@
 
 /* scrollbar inside compare panels */
 .coach-compare-content::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 .coach-compare-content::-webkit-scrollbar-track {
   background: transparent;
 }
 .coach-compare-content::-webkit-scrollbar-thumb {
   background: rgba(0,0,0,0.10);
-  border-radius: 2px;
+  border-radius: 3px;
+}
+
+/* ---------- change cards (complete phase) ---------- */
+.coach-changes-section {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.coach-changes-heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.85);
+  margin-bottom: 4px;
+}
+.coach-change-card {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.coach-change-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.80);
+  margin-bottom: 14px;
+}
+.coach-change-diff {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.coach-change-before,
+.coach-change-after {
+  flex: 1;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.coach-change-before {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.12);
+  color: rgba(0,0,0,0.60);
+}
+.coach-change-after {
+  background: rgba(34, 197, 94, 0.06);
+  border: 1px solid rgba(34, 197, 94, 0.15);
+  color: rgba(0,0,0,0.80);
+}
+.coach-change-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.coach-change-before .coach-change-label { color: #ef4444; }
+.coach-change-after .coach-change-label { color: #16a34a; }
+.coach-change-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.coach-change-arrow {
+  font-size: 18px;
+  color: rgba(0,0,0,0.20);
+  flex-shrink: 0;
+  margin-top: 36px;
 }
 
 @media (max-width: 640px) {
@@ -807,5 +899,19 @@
   }
   .coach-complete-actions {
     flex-direction: column;
+  }
+  .coach-choice-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+  .coach-choice-card {
+    max-width: 100%;
+  }
+  .coach-change-diff {
+    flex-direction: column;
+  }
+  .coach-change-arrow {
+    transform: rotate(90deg);
+    margin: 0 auto;
   }
 }

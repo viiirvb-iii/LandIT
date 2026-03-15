@@ -5,7 +5,11 @@ import {
   getParsedResume,
   getResumeRawText,
   exportResumePdf,
+  generateResumePdfDataUri,
+  getOriginalResumePdfUrl,
+  downloadOriginalResumePdf,
 } from "../services/resume";
+import CompanyAvatar from "./CompanyAvatar";
 import "./AICoach.css";
 
 /* ------------------------------------------------------------------ */
@@ -58,6 +62,10 @@ export default function AICoach({ job, open, onClose, onToast }) {
   const [originalText, setOriginalText] = useState("");
   const [modifiedText, setModifiedText] = useState("");
 
+  /* PDF preview data URIs */
+  const [originalPdfUrl, setOriginalPdfUrl] = useState("");
+  const [modifiedPdfUrl, setModifiedPdfUrl] = useState("");
+
   /* ---- reset when overlay opens ---- */
   useEffect(() => {
     if (open) {
@@ -81,6 +89,8 @@ export default function AICoach({ job, open, onClose, onToast }) {
       setHasResume(false);
       setOriginalText("");
       setModifiedText("");
+      setOriginalPdfUrl("");
+      setModifiedPdfUrl("");
 
       // Check if user already has a parsed resume & fetch raw text
       getParsedResume().then((data) => {
@@ -94,6 +104,32 @@ export default function AICoach({ job, open, onClose, onToast }) {
       });
     }
   }, [open]);
+
+  /* ---- generate PDF previews when coaching completes ---- */
+  useEffect(() => {
+    if (phase !== "complete") return;
+    const approvedChanges = history
+      .filter((h) => h.status === "approved" && h.before && h.after)
+      .map((h) => ({ before: h.before, after: h.after }));
+
+    // Original: try to load the actual uploaded PDF first (preserves exact format)
+    getOriginalResumePdfUrl()
+      .then((url) => {
+        if (url) {
+          setOriginalPdfUrl(url);
+        } else {
+          // Fallback: re-render from raw text
+          return generateResumePdfDataUri(originalText, job?.role, job?.company, true)
+            .then(setOriginalPdfUrl);
+        }
+      })
+      .catch(() => setOriginalPdfUrl(""));
+
+    // Modified: generate with highlighted changes
+    generateResumePdfDataUri(modifiedText || originalText, job?.role, job?.company, false, approvedChanges)
+      .then(setModifiedPdfUrl)
+      .catch(() => setModifiedPdfUrl(""));
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ---- auto-scroll chat ---- */
   useEffect(() => {
@@ -314,16 +350,14 @@ export default function AICoach({ job, open, onClose, onToast }) {
   /* ---- render helpers ---- */
   const renderLogo = () => {
     if (!job) return null;
-    if (job.logo) {
-      return <img src={job.logo} alt="" className="coach-job-logo" />;
-    }
     return (
-      <div
-        className="coach-job-logo-placeholder"
-        style={{ background: job.color || "#a855f7" }}
-      >
-        {(job.company || "?")[0]}
-      </div>
+      <CompanyAvatar
+        logoUrl={job.logoUrl}
+        company={job.company}
+        color={job.color || "#a855f7"}
+        size={36}
+        radius={10}
+      />
     );
   };
 
@@ -463,8 +497,8 @@ export default function AICoach({ job, open, onClose, onToast }) {
             <div className="coach-progress-ring-container">
               <svg
                 className="coach-progress-ring"
-                width="100"
-                height="100"
+                width="120"
+                height="120"
                 viewBox="0 0 100 100"
               >
                 <circle className="ring-bg" cx="50" cy="50" r="44" />
@@ -605,12 +639,14 @@ export default function AICoach({ job, open, onClose, onToast }) {
         )}
 
         {/* ===================== Phase 5: Complete — Comparison ===================== */}
-        {phase === "complete" && (
+        {phase === "complete" && (() => {
+          const approvedChanges = history.filter((h) => h.status === "approved" && h.before && h.after);
+          return (
           <div className="coach-complete-wrap coach-compare-layout">
             <div className="coach-complete-check">✓</div>
             <div className="coach-complete-title">Coaching complete</div>
             <div className="coach-complete-sub">
-              Compare your original resume with the improved version below.
+              Your resume with {approvedChanges.length} improvement{approvedChanges.length !== 1 ? "s" : ""} highlighted below.
             </div>
 
             <div className="coach-score-summary">
@@ -620,41 +656,46 @@ export default function AICoach({ job, open, onClose, onToast }) {
               <span>ATS score</span>
             </div>
 
-            {/* Side-by-side comparison */}
-            <div className="coach-compare-container">
-              <div className="coach-compare-panel coach-compare-original">
-                <div className="coach-compare-panel-header">
-                  <span className="coach-compare-dot" style={{ background: "#ff453a" }} />
-                  Original Resume
-                </div>
-                <div className="coach-compare-content">
-                  {originalText || "No resume uploaded yet."}
-                </div>
+            {/* Your resume — exact original format */}
+            <div className="coach-compare-panel" style={{ width: "100%", maxWidth: 560 }}>
+              <div className="coach-compare-panel-header">
+                <span className="coach-compare-dot" style={{ background: "#3b82f6" }} />
+                Your Resume
               </div>
-              <div className="coach-compare-panel coach-compare-modified">
-                <div className="coach-compare-panel-header">
-                  <span className="coach-compare-dot" style={{ background: "#30d158" }} />
-                  Improved Resume
-                </div>
-                <div className="coach-compare-content">
-                  {modifiedText || "No changes applied."}
-                </div>
-              </div>
+              {originalPdfUrl ? (
+                <iframe
+                  src={originalPdfUrl}
+                  className="coach-compare-pdf"
+                  title="Your Resume"
+                  style={{ height: 500 }}
+                />
+              ) : (
+                <div className="coach-compare-content">Loading preview...</div>
+              )}
             </div>
 
-            {/* Changes applied summary */}
-            {history.filter((h) => h.status === "approved").length > 0 && (
-              <div className="coach-lesson-box">
-                <div className="coach-lesson-heading">
-                  Changes applied ({history.filter((h) => h.status === "approved").length})
+            {/* Changes applied — before/after diff cards */}
+            {approvedChanges.length > 0 && (
+              <div className="coach-changes-section">
+                <div className="coach-changes-heading">
+                  Changes to apply ({approvedChanges.length})
                 </div>
-                <ul>
-                  {history
-                    .filter((h) => h.status === "approved")
-                    .map((h, i) => (
-                      <li key={i}>{h.title}</li>
-                    ))}
-                </ul>
+                {approvedChanges.map((h, i) => (
+                  <div className="coach-change-card" key={i}>
+                    <div className="coach-change-title">{h.title}</div>
+                    <div className="coach-change-diff">
+                      <div className="coach-change-before">
+                        <div className="coach-change-label">Before</div>
+                        <div className="coach-change-text">{h.before}</div>
+                      </div>
+                      <div className="coach-change-arrow">→</div>
+                      <div className="coach-change-after">
+                        <div className="coach-change-label">After</div>
+                        <div className="coach-change-text">{h.after}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -677,30 +718,41 @@ export default function AICoach({ job, open, onClose, onToast }) {
                 className="coach-btn-export"
                 onClick={async () => {
                   try {
-                    const approvedChanges = history
-                      .filter((h) => h.status === "approved" && h.before && h.after)
-                      .map((h) => ({ before: h.before, after: h.after }));
-                    await exportResumePdf(modifiedText || originalText, job?.role, job?.company, false, approvedChanges);
-                    if (onToast) onToast("Improved resume downloaded");
+                    // Download the actual uploaded PDF (exact format preserved)
+                    const blob = await downloadOriginalResumePdf();
+                    if (blob) {
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `Resume_${(job?.company || "export").replace(/\s+/g, "_")}.pdf`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    } else {
+                      await exportResumePdf(originalText, job?.role, job?.company, true);
+                    }
+                    if (onToast) onToast("Resume downloaded");
                   } catch {
                     if (onToast) onToast("PDF export failed");
                   }
                 }}
               >
-                Download Improved
+                Download Resume
               </button>
               <button
-                className="coach-btn-restart"
+                className="coach-btn-export"
                 onClick={async () => {
                   try {
-                    await exportResumePdf(originalText, job?.role, job?.company, true);
-                    if (onToast) onToast("Original resume downloaded");
+                    const changes = approvedChanges.map((h) => ({ before: h.before, after: h.after }));
+                    await exportResumePdf(modifiedText || originalText, job?.role, job?.company, false, changes);
+                    if (onToast) onToast("Changes sheet downloaded");
                   } catch {
                     if (onToast) onToast("PDF export failed");
                   }
                 }}
               >
-                Download Original
+                Download Changes
               </button>
               <button
                 className="coach-btn-restart"
@@ -710,7 +762,8 @@ export default function AICoach({ job, open, onClose, onToast }) {
               </button>
             </div>
           </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

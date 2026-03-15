@@ -156,7 +156,7 @@ export function computeMatchScore(userSkills, jobSkillMatches) {
  * @param {boolean} isOriginal - true = original, false = improved
  * @param {Array<{before: string, after: string}>} changes - approved changes to highlight in the improved version
  */
-export async function exportResumePdf(resumeText, jobTitle, company, isOriginal = false, changes = []) {
+async function _buildResumePdf(resumeText, jobTitle, company, isOriginal = false, changes = []) {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4" });
 
@@ -165,22 +165,42 @@ export async function exportResumePdf(resumeText, jobTitle, company, isOriginal 
   const maxWidth = pageWidth - margin * 2;
   let y = 20;
 
-  // Body — render resume content directly (no "Tailored Resume" header)
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
 
-  // Build a set of "after" lines to know which lines to highlight
+  // Build a set of "after" lines for highlighting modified content
   const highlightLines = new Set();
   if (!isOriginal && changes.length > 0) {
     for (const change of changes) {
       if (change.after) {
-        // Split after text into individual lines and trim for matching
         const afterLines = change.after.split("\n").map((l) => l.trim()).filter(Boolean);
         for (const al of afterLines) {
           highlightLines.add(al);
         }
       }
     }
+  }
+
+  // If modified version with changes, show a legend at the top
+  if (!isOriginal && changes.length > 0) {
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(37, 99, 235);
+    doc.text(`Tailored for: ${jobTitle || ""} at ${company || ""}`, margin, y);
+    y += 5;
+    // Legend
+    doc.setFillColor(219, 234, 254); // blue-100
+    doc.rect(margin, y - 3, 4, 4, "F");
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 116, 139);
+    doc.text(`  ${changes.length} change(s) highlighted in blue`, margin + 5, y);
+    y += 8;
+    // Separator
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 6;
   }
 
   const allLines = doc.splitTextToSize(resumeText || "No content", maxWidth);
@@ -194,7 +214,6 @@ export async function exportResumePdf(resumeText, jobTitle, company, isOriginal 
     const trimmed = line.trim();
     const isHeader = trimmed === trimmed.toUpperCase() && trimmed.length > 2 && trimmed.length < 40;
 
-    // Check if this line should be highlighted (it's a changed line)
     let shouldHighlight = false;
     if (!isOriginal && highlightLines.size > 0) {
       for (const hl of highlightLines) {
@@ -207,45 +226,50 @@ export async function exportResumePdf(resumeText, jobTitle, company, isOriginal 
 
     if (isHeader) {
       y += 4;
-      // Section header — bold, slightly larger, with underline
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.setTextColor(0);
+      doc.setTextColor(15, 23, 42);
       doc.text(line, margin, y);
-      // Underline
       const textWidth = doc.getTextWidth(line);
-      doc.setDrawColor(0, 0, 0);
+      doc.setDrawColor(15, 23, 42);
       doc.setLineWidth(0.3);
       doc.line(margin, y + 1.2, margin + textWidth, y + 1.2);
       doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
     } else {
       if (shouldHighlight) {
-        // Yellow highlight background behind the changed text
-        const textWidth = doc.getTextWidth(line);
-        doc.setFillColor(255, 247, 205); // light yellow
-        doc.rect(margin - 1, y - 3.5, Math.min(textWidth + 2, maxWidth + 2), 5, "F");
-        doc.setTextColor(0, 100, 0); // dark green text for changed content
+        // Blue highlight bar on the left edge
+        doc.setFillColor(37, 99, 235);
+        doc.rect(margin - 4, y - 3.5, 2, 5, "F");
+        // Light blue background behind the text
+        doc.setFillColor(219, 234, 254);
+        doc.rect(margin - 1, y - 3.5, maxWidth + 2, 5, "F");
+        // Dark blue text for changed content
+        doc.setTextColor(30, 58, 138);
+        doc.setFont("helvetica", "bold");
         doc.text(line, margin, y);
-        doc.setTextColor(0);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(51, 65, 85);
       } else {
+        doc.setTextColor(51, 65, 85);
         doc.text(line, margin, y);
       }
     }
     y += 5.5;
   }
 
-  // Footer — small label at bottom of last page
-  const pageH = doc.internal.pageSize.getHeight();
-  doc.setFontSize(8);
-  doc.setTextColor(160);
-  if (!isOriginal && changes.length > 0) {
-    doc.text(`Tailored for: ${jobTitle || ""} at ${company || ""} · ${changes.length} change(s) highlighted`, margin, pageH - 10);
-  }
-  doc.setTextColor(0);
+  return doc;
+}
 
+export async function exportResumePdf(resumeText, jobTitle, company, isOriginal = false, changes = []) {
+  const doc = await _buildResumePdf(resumeText, jobTitle, company, isOriginal, changes);
   const prefix = isOriginal ? "Resume_Original" : "Resume_Tailored";
   doc.save(`${prefix}_${(company || "export").replace(/\s+/g, "_")}.pdf`);
+}
+
+export async function generateResumePdfDataUri(resumeText, jobTitle, company, isOriginal = false, changes = []) {
+  const doc = await _buildResumePdf(resumeText, jobTitle, company, isOriginal, changes);
+  return doc.output("datauristring");
 }
 
 /**
@@ -352,6 +376,49 @@ export async function getResumeRawText() {
     .maybeSingle();
   if (!data) return null;
   return data.raw_text || JSON.stringify(data.parsed_data, null, 2);
+}
+
+/**
+ * Get the user's original uploaded resume as a data URI for iframe display.
+ * Downloads the file from Supabase storage and converts to blob URL.
+ * Returns the blob URL string, or null if not found.
+ */
+export async function getOriginalResumePdfUrl() {
+  if (!supabaseConfigured || !supabase) return null;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return null;
+
+  // Try common extensions
+  for (const ext of ["pdf", "PDF"]) {
+    const path = `${session.user.id}/resume.${ext}`;
+    const { data, error } = await supabase.storage
+      .from("resumes")
+      .download(path);
+    if (!error && data) {
+      // Convert blob to object URL for iframe display
+      return URL.createObjectURL(data);
+    }
+  }
+  return null;
+}
+
+/**
+ * Download the original uploaded resume PDF file.
+ * Returns the blob, or null if not found.
+ */
+export async function downloadOriginalResumePdf() {
+  if (!supabaseConfigured || !supabase) return null;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return null;
+
+  for (const ext of ["pdf", "PDF"]) {
+    const path = `${session.user.id}/resume.${ext}`;
+    const { data, error } = await supabase.storage
+      .from("resumes")
+      .download(path);
+    if (!error && data) return data;
+  }
+  return null;
 }
 
 /* ── Cover Letter / Outreach ── */
