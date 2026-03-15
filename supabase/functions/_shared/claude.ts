@@ -24,6 +24,8 @@ export async function callClaude(
     headers: {
       "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
       "Content-Type": "application/json",
+      "HTTP-Referer": "https://landed-app.vercel.app",
+      "X-Title": "Landed App",
     },
     body: JSON.stringify({
       model: "anthropic/claude-sonnet-4",

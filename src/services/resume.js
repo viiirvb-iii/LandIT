@@ -3,11 +3,24 @@ import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from "@s
 
 /** Get a valid access token, refreshing if needed */
 async function getAccessToken() {
+  // Always try to refresh first to guarantee a fresh token
   const { data: refreshData } = await supabase.auth.refreshSession();
-  const session = refreshData?.session
-    || (await supabase.auth.getSession()).data?.session;
+  if (refreshData?.session?.access_token) {
+    return refreshData.session.access_token;
+  }
+
+  // Refresh failed — the refresh token itself may be expired.
+  // Do NOT fall back to getSession() as it returns a cached (possibly expired) token.
+  // Instead, try getUser() which forces a server-side validation.
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    throw new Error("Session expired. Please sign out and sign in again.");
+  }
+
+  // getUser() succeeded, so the SDK just refreshed internally — grab the fresh session
+  const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) {
-    throw new Error("Not authenticated. Please sign in again.");
+    throw new Error("Session expired. Please sign out and sign in again.");
   }
   return session.access_token;
 }
@@ -40,17 +53,7 @@ export async function uploadAndParseResume(file) {
     throw new Error("Supabase not configured");
   }
 
-  // Force a fresh session — refreshes the access token
-  const { data: refreshData, error: refreshError } =
-    await supabase.auth.refreshSession();
-  const session = refreshData?.session;
-  if (refreshError || !session) {
-    // If refresh fails, try getSession as fallback
-    const { data: { session: fallbackSession } } = await supabase.auth.getSession();
-    if (!fallbackSession) {
-      throw new Error("Not authenticated. Please sign out and sign in again.");
-    }
-  }
+  const token = await getAccessToken();
 
   const {
     data: { user },
@@ -70,11 +73,10 @@ export async function uploadAndParseResume(file) {
   if (uploadErr) throw new Error(`Upload failed: ${uploadErr.message}`);
 
   // 2. Call parse-resume Edge Function with explicit auth header
-  const { data: { session: currentSession } } = await supabase.auth.getSession();
   const { data, error } = await supabase.functions.invoke("parse-resume", {
     body: { storage_path: storagePath },
     headers: {
-      Authorization: `Bearer ${currentSession?.access_token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -281,10 +283,10 @@ export async function matchResumeToJob(jobId) {
     throw new Error("Supabase not configured");
   }
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const token = await getAccessToken();
   const { data, error } = await supabase.functions.invoke("match-resume", {
     body: { job_id: jobId },
-    headers: { Authorization: `Bearer ${session?.access_token}` },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (error) {
@@ -456,10 +458,10 @@ export async function generateOutreach(jobId, language = "en") {
  */
 export async function regenerateCoverLetter(jobId, userEdits, language = "en") {
   if (!supabaseConfigured || !supabase) throw new Error("Supabase not configured");
-  const { data: { session } } = await supabase.auth.getSession();
+  const token = await getAccessToken();
   const { data, error } = await supabase.functions.invoke("generate-cover-letter", {
     body: { job_id: jobId, action: "cover_letter", language, user_edits: userEdits },
-    headers: { Authorization: `Bearer ${session?.access_token}` },
+    headers: { Authorization: `Bearer ${token}` },
   });
   if (error) throw new Error(`Regenerate failed: ${await extractFunctionError(error, error.message)}`);
   return data;

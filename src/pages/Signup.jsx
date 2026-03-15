@@ -29,10 +29,7 @@ export default function Signup() {
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
-            name:               name,
-            email:              data.user.email,
-            fields_of_interest:  [],
-            industry_interests:  [],
+            full_name:           name,
             skills:              [],
             session_preferences: {
               auto_updates_remaining: 5,
