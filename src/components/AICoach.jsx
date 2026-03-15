@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { uploadAndParseResume, coachResume, getParsedResume } from "../services/resume";
+import { uploadAndParseResume, coachResume, getParsedResume, exportResumePdf } from "../services/resume";
 import "./AICoach.css";
 
 /* ------------------------------------------------------------------ */
@@ -192,7 +192,7 @@ export default function AICoach({ job, open, onClose, onToast }) {
         });
       }, 1200);
 
-      const result = await coachResume(job.id, userAnswers);
+      const result = await coachResume(job.id, userAnswers, job.about || job.desc || "");
       clearInterval(stepTimer);
       setLoadStep(LOADING_STEPS.length);
       setLoadProgress(100);
@@ -337,7 +337,7 @@ export default function AICoach({ job, open, onClose, onToast }) {
             <input
               ref={fileRef}
               type="file"
-              accept=".pdf,.txt"
+              accept=".pdf,.txt,.docx"
               style={{ display: "none" }}
               onChange={handleFileSelect}
             />
@@ -603,8 +603,13 @@ export default function AICoach({ job, open, onClose, onToast }) {
             <div className="coach-complete-actions">
               <button
                 className="coach-btn-export"
-                onClick={() => {
-                  if (onToast) onToast("Resume exported successfully");
+                onClick={async () => {
+                  try {
+                    await exportResumePdf();
+                    if (onToast) onToast("Resume exported successfully");
+                  } catch {
+                    if (onToast) onToast("PDF export — check backend is running");
+                  }
                 }}
               >
                 Export Resume

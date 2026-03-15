@@ -3,6 +3,11 @@ import { corsHeaders } from "../_shared/cors.ts";
 import { callClaude, parseJsonResponse } from "../_shared/claude.ts";
 import { getEmbedding } from "../_shared/embeddings.ts";
 import { validateTailoredOutput } from "../_shared/validation.ts";
+import {
+  removeAiPhrases,
+  calculateKeywordMatch,
+  checkMasterAlignment,
+} from "../_shared/refiner.ts";
 
 const TAILOR_SYSTEM_PROMPT = `You are a resume tailoring assistant. You have the user's ACTUAL resume and the ACTUAL job posting.
 
@@ -97,19 +102,40 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 3. Deterministic skill matching (NO LLM)
-    const resumeSkills = new Set(
-      (resume.skills_extracted || []).map((s: string) => s.toLowerCase())
-    );
+    // 2b. If job has sparse data, synthesize from available fields
+    if (!job.description && !job.about) {
+      if (job.raw_description) {
+        job.description = job.raw_description;
+      } else {
+        const parts = [`Role: ${job.role || job.title || "Unknown"}`];
+        if (job.company) parts.push(`Company: ${job.company}`);
+        if (job.location) parts.push(`Location: ${job.location}`);
+        if (job.job_type) parts.push(`Type: ${job.job_type}`);
+        if (job.field) parts.push(`Field: ${job.field}`);
+        job.description = parts.join(". ") + ". Tailor the resume for this type of role based on common industry requirements.";
+      }
+    }
+    if (!job.skill_matches || job.skill_matches.length === 0) {
+      if (job.skills_required) {
+        try {
+          const parsed = typeof job.skills_required === "string"
+            ? JSON.parse(job.skills_required)
+            : job.skills_required;
+          job.skill_matches = Array.isArray(parsed) ? parsed : [];
+        } catch { /* ignore */ }
+      }
+    }
+
+    // 3. Deterministic skill matching using word-boundary matching (Resume-Matcher style)
+    const resumeText = resume.raw_text || JSON.stringify(resume.parsed_data);
     const jobSkills: string[] = (job.skill_matches || []).map(
       (s: { name?: string; skill?: string }) =>
         (s.name || s.skill || "").toLowerCase()
     );
 
-    const matched = jobSkills.filter((s) => resumeSkills.has(s));
-    const missing = jobSkills.filter((s) => !resumeSkills.has(s));
-    const matchPct = Math.round(
-      (matched.length / Math.max(jobSkills.length, 1)) * 100
+    const { score: matchPct, matched, missing } = calculateKeywordMatch(
+      resumeText,
+      jobSkills
     );
 
     // 4. Semantic retrieval - get relevant resume chunks
@@ -184,7 +210,43 @@ Tailor this resume for the job posting above. Follow all rules strictly.`;
       );
     }
 
-    // 6. Post-processing validation
+    // 6. Post-processing: AI phrase removal on tailored text (Resume-Matcher)
+    const jobDesc = `${job.description || ""} ${job.about || ""} ${JSON.stringify(job.requirements || [])}`;
+    let totalPhrasesRemoved = 0;
+
+    const sections = (tailorResult.tailored_sections as Array<{ section: string; original: string; tailored: string }>) || [];
+    for (const sec of sections) {
+      if (sec.tailored) {
+        const { cleaned, removedCount } = removeAiPhrases(sec.tailored, jobDesc);
+        sec.tailored = cleaned;
+        totalPhrasesRemoved += removedCount;
+      }
+    }
+
+    // 7. Hallucination detection via master alignment check
+    const tailoredSkills = (tailorResult.ats_keywords_added as string[]) || [];
+    const tailoredCompanies: string[] = [];
+    const tailoredCerts: string[] = [];
+
+    // Extract company/cert names from parsed data for alignment check
+    const parsedData = resume.parsed_data as Record<string, unknown>;
+    if (parsedData) {
+      const exp = (parsedData.experience as Array<{ company?: string }>) || [];
+      for (const e of exp) {
+        if (e.company) tailoredCompanies.push(e.company);
+      }
+      const certs = (parsedData.certifications as string[]) || [];
+      tailoredCerts.push(...certs);
+    }
+
+    const alignment = checkMasterAlignment(
+      tailoredSkills,
+      tailoredCompanies,
+      tailoredCerts,
+      resumeText
+    );
+
+    // 8. Standard validation
     const validation = validateTailoredOutput(
       tailorResult as Parameters<typeof validateTailoredOutput>[0],
       resume.skills_extracted || [],
@@ -192,12 +254,20 @@ Tailor this resume for the job posting above. Follow all rules strictly.`;
       resume.raw_text || ""
     );
 
-    if (validation.warnings.length > 0) {
-      (tailorResult as Record<string, unknown>).validation_warnings =
-        validation.warnings;
+    // Merge all warnings
+    const allWarnings = [
+      ...validation.warnings,
+      ...alignment.violations.map((v) => v.message),
+    ];
+
+    if (allWarnings.length > 0) {
+      (tailorResult as Record<string, unknown>).validation_warnings = allWarnings;
+    }
+    if (totalPhrasesRemoved > 0) {
+      (tailorResult as Record<string, unknown>).ai_phrases_removed = totalPhrasesRemoved;
     }
 
-    // 7. Store result in tailored_resumes table
+    // 9. Store result in tailored_resumes table
     const atsScoreAfter =
       (tailorResult.ats_score_estimate as number) || matchPct;
 
@@ -211,7 +281,7 @@ Tailor this resume for the job posting above. Follow all rules strictly.`;
       changes: tailorResult.changes_made || [],
     });
 
-    // 8. Decrement ai_tailors_remaining
+    // 10. Decrement ai_tailors_remaining
     const { data: profile } = await supabase
       .from("profiles")
       .select("ai_tailors_remaining")

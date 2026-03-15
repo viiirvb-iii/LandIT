@@ -120,6 +120,32 @@ Deno.serve(async (req) => {
       });
     }
 
+    // 2b. If job has sparse data, synthesize a description from available fields
+    if (!job.description && !job.about) {
+      const parts = [`Role: ${job.role || job.title || "Unknown"}`];
+      if (job.company) parts.push(`Company: ${job.company}`);
+      if (job.location) parts.push(`Location: ${job.location}`);
+      if (job.job_type) parts.push(`Type: ${job.job_type}`);
+      if (job.field) parts.push(`Field: ${job.field}`);
+      if (job.industry) parts.push(`Industry: ${job.industry}`);
+      if (job.raw_description) {
+        job.description = job.raw_description;
+      } else {
+        job.description = parts.join(". ") + ". Provide general coaching for this type of role based on common industry requirements.";
+      }
+    }
+    if (!job.skill_matches || job.skill_matches.length === 0) {
+      // Try to extract from skills_required or job_description_fields
+      if (job.skills_required) {
+        try {
+          const parsed = typeof job.skills_required === "string"
+            ? JSON.parse(job.skills_required)
+            : job.skills_required;
+          job.skill_matches = Array.isArray(parsed) ? parsed : [];
+        } catch { /* ignore */ }
+      }
+    }
+
     // 3. Deterministic skill matching
     const resumeSkills = new Set(
       (resume.skills_extracted || []).map((s: string) => s.toLowerCase())

@@ -1,4 +1,24 @@
 import { supabase, supabaseConfigured } from "../lib/supabase";
+import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from "@supabase/supabase-js";
+
+/** Extract the real error message from a Supabase functions error */
+async function extractFunctionError(error, fallbackMsg) {
+  if (error instanceof FunctionsHttpError) {
+    try {
+      const errBody = await error.context.json();
+      return errBody?.error || errBody?.details || JSON.stringify(errBody);
+    } catch {
+      try {
+        return await error.context.text();
+      } catch {
+        return fallbackMsg;
+      }
+    }
+  }
+  if (error instanceof FunctionsRelayError) return `Relay error: ${error.message}`;
+  if (error instanceof FunctionsFetchError) return `Fetch error: ${error.message}`;
+  return error?.message || fallbackMsg;
+}
 
 /**
  * Upload a resume file to Supabase Storage, then trigger parsing.
@@ -9,18 +29,24 @@ export async function uploadAndParseResume(file) {
     throw new Error("Supabase not configured");
   }
 
-  // Use getSession() (local cache) instead of getUser() (network request)
-  // to avoid race conditions after signup
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
-  if (sessionError || !session?.user) {
-    throw new Error(
-      "Not authenticated. Please sign in first."
-    );
+  // Force a fresh session — refreshes the access token
+  const { data: refreshData, error: refreshError } =
+    await supabase.auth.refreshSession();
+  const session = refreshData?.session;
+  if (refreshError || !session) {
+    // If refresh fails, try getSession as fallback
+    const { data: { session: fallbackSession } } = await supabase.auth.getSession();
+    if (!fallbackSession) {
+      throw new Error("Not authenticated. Please sign out and sign in again.");
+    }
   }
-  const user = session.user;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error("Not authenticated. Please sign in first.");
+  }
 
   // 1. Upload to Supabase Storage
   const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
@@ -32,13 +58,19 @@ export async function uploadAndParseResume(file) {
 
   if (uploadErr) throw new Error(`Upload failed: ${uploadErr.message}`);
 
-  // 2. Call parse-resume Edge Function
+  // 2. Call parse-resume Edge Function with explicit auth header
+  const { data: { session: currentSession } } = await supabase.auth.getSession();
   const { data, error } = await supabase.functions.invoke("parse-resume", {
     body: { storage_path: storagePath },
-    headers: { Authorization: `Bearer ${session.access_token}` },
+    headers: {
+      Authorization: `Bearer ${currentSession?.access_token}`,
+    },
   });
 
-  if (error) throw new Error(`Parse failed: ${error.message}`);
+  if (error) {
+    const detail = await extractFunctionError(error, error.message);
+    throw new Error(`Parse failed: ${detail}`);
+  }
   return data;
 }
 
@@ -57,7 +89,10 @@ export async function tailorResume(jobId) {
     headers: { Authorization: `Bearer ${session?.access_token}` },
   });
 
-  if (error) throw new Error(`Tailor failed: ${error.message}`);
+  if (error) {
+    const detail = await extractFunctionError(error, error.message);
+    throw new Error(`Tailor failed: ${detail}`);
+  }
   return data;
 }
 
@@ -76,7 +111,10 @@ export async function coachResume(jobId, userAnswers = null) {
     headers: { Authorization: `Bearer ${session?.access_token}` },
   });
 
-  if (error) throw new Error(`Coach failed: ${error.message}`);
+  if (error) {
+    const detail = await extractFunctionError(error, error.message);
+    throw new Error(`Coach failed: ${detail}`);
+  }
   return data;
 }
 
@@ -90,12 +128,11 @@ export async function getParsedResume() {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.user) return null;
-  const user = session.user;
 
   const { data } = await supabase
     .from("parsed_resumes")
     .select("parsed_data, skills_extracted, parsed_at")
-    .eq("user_id", user.id)
+    .eq("user_id", session.user.id)
     .maybeSingle();
 
   return data;
@@ -121,6 +158,37 @@ export function computeMatchScore(userSkills, jobSkillMatches) {
 }
 
 /**
+ * Export the user's tailored resume as a downloadable PDF.
+ * Fetches the latest tailored resume from Supabase and triggers download.
+ */
+export async function exportResumePdf(jobId) {
+  if (!supabaseConfigured || !supabase) {
+    throw new Error("Supabase not configured");
+  }
+
+  const { data, error } = await supabase.functions.invoke("export-resume-pdf", {
+    body: { job_id: jobId },
+  });
+
+  if (error) {
+    const detail = await extractFunctionError(error, error.message);
+    throw new Error(`Export failed: ${detail}`);
+  }
+
+  // If the edge function returns a blob/PDF, trigger download
+  if (data instanceof Blob) {
+    const url = URL.createObjectURL(data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Resume_Tailored.pdf";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return data;
+}
+
+/**
  * Get full Resume-Matcher style analysis for a job.
  * Combines TF-IDF, semantic similarity, skill matching, and preference matching.
  */
@@ -135,7 +203,10 @@ export async function matchResumeToJob(jobId) {
     headers: { Authorization: `Bearer ${session?.access_token}` },
   });
 
-  if (error) throw new Error(`Match failed: ${error.message}`);
+  if (error) {
+    const detail = await extractFunctionError(error, error.message);
+    throw new Error(`Match failed: ${detail}`);
+  }
   return data;
 }
 
@@ -150,12 +221,11 @@ export async function getUserSkills() {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.user) return [];
-  const user = session.user;
 
   const { data } = await supabase
     .from("user_skills")
     .select("skill_name, level, tag")
-    .eq("user_id", user.id)
+    .eq("user_id", session.user.id)
     .order("level", { ascending: false });
 
   return (data || []).map((s) => ({
@@ -175,12 +245,11 @@ export async function getSkillGaps() {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.user) return [];
-  const user = session.user;
 
   const { data } = await supabase
     .from("skill_gaps")
     .select("skill_name, frequency")
-    .eq("user_id", user.id)
+    .eq("user_id", session.user.id)
     .order("frequency", { ascending: false })
     .limit(10);
 

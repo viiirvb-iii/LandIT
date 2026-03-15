@@ -28,7 +28,7 @@ export default function Login() {
           .from('profiles')
           .select('degree')
           .eq('id', data.user.id)
-          .single()
+          .maybeSingle()
 
         if (!profile?.degree) {
           navigate('/onboarding')
@@ -64,7 +64,6 @@ export default function Login() {
           <div className="input-group">
             <label htmlFor="email">Email</label>
             <div className="input-wrapper">
-              <span className="input-icon">✉</span>
               <input
                 id="email"
                 type="email"
@@ -79,7 +78,6 @@ export default function Login() {
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <div className="input-wrapper">
-              <span className="input-icon">🔒</span>
               <input
                 id="password"
                 type="password"
