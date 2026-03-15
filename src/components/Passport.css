@@ -1,271 +1,657 @@
 /* ═══════════════════════════════════════════════════
-   PassportCard.css
-   Matches the ReviewPage light-mode system:
-   - Font sizes from review-card / review-stat patterns
-   - Colour logic: rgba(0,0,0,0.x) for light surfaces
-   - Blue accent: #2563eb
-   - Border style: 1px solid rgba(0,0,0,0.08)
-   - Border radius: 18px (matches .review-card)
-   - backdrop-filter: blur(20px) on light areas
+   PASSPORT OVERLAY — Landed Design System (Light)
+   Palette: cream #faf6f1 · tan #d49d66 · terra #894825
+            slate #607fa9 · navy #2c3e5a
 ═══════════════════════════════════════════════════ */
 
-.ppc-wrap {
-  position: relative;
-  border-radius: 18px;
+.passport-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #faf6f1;
+  transform: translateY(100%);
+  transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  /* Matches review-card box-shadow pattern */
-  box-shadow:
-    0 1px 3px rgba(0,0,0,0.08),
-    0 8px 28px rgba(0,0,0,0.12);
-  /* Left spine — physical passport binding feel */
 }
 
-/* Spine shadow — bound edge */
-.ppc-spine {
+.passport-overlay.open {
+  transform: translateY(0);
+}
+
+/* ── Header ── */
+.passport-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(137, 72, 37, 0.15);
+  background: #fff;
+  flex-shrink: 0;
+}
+.passport-header-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.passport-header-icon {
+  color: #2b669e;
+}
+.passport-header-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e5a;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+.passport-header-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #7a8a9e;
+  letter-spacing: 0.03em;
+  padding-left: 4px;
+  border-left: 1px solid rgba(137, 72, 37, 0.25);
+  margin-left: 4px;
+}
+.passport-close-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(137, 72, 37, 0.2);
+  background: rgba(137, 72, 37, 0.06);
+  color: #607fa9;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.2s;
+}
+.passport-close-btn:hover {
+  background: rgba(137, 72, 37, 0.12);
+  color: #2c3e5a;
+}
+
+/* ── Scrollable area ── */
+.passport-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.passport-content::-webkit-scrollbar { display: none; }
+
+/* ═══════════════════════════════════════════════════
+   PASSPORT BOOKLET
+═══════════════════════════════════════════════════ */
+.pp-booklet {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 0 rgba(44, 62, 90, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Left spine shadow */
+.pp-spine {
   position: absolute;
-  top: 0; left: 0;
-  width: 13px; height: 100%;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 100%;
   background: linear-gradient(to right,
-    rgba(0,0,0,0.18) 0%,
-    rgba(0,0,0,0.05) 55%,
+    rgba(0,0,0,0.12) 0%,
+    rgba(0,0,0,0.04) 60%,
     transparent 100%
   );
-  pointer-events: none;
   z-index: 10;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  pointer-events: none;
+  border-right: 1px solid rgba(137, 72, 37, 0.12);
 }
 
-/* ── Dark cover — passport data page ── */
-.ppc-cover {
-  /* Navy matching travel/aviation convention */
-  background: linear-gradient(165deg,
-    #0f1e3a 0%,
-    #1a3060 30%,
-    #1f4d96 62%,
-    #1a5580 100%
+/* ── Photo page ── */
+.pp-photo-page {
+  background: linear-gradient(160deg,
+    #1a2a4a 0%,
+    #1e3a6e 30%,
+    #2b5ea8 65%,
+    #2a6b8e 100%
   );
-  padding: 16px 18px 0;
+  padding: 16px 20px 0;
   position: relative;
   overflow: hidden;
 }
 
-/* Linen weave */
-.ppc-texture {
-  position: absolute; inset: 0; pointer-events: none;
-  background-image:
-    repeating-linear-gradient(0deg,
-      transparent, transparent 2px,
-      rgba(255,255,255,0.018) 2px, rgba(255,255,255,0.018) 4px),
-    repeating-linear-gradient(90deg,
-      transparent, transparent 3px,
-      rgba(0,0,0,0.015) 3px, rgba(0,0,0,0.015) 6px);
-}
-
-/* Globe watermark */
-.ppc-globe {
+/* Linen texture via repeating gradient */
+.pp-texture {
   position: absolute;
-  bottom: -18px; right: -18px;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,0.03) 2px,
+      rgba(255,255,255,0.03) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(255,255,255,0.02) 3px,
+      rgba(255,255,255,0.02) 6px
+    );
   pointer-events: none;
 }
 
-/* ── Authority row ── */
-.ppc-authority {
+/* Authority bar */
+.pp-authority-bar {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 14px;
-  position: relative; z-index: 1;
+  position: relative;
+  z-index: 1;
 }
-.ppc-authority-text { flex: 1; }
-.ppc-authority-country {
-  /* Matches review-card-company scale but lighter-on-dark */
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.88);
+.pp-authority-text {
+  flex: 1;
+}
+.pp-authority-country {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #e8eef6;
   line-height: 1.2;
 }
-.ppc-authority-sub {
-  /* Same weight/size as review-stat-label */
-  font-size: 8px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.38);
+.pp-authority-sub {
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.5);
   margin-top: 2px;
+  text-transform: uppercase;
 }
-.ppc-authority-p {
-  width: 28px; height: 28px;
-  border-radius: 5px;
-  border: 1.5px solid rgba(255,255,255,0.35);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700;
-  color: rgba(255,255,255,0.78);
-  letter-spacing: 0.04em;
+.pp-authority-type {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: 0.06em;
 }
 
-/* ── Identity section ── */
-.ppc-identity {
+/* Identity row — photo + fields */
+.pp-identity-row {
   display: flex;
   gap: 14px;
   margin-bottom: 14px;
-  position: relative; z-index: 1;
+  position: relative;
+  z-index: 1;
 }
-
-/* Photo column */
-.ppc-photo-col {
+.pp-photo-frame {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
 }
-.ppc-photo {
-  width: 58px; height: 70px;
-  border-radius: 4px;
-  border: 1.5px solid rgba(255,255,255,0.38);
-  background: rgba(255,255,255,0.08);
-  display: flex; align-items: center; justify-content: center;
-  position: relative; overflow: hidden;
+.pp-photo-inner {
+  width: 64px;
+  height: 76px;
+  border-radius: 5px;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
-/* Registration corner marks */
-.ppc-photo-tl,
-.ppc-photo-br {
+/* Corner registration marks */
+.pp-photo-inner::before,
+.pp-photo-inner::after {
+  content: '';
   position: absolute;
-  width: 8px; height: 8px;
-  border-color: rgba(255,255,255,0.42);
+  width: 8px;
+  height: 8px;
+  border-color: rgba(255, 255, 255, 0.5);
   border-style: solid;
 }
-.ppc-photo-tl {
+.pp-photo-inner::before {
   top: 3px; left: 3px;
   border-width: 1px 0 0 1px;
 }
-.ppc-photo-br {
+.pp-photo-inner::after {
   bottom: 3px; right: 3px;
   border-width: 0 1px 1px 0;
 }
-.ppc-photo-initials {
-  /* Matches review-card-logo size feel */
-  font-size: 20px; font-weight: 700;
-  color: rgba(255,255,255,0.72);
-  letter-spacing: 0.03em;
+.pp-photo-initials {
+  font-size: 22px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: 0.04em;
 }
-.ppc-photo-label {
-  /* Same scale as review-stat-label */
-  font-size: 7px;
-  font-weight: 500;
+.pp-photo-label {
+  font-size: 6px;
   letter-spacing: 0.14em;
-  color: rgba(255,255,255,0.28);
+  color: rgba(255, 255, 255, 0.35);
   text-transform: uppercase;
 }
 
-/* Fields */
-.ppc-fields {
+/* ID fields */
+.pp-identity-fields {
   flex: 1;
-  display: flex; flex-direction: column; gap: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
-.ppc-field-label {
-  /* review-stat-label equivalent */
-  font-size: 8px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+.pp-id-field {}
+.pp-id-label {
+  font-size: 7px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.36);
+  color: rgba(255, 255, 255, 0.45);
   margin-bottom: 1px;
 }
-.ppc-field-value {
-  /* review-card-role weight, adjusted for dark bg */
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.9);
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-}
-.ppc-field-value--hero {
-  /* review-card-role scale */
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-.ppc-field-value--md {
+.pp-id-value {
   font-size: 13px;
   font-weight: 600;
+  color: #e8eef6;
+  line-height: 1.2;
 }
-.ppc-field-value--sm {
-  /* review-card-company scale */
-  font-size: 11px;
-  font-weight: 400;
-  color: rgba(255,255,255,0.62);
+.pp-id-value--lg {
+  font-size: 17px;
+  font-weight: 800;
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: 0.02em;
+}
+.pp-id-value--sm {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(232, 238, 246, 0.75);
 }
 
-/* ── Flight info strip ── */
-.ppc-strip {
+/* Flight strip */
+.pp-flight-strip {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  margin: 0 -18px;
-  padding: 9px 18px;
-  background: rgba(0,0,0,0.2);
-  border-top: 0.5px solid rgba(255,255,255,0.08);
-  border-bottom: 0.5px solid rgba(255,255,255,0.08);
-  position: relative; z-index: 1;
+  background: rgba(0, 0, 0, 0.15);
+  margin: 0 -20px;
+  padding: 9px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 1;
 }
-.ppc-strip-label {
-  /* review-stat-label */
-  font-size: 7px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+.pp-flight-field {}
+.pp-flight-label {
+  font-size: 6px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.32);
+  color: rgba(255, 255, 255, 0.4);
   margin-bottom: 3px;
 }
-.ppc-strip-value {
-  /* review-stat-value scale */
+.pp-flight-value {
   font-size: 11px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.88);
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  color: #e8eef6;
+  letter-spacing: 0.03em;
 }
 
-/* ── Perforated tear ── */
-.ppc-tear {
-  margin: 0 -18px;
-  height: 13px;
-  background: rgba(0,0,0,0.15);
-  position: relative; z-index: 1;
+/* Tear wrap */
+.pp-tear-wrap {
+  margin: 0 -20px;
+  position: relative;
+  z-index: 1;
+  height: 12px;
   overflow: visible;
 }
 
-/* ── MRZ + barcode ── */
-.ppc-mrz {
-  background: rgba(0,0,0,0.28);
-  margin: 0 -18px;
-  padding: 10px 18px 14px;
-  position: relative; z-index: 1;
+/* MRZ / barcode section */
+.pp-mrz-section {
+  background: rgba(0, 0, 0, 0.2);
+  margin: 0 -20px;
+  padding: 10px 20px 14px;
+  position: relative;
+  z-index: 1;
 }
-.ppc-barcode-row {
+.pp-barcode-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 }
-.ppc-barcode-code {
-  /* review-card-company scale */
-  font-family: 'Courier New', monospace;
+.pp-barcode-code {
   font-size: 9px;
-  font-weight: 500;
   letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255, 255, 255, 0.4);
+  font-family: 'Courier New', monospace;
   white-space: nowrap;
 }
-.ppc-mrz-line {
+.pp-mrz-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pp-mrz-line {
   font-family: 'Courier New', Courier, monospace;
-  /* review-card-company size */
-  font-size: 8px;
-  font-weight: 400;
+  font-size: 8.5px;
   letter-spacing: 0.07em;
-  color: rgba(255,255,255,0.22);
+  color: rgba(255, 255, 255, 0.3);
   white-space: nowrap;
   overflow: hidden;
-  line-height: 1.7;
+  text-overflow: clip;
+  line-height: 1.6;
+}
+
+/* ── Stamps page ── */
+.pp-stamps-page {
+  background: linear-gradient(160deg, #f5ebe0 0%, #f0e4d6 100%);
+  padding: 14px 20px 18px;
+  border-top: 2px solid rgba(137, 72, 37, 0.2);
+}
+.pp-stamps-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+.pp-stamps-page-header > span:first-child {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #894825;
+}
+.pp-stamps-page-sub {
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  color: rgba(137, 72, 37, 0.45);
+  text-transform: uppercase;
+}
+.pp-stamps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.pp-stamp {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.pp-stamp--filled {
+  background: rgba(96, 127, 169, 0.1);
+  border: 1.5px solid rgba(96, 127, 169, 0.3);
+}
+.pp-stamp--gold {
+  background: rgba(212, 157, 102, 0.12);
+  border: 1.5px solid rgba(212, 157, 102, 0.4);
+}
+.pp-stamp--empty {
+  background: rgba(137, 72, 37, 0.03);
+  border: 1px dashed rgba(137, 72, 37, 0.15);
+}
+.pp-stamp-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.pp-stamp-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  line-height: 1.2;
+  color: #3a5a7a;
+}
+.pp-stamp--gold .pp-stamp-label { color: #a06820; }
+.pp-stamp--filled .pp-stamp-label { color: #4a7aaa; }
+.pp-stamp-date {
+  font-size: 7px;
+  color: rgba(137, 72, 37, 0.45);
+  font-family: 'Courier New', monospace;
+}
+.pp-stamp-empty-ring {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px dashed rgba(137, 72, 37, 0.15);
+}
+
+/* ── Update button ── */
+.passport-update-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: 1px solid rgba(137, 72, 37, 0.2);
+  background: #fff;
+  color: #607fa9;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  letter-spacing: 0.02em;
+}
+.passport-update-btn:hover {
+  background: rgba(137, 72, 37, 0.06);
+  border-color: rgba(137, 72, 37, 0.35);
+  color: #2c3e5a;
+}
+
+/* ── Info cards ── */
+.pp-info-card {
+  background: #fff;
+  border: 1px solid rgba(137, 72, 37, 0.12);
+  border-radius: 12px;
+  padding: 16px;
+}
+.pp-info-card-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: #607fa9;
+  margin-bottom: 12px;
+}
+.pp-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(137, 72, 37, 0.08);
+  gap: 12px;
+}
+.pp-info-row:last-child { border-bottom: none; }
+.pp-info-label {
+  font-size: 12px;
+  color: #8a7a6a;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.pp-info-value {
+  font-size: 12px;
+  color: #2c3e5a;
+  font-weight: 600;
+  text-align: right;
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* ── Resume Card ── */
+.pp-resume-card {
+  border-color: rgba(96, 127, 169, 0.2);
+}
+
+.pp-resume-toggle {
+  background: rgba(96, 127, 169, 0.08);
+  border: 1px solid rgba(96, 127, 169, 0.2);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #607fa9;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: background 0.15s;
+}
+.pp-resume-toggle:hover {
+  background: rgba(96, 127, 169, 0.15);
+  color: #2c3e5a;
+}
+
+.pp-resume-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(137, 72, 37, 0.08);
+}
+.pp-resume-section:first-of-type {
+  margin-top: 8px;
+  border-top: none;
+  padding-top: 0;
+}
+
+.pp-resume-section-title {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #607fa9;
+  margin-bottom: 8px;
+}
+
+.pp-resume-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.pp-resume-contact span {
+  font-size: 11px;
+  color: #4a5a6a;
+}
+
+.pp-resume-text {
+  font-size: 11px;
+  line-height: 1.55;
+  color: #5a6a7a;
+  margin: 0;
+}
+
+.pp-resume-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.pp-resume-skill-tag {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(96, 127, 169, 0.08);
+  color: #4a7aaa;
+  border: 1px solid rgba(96, 127, 169, 0.18);
+}
+
+.pp-resume-exp {
+  margin-bottom: 10px;
+}
+.pp-resume-exp:last-child {
+  margin-bottom: 0;
+}
+.pp-resume-exp-header {
+  font-size: 12px;
+  color: #2c3e5a;
+  line-height: 1.3;
+}
+.pp-resume-exp-header strong {
+  font-weight: 700;
+}
+.pp-resume-exp-header span {
+  font-weight: 400;
+  color: #7a8a9e;
+}
+.pp-resume-exp-dates {
+  font-size: 10px;
+  color: #a09080;
+  margin-top: 2px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.04em;
+}
+.pp-resume-exp-bullets {
+  margin: 6px 0 0;
+  padding: 0 0 0 14px;
+  list-style: disc;
+}
+.pp-resume-exp-bullets li {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #5a6a7a;
+  margin-bottom: 3px;
+}
+.pp-resume-more {
+  color: #607fa9 !important;
+  font-style: italic;
+  list-style: none !important;
+  margin-left: -14px;
+}
+.pp-resume-more-hint {
+  font-size: 11px;
+  color: #607fa9;
+  font-style: italic;
+  margin-top: 6px;
+}
+
+.pp-resume-download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 11px;
+  border-radius: 10px;
+  border: 1px solid rgba(96, 127, 169, 0.2);
+  background: rgba(96, 127, 169, 0.06);
+  color: #607fa9;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.pp-resume-download-btn:hover {
+  background: rgba(96, 127, 169, 0.12);
+  border-color: rgba(96, 127, 169, 0.35);
+  color: #2c3e5a;
+}
+
+.pp-resume-empty p {
+  font-size: 12px;
+  color: #8a7a6a;
+  margin: 8px 0 0;
+  text-align: center;
 }
