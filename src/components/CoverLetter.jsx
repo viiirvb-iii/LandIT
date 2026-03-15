@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
+import CompanyAvatar from "./CompanyAvatar";
 import {
   generateCoverLetter,
   generateOutreach,
@@ -162,11 +163,20 @@ export default function CoverLetter({ job, open, onClose, onToast }) {
       <div className="cl-shell">
         {/* Header */}
         <div className="cl-header">
-          <div>
-            <h2 className="cl-title">
-              {tab === "cover_letter" ? "Cover Letter" : "Outreach Email"}
-            </h2>
-            <span className="cl-sub">{job?.role} at {job?.company}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <CompanyAvatar
+              logoUrl={job?.logoUrl}
+              company={job?.company}
+              color={job?.color || "#3b82f6"}
+              size={36}
+              radius={10}
+            />
+            <div>
+              <h2 className="cl-title">
+                {tab === "cover_letter" ? "Cover Letter" : "Outreach Email"}
+              </h2>
+              <span className="cl-sub">{job?.role} at {job?.company}</span>
+            </div>
           </div>
           <button className="cl-close" onClick={onClose} aria-label="Close">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -317,20 +327,20 @@ export default function CoverLetter({ job, open, onClose, onToast }) {
           overflow-y: auto;
         }
         .cl-shell {
-          width: 100%; max-width: 640px;
-          padding: 24px 20px 32px;
+          width: 100%; max-width: 680px;
+          padding: 28px 24px 36px;
         }
 
         /* Header */
         .cl-header {
           display: flex; justify-content: space-between; align-items: flex-start;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
         .cl-title {
-          font-size: 20px; font-weight: 700; color: #0f172a;
+          font-size: 16px; font-weight: 700; color: #0f172a;
           margin: 0; letter-spacing: -0.02em;
         }
-        .cl-sub { font-size: 13px; color: #94a3b8; margin-top: 2px; display: block; }
+        .cl-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; display: block; }
         .cl-close {
           width: 36px; height: 36px; border-radius: 50%;
           border: 1px solid #e2e8f0; background: #fff;
@@ -338,14 +348,15 @@ export default function CoverLetter({ job, open, onClose, onToast }) {
           cursor: pointer; transition: all 0.15s;
         }
         .cl-close:hover { background: #f1f5f9; color: #0f172a; }
+        .cl-close svg { width: 16px; height: 16px; }
 
         /* Tabs */
         .cl-tabs {
           display: flex; gap: 0;
-          border-bottom: 1px solid #e2e8f0; margin-bottom: 20px;
+          border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;
         }
         .cl-tab {
-          flex: 1; padding: 10px 0; text-align: center;
+          flex: 1; padding: 11px 0; text-align: center;
           font-size: 13px; font-weight: 600; font-family: inherit;
           color: #94a3b8; background: none; border: none;
           border-bottom: 2px solid transparent; cursor: pointer;
@@ -356,68 +367,69 @@ export default function CoverLetter({ job, open, onClose, onToast }) {
 
         /* Empty state */
         .cl-empty {
-          text-align: center; padding: 56px 24px;
-          background: #fff; border-radius: 16px;
+          text-align: center; padding: 64px 28px;
+          background: #fff; border-radius: 20px;
           border: 1px solid #e2e8f0;
         }
-        .cl-empty-icon { margin-bottom: 16px; }
+        .cl-empty-icon { margin-bottom: 20px; }
+        .cl-empty-icon svg { width: 48px; height: 48px; }
         .cl-empty-text {
-          color: #64748b; font-size: 14px; line-height: 1.6;
-          margin: 0 0 24px; max-width: 340px; margin-left: auto; margin-right: auto;
+          color: #64748b; font-size: 13px; line-height: 1.6;
+          margin: 0 0 28px; max-width: 380px; margin-left: auto; margin-right: auto;
         }
 
         /* Letter preview — looks like a real letter */
         .cl-letter {
           background: #fff; border: 1px solid #e2e8f0;
-          border-radius: 16px; padding: 32px 28px;
-          margin-bottom: 16px; position: relative;
+          border-radius: 20px; padding: 30px 26px;
+          margin-bottom: 20px; position: relative;
           box-shadow: 0 4px 16px rgba(0,0,0,0.04);
         }
         .cl-letter-version {
-          position: absolute; top: 16px; right: 20px;
-          font-size: 10px; color: #cbd5e1; font-weight: 600;
-          background: #f8fafc; padding: 2px 8px; border-radius: 6px;
+          position: absolute; top: 18px; right: 22px;
+          font-size: 12px; color: #cbd5e1; font-weight: 600;
+          background: #f8fafc; padding: 3px 10px; border-radius: 8px;
           border: 1px solid #f1f5f9;
         }
-        .cl-letter-sender { margin-bottom: 12px; }
+        .cl-letter-sender { margin-bottom: 16px; }
         .cl-letter-sender-name {
-          font-size: 15px; font-weight: 700; color: #0f172a;
+          font-size: 14px; font-weight: 700; color: #0f172a;
           letter-spacing: -0.01em;
         }
         .cl-letter-sender-email {
-          font-size: 12px; color: #94a3b8; margin-top: 2px;
+          font-size: 11px; color: #94a3b8; margin-top: 2px;
         }
         .cl-letter-divider {
-          height: 1px; background: #e2e8f0; margin: 16px 0;
+          height: 1px; background: #e2e8f0; margin: 20px 0;
         }
         .cl-letter-date {
-          font-size: 12px; color: #94a3b8; margin-bottom: 20px;
+          font-size: 11px; color: #94a3b8; margin-bottom: 20px;
         }
         .cl-letter-greeting {
-          font-size: 14px; font-weight: 600; color: #0f172a;
+          font-size: 13px; font-weight: 600; color: #0f172a;
           margin-bottom: 14px;
         }
         .cl-letter-body {
-          font-size: 14px; line-height: 1.75; color: #334155;
+          font-size: 13px; line-height: 1.7; color: #334155;
           white-space: pre-wrap;
         }
         .cl-letter-signoff {
-          margin-top: 24px; font-size: 14px; color: #334155;
+          margin-top: 22px; font-size: 13px; color: #334155;
         }
         .cl-letter-signoff-name {
           font-weight: 700; color: #0f172a; margin-top: 6px;
         }
         .cl-letter-signoff-email {
-          font-size: 12px; color: #94a3b8; margin-top: 2px;
+          font-size: 11px; color: #94a3b8; margin-top: 3px;
         }
 
         /* Actions */
-        .cl-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .cl-edit-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .cl-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .cl-edit-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .cl-edit-input {
-          flex: 1; min-width: 180px; padding: 10px 14px; border-radius: 10px;
+          flex: 1; min-width: 200px; padding: 11px 14px; border-radius: 12px;
           background: #fff; border: 1px solid #e2e8f0;
-          color: #0f172a; font-size: 13px; font-family: inherit; outline: none;
+          color: #0f172a; font-size: 12px; font-family: inherit; outline: none;
           transition: border-color 0.15s;
         }
         .cl-edit-input:focus { border-color: #3b82f6; }
@@ -425,32 +437,32 @@ export default function CoverLetter({ job, open, onClose, onToast }) {
 
         /* Buttons */
         .cl-btn-primary {
-          padding: 10px 20px; border-radius: 10px;
+          padding: 11px 20px; border-radius: 12px;
           background: #3b82f6; color: #fff;
           font-size: 13px; font-weight: 600; border: none;
           cursor: pointer; font-family: inherit;
-          display: inline-flex; align-items: center; gap: 6px;
+          display: inline-flex; align-items: center; gap: 7px;
           transition: background 0.15s;
         }
         .cl-btn-primary:hover { background: #2563eb; }
         .cl-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .cl-btn-outline {
-          padding: 10px 16px; border-radius: 10px;
+          padding: 11px 16px; border-radius: 12px;
           background: #fff; color: #475569;
           border: 1px solid #e2e8f0; font-size: 13px;
           font-weight: 600; cursor: pointer; font-family: inherit;
-          display: inline-flex; align-items: center; gap: 6px;
+          display: inline-flex; align-items: center; gap: 7px;
           transition: all 0.15s;
         }
         .cl-btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
         .cl-btn-outline:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .cl-btn-sm { padding: 8px 14px; font-size: 12px; }
+        .cl-btn-sm { padding: 9px 14px; font-size: 12px; }
 
         /* Spinner */
         .cl-spinner {
-          display: inline-block; width: 14px; height: 14px;
+          display: inline-block; width: 16px; height: 16px;
           border: 2px solid rgba(255,255,255,0.3);
           border-top-color: #fff; border-radius: 50%;
           animation: cl-spin 0.6s linear infinite;
