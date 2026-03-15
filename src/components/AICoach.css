@@ -1,5 +1,5 @@
 /* ============================================================
-   AICoach.css  --  Light-mode, Apple-inspired overlay
+   AICoach.css  --  Dark-mode, Apple-inspired overlay
    ============================================================ */
 
 /* ---------- overlay shell ---------- */
@@ -7,7 +7,7 @@
   position: fixed;
   inset: 0;
   z-index: 9000;
-  background: rgba(248, 250, 252, 0.97);
+  background: rgba(6, 9, 15, 0.97);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   transform: translateY(100%);
@@ -26,7 +26,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 28px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   flex-shrink: 0;
 }
 .coach-header-left {
@@ -54,15 +54,15 @@
 .coach-header-title {
   font-size: 15px;
   font-weight: 600;
-  color: #0f172a;
+  color: rgba(255,255,255,0.90);
 }
 .coach-header-sub {
   font-size: 12px;
-  color: #64748b;
+  color: rgba(255,255,255,0.45);
   margin-top: 1px;
 }
 .coach-close-btn {
-  background: #f1f5f9;
+  background: rgba(255,255,255,0.03);
   border: none;
   border-radius: 50%;
   width: 34px;
@@ -72,11 +72,11 @@
   justify-content: center;
   cursor: pointer;
   font-size: 18px;
-  color: #64748b;
+  color: rgba(255,255,255,0.45);
   transition: background 0.2s;
 }
 .coach-close-btn:hover {
-  background: #e2e8f0;
+  background: rgba(255,255,255,0.08);
 }
 
 /* ---------- body container ---------- */
@@ -101,12 +101,12 @@
 .coach-choice-heading {
   font-size: 22px;
   font-weight: 700;
-  color: #0f172a;
+  color: rgba(255,255,255,0.90);
   margin-bottom: 6px;
 }
 .coach-choice-sub {
   font-size: 14px;
-  color: #64748b;
+  color: rgba(255,255,255,0.45);
   margin-bottom: 28px;
 }
 .coach-choice-cards {
@@ -117,8 +117,8 @@
 .coach-choice-card {
   flex: 1;
   max-width: 240px;
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   padding: 28px 20px;
   cursor: pointer;
@@ -137,12 +137,12 @@
 .coach-choice-card h3 {
   font-size: 15px;
   font-weight: 600;
-  color: #0f172a;
+  color: rgba(255,255,255,0.90);
   margin: 0 0 6px;
 }
 .coach-choice-card p {
   font-size: 13px;
-  color: #64748b;
+  color: rgba(255,255,255,0.45);
   margin: 0;
   line-height: 1.45;
 }
@@ -185,12 +185,12 @@
   flex-shrink: 0;
 }
 .coach-bubble {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 14px;
   padding: 14px 16px;
   font-size: 14px;
-  color: #0f172a;
+  color: rgba(255,255,255,0.90);
   line-height: 1.55;
   max-width: 420px;
 }
@@ -236,25 +236,25 @@
   gap: 10px;
   align-items: center;
   padding-top: 12px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid rgba(255,255,255,0.08);
   margin-top: auto;
 }
 .coach-qa-input {
   flex: 1;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid rgba(255,255,255,0.10);
   border-radius: 12px;
   padding: 12px 14px;
   font-size: 14px;
   outline: none;
-  color: #0f172a;
-  background: #fff;
+  color: rgba(255,255,255,0.90);
+  background: rgba(255,255,255,0.06);
   transition: border-color 0.2s;
 }
 .coach-qa-input:focus {
   border-color: #a855f7;
 }
 .coach-qa-input::placeholder {
-  color: #94a3b8;
+  color: rgba(255,255,255,0.30);
 }
 .coach-send-btn {
   background: #a855f7;
@@ -283,14 +283,14 @@
 .coach-skip-btn {
   background: none;
   border: none;
-  color: #64748b;
+  color: rgba(255,255,255,0.45);
   font-size: 13px;
   cursor: pointer;
   text-decoration: underline;
 }
 .coach-q-counter {
   font-size: 12px;
-  color: #94a3b8;
+  color: rgba(255,255,255,0.30);
 }
 
 /* ============================================================
@@ -315,7 +315,7 @@
   stroke-width: 6;
 }
 .coach-progress-ring .ring-bg {
-  stroke: #e2e8f0;
+  stroke: rgba(255,255,255,0.08);
 }
 .coach-progress-ring .ring-fg {
   stroke: #a855f7;
@@ -335,7 +335,7 @@
 .coach-loading-title {
   font-size: 17px;
   font-weight: 600;
-  color: #0f172a;
+  color: rgba(255,255,255,0.90);
   margin-bottom: 20px;
 }
 .coach-steps {
@@ -350,7 +350,7 @@
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  color: #94a3b8;
+  color: rgba(255,255,255,0.30);
   transition: color 0.3s;
 }
 .coach-step.active {
@@ -368,7 +368,7 @@
 .coach-bar-track {
   height: 6px;
   border-radius: 3px;
-  background: #e2e8f0;
+  background: rgba(255,255,255,0.08);
   overflow: hidden;
 }
 .coach-bar-fill {
@@ -391,13 +391,13 @@
   justify-content: space-between;
   margin-bottom: 20px;
   padding: 14px 18px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 14px;
 }
 .coach-ats-label {
   font-size: 13px;
-  color: #64748b;
+  color: rgba(255,255,255,0.45);
   font-weight: 500;
 }
 .coach-ats-score {
@@ -409,7 +409,7 @@
 .coach-ats-track {
   flex: 1;
   height: 6px;
-  background: #e2e8f0;
+  background: rgba(255,255,255,0.08);
   border-radius: 3px;
   margin: 0 14px;
   overflow: hidden;
@@ -423,8 +423,8 @@
 
 /* suggestion card */
 .coach-suggestion-card {
-  background: #fff;
-  border: 1.5px solid #e2e8f0;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   padding: 24px;
   animation: coachCardIn 0.35s ease;
@@ -452,21 +452,21 @@
 .coach-sug-title {
   font-size: 16px;
   font-weight: 600;
-  color: #0f172a;
+  color: rgba(255,255,255,0.90);
 }
 .coach-sug-insight {
   font-size: 14px;
-  color: #0f172a;
+  color: rgba(255,255,255,0.90);
   line-height: 1.55;
   margin-bottom: 10px;
 }
 .coach-sug-why {
   font-size: 13px;
-  color: #64748b;
+  color: rgba(255,255,255,0.45);
   line-height: 1.5;
   margin-bottom: 18px;
   padding: 10px 14px;
-  background: #f8fafc;
+  background: rgba(255,255,255,0.03);
   border-radius: 10px;
 }
 .coach-diff {
@@ -483,24 +483,24 @@
   margin-bottom: 2px;
 }
 .coach-diff-before {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: rgba(255,69,58,0.08);
+  border: 1px solid rgba(255,69,58,0.18);
   border-radius: 10px;
   padding: 12px 14px;
   font-size: 13px;
-  color: #991b1b;
+  color: rgba(255,69,58,0.85);
   line-height: 1.5;
 }
 .coach-diff-before .coach-diff-label {
   color: #ef4444;
 }
 .coach-diff-after {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: rgba(48,209,88,0.08);
+  border: 1px solid rgba(48,209,88,0.18);
   border-radius: 10px;
   padding: 12px 14px;
   font-size: 13px;
-  color: #166534;
+  color: rgba(48,209,88,0.85);
   line-height: 1.5;
 }
 .coach-diff-after .coach-diff-label {
@@ -528,9 +528,9 @@
 .coach-btn-edit {
   padding: 11px 18px;
   border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
-  background: #fff;
-  color: #0f172a;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.90);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -542,8 +542,8 @@
 .coach-btn-skip {
   padding: 11px 18px;
   border-radius: 12px;
-  border: 1.5px solid #fecaca;
-  background: #fff;
+  border: 1.5px solid rgba(255,69,58,0.20);
+  background: rgba(255,255,255,0.05);
   color: #ef4444;
   font-size: 14px;
   font-weight: 500;
@@ -551,13 +551,13 @@
   transition: background 0.2s;
 }
 .coach-btn-skip:hover {
-  background: #fef2f2;
+  background: rgba(255,69,58,0.10);
 }
 .coach-card-counter {
   text-align: center;
   margin-top: 14px;
   font-size: 12px;
-  color: #94a3b8;
+  color: rgba(255,255,255,0.30);
 }
 
 /* collapsed card */
@@ -566,15 +566,15 @@
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: rgba(48,209,88,0.10);
+  border: 1px solid rgba(48,209,88,0.20);
   border-radius: 12px;
   margin-bottom: 12px;
   animation: coachCardIn 0.3s ease;
 }
 .coach-card-collapsed.skipped {
-  background: #fef2f2;
-  border-color: #fecaca;
+  background: rgba(255,69,58,0.10);
+  border-color: rgba(255,69,58,0.20);
 }
 .coach-collapsed-icon {
   font-size: 16px;
@@ -582,7 +582,7 @@
 .coach-collapsed-title {
   font-size: 13px;
   font-weight: 500;
-  color: #0f172a;
+  color: rgba(255,255,255,0.90);
   flex: 1;
 }
 .coach-collapsed-badge {
@@ -592,12 +592,12 @@
   border-radius: 6px;
 }
 .coach-collapsed-badge.approved {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(48,209,88,0.10);
+  color: #30d158;
 }
 .coach-collapsed-badge.skipped {
-  background: #fee2e2;
-  color: #991b1b;
+  background: rgba(255,69,58,0.10);
+  color: #ff453a;
 }
 
 /* ============================================================
@@ -612,7 +612,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #dcfce7;
+  background: rgba(48,209,88,0.10);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -622,12 +622,12 @@
 .coach-complete-title {
   font-size: 22px;
   font-weight: 700;
-  color: #0f172a;
+  color: rgba(255,255,255,0.90);
   margin-bottom: 6px;
 }
 .coach-complete-sub {
   font-size: 14px;
-  color: #64748b;
+  color: rgba(255,255,255,0.45);
   margin-bottom: 24px;
 }
 .coach-score-summary {
@@ -637,12 +637,12 @@
   gap: 12px;
   margin-bottom: 24px;
   font-size: 14px;
-  color: #64748b;
+  color: rgba(255,255,255,0.45);
 }
 .coach-score-old {
   font-size: 28px;
   font-weight: 700;
-  color: #94a3b8;
+  color: rgba(255,255,255,0.30);
 }
 .coach-score-arrow {
   font-size: 20px;
@@ -654,8 +654,8 @@
   color: #22c55e;
 }
 .coach-lesson-box {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 14px;
   padding: 20px;
   text-align: left;
@@ -664,7 +664,7 @@
 .coach-lesson-heading {
   font-size: 14px;
   font-weight: 600;
-  color: #0f172a;
+  color: rgba(255,255,255,0.90);
   margin-bottom: 12px;
 }
 .coach-lesson-box ul {
@@ -677,7 +677,7 @@
 }
 .coach-lesson-box li {
   font-size: 13px;
-  color: #334155;
+  color: rgba(255,255,255,0.65);
   line-height: 1.5;
   padding-left: 18px;
   position: relative;
@@ -711,9 +711,9 @@
 .coach-btn-restart {
   padding: 12px 28px;
   border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
-  background: #fff;
-  color: #0f172a;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.90);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;

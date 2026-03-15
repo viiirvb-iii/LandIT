@@ -63,6 +63,7 @@ export default function JobDetail({
     timeline,
     companyAbout,
     logo,
+    logoUrl,
     color,
     g,
   } = job;
@@ -94,9 +95,13 @@ export default function JobDetail({
         <h1 className="jd-role-title">{role}</h1>
 
         <div className="jd-company-badge">
-          <div className="jd-company-logo" style={{ background: color || "#3b82f6" }}>
-            {logo || company?.charAt(0) || "?"}
-          </div>
+          {logoUrl ? (
+            <img className="jd-company-logo" src={logoUrl} alt={company} style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover' }} />
+          ) : (
+            <div className="jd-company-logo" style={{ background: color || "#3b82f6" }}>
+              {logo || company?.charAt(0) || "?"}
+            </div>
+          )}
           <div className="jd-company-info">
             <span className="jd-company-name">{company}</span>
             <span className="jd-company-loc">{location}</span>

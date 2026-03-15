@@ -41,7 +41,7 @@ export async function updateSkills(userId, skills) {
 
 // Add a passport stamp
 export async function addPassportStamp(userId, stamp) {
-  // stamp = { type: 'applied', label: 'Shopify Applied', awarded_at: '2026-03-14' }
+  // stamp = { type: 'applied', label: 'REA Group Applied', awarded_at: '2026-03-14' }
 
   // Fetch current passport data first
   const { data: user, error: fetchError } = await supabase

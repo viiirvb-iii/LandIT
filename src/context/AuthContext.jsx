@@ -32,6 +32,14 @@ export function AuthProvider({ children }) {
       password,
       options: { data: { full_name: fullName } },
     })
+    // Fallback: if the user got a session immediately but the trigger didn't
+    // fire (common on first deploy), manually ensure the profile row exists.
+    if (!error && data?.user && data?.session) {
+      await supabase.from('profiles').upsert(
+        { id: data.user.id, full_name: fullName || '' },
+        { onConflict: 'id', ignoreDuplicates: true }
+      )
+    }
     return { data, error }
   }
 

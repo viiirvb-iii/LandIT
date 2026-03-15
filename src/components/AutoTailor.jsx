@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { uploadAndParseResume, tailorResume } from "../services/resume";
 import "./AutoTailor.css";
 
 const STEPS = [
@@ -8,44 +9,22 @@ const STEPS = [
   "Generating tailored version",
 ];
 
-const ORIGINAL_RESUME = `EXPERIENCE
-
-Software Engineer — Acme Corp
-Jan 2022 – Present
-• Built internal dashboards using React
-• Worked on backend services
-• Collaborated with design team on UI
-
-SKILLS
-JavaScript, React, Node.js, CSS, HTML
-Communication, Team Work`;
-
-const TAILORED_RESUME = `EXPERIENCE
-
-Software Engineer — Acme Corp
-Jan 2022 – Present
-• Architected and shipped 5 customer-facing dashboards in React, reducing support tickets by 30%
-• Designed RESTful APIs powering real-time analytics for 20k+ daily active users
-• Led cross-functional sprints with Design & PM, delivering features 2 weeks ahead of schedule
-
-SKILLS
-JavaScript, TypeScript, React, Node.js, REST APIs, CI/CD
-Agile, Cross-functional Leadership, Technical Communication`;
-
-const SUMMARY_ITEMS = [
-  "Replaced vague bullet points with quantified impact statements",
-  "Added missing keywords from the job description (TypeScript, REST APIs, CI/CD)",
-  "Reframed soft skills to match the listing's leadership requirements",
-  "Optimised section ordering to prioritise relevant experience",
-];
-
 export default function AutoTailor({ job, open, onClose, onToast }) {
-  const [phase, setPhase] = useState("upload"); // upload | processing | results
+  const [phase, setPhase] = useState("upload"); // upload | processing | results | error
   const [stepIdx, setStepIdx] = useState(-1);
   const [diffTab, setDiffTab] = useState("tailored");
   const [atsAnimated, setAtsAnimated] = useState(false);
+  const [error, setError] = useState("");
   const fileRef = useRef(null);
   const timers = useRef([]);
+
+  // Result data from the RAG pipeline
+  const [originalText, setOriginalText] = useState("");
+  const [tailoredText, setTailoredText] = useState("");
+  const [summaryItems, setSummaryItems] = useState([]);
+  const [atsBefore, setAtsBefore] = useState(0);
+  const [atsAfter, setAtsAfter] = useState(0);
+  const [honestGaps, setHonestGaps] = useState([]);
 
   // Reset when overlay opens
   useEffect(() => {
@@ -54,14 +33,16 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
       setStepIdx(-1);
       setDiffTab("tailored");
       setAtsAnimated(false);
+      setError("");
+      setOriginalText("");
+      setTailoredText("");
+      setSummaryItems([]);
+      setAtsBefore(0);
+      setAtsAfter(0);
+      setHonestGaps([]);
     }
     return () => timers.current.forEach(clearTimeout);
   }, [open]);
-
-  const clearTimers = () => {
-    timers.current.forEach(clearTimeout);
-    timers.current = [];
-  };
 
   const schedule = (fn, ms) => {
     const id = setTimeout(fn, ms);
@@ -69,18 +50,72 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
     return id;
   };
 
-  const handleUpload = () => {
+  const handleFileSelect = async (e) => {
+    const file = e?.target?.files?.[0];
+    if (!file) return;
+
     setPhase("processing");
     setStepIdx(0);
 
-    STEPS.forEach((_, i) => {
-      schedule(() => setStepIdx(i + 1), (i + 1) * 900);
-    });
+    try {
+      // Step 1: Parse resume (show steps progressively)
+      const stepTimer = setInterval(() => {
+        setStepIdx((prev) => {
+          if (prev < STEPS.length - 1) return prev + 1;
+          clearInterval(stepTimer);
+          return prev;
+        });
+      }, 2000);
 
-    schedule(() => {
+      // Upload and parse the resume
+      await uploadAndParseResume(file);
+      setStepIdx(1);
+
+      // Tailor the resume for this job
+      const result = await tailorResume(job.id);
+      clearInterval(stepTimer);
+      setStepIdx(STEPS.length);
+
+      // Extract results
+      const { result: tailorResult, skill_analysis } = result;
+
+      // Build original text from resume sections
+      const sections = tailorResult.tailored_sections || [];
+      setOriginalText(
+        sections.map((s) => `${s.section?.toUpperCase() || ""}\n${s.original}`).join("\n\n")
+      );
+      setTailoredText(
+        sections.map((s) => `${s.section?.toUpperCase() || ""}\n${s.tailored}`).join("\n\n")
+      );
+
+      // Build summary items from changes_made
+      const changes = tailorResult.changes_made || [];
+      setSummaryItems(changes.map((c) => c.what));
+
+      // Set ATS scores
+      setAtsBefore(skill_analysis?.match_percentage || 0);
+      setAtsAfter(tailorResult.ats_score_estimate || skill_analysis?.match_percentage || 0);
+
+      // Set honest gaps
+      setHonestGaps(tailorResult.honest_gaps || []);
+
+      // Show validation warnings if any
+      if (tailorResult.validation_warnings?.length > 0) {
+        console.warn("Validation warnings:", tailorResult.validation_warnings);
+      }
+
+      // Transition to results
       setPhase("results");
       schedule(() => setAtsAnimated(true), 200);
-    }, STEPS.length * 900 + 600);
+    } catch (err) {
+      console.error("AutoTailor error:", err);
+      setError(err.message || "Something went wrong");
+      setPhase("error");
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileRef.current?.click();
   };
 
   const handleExport = () => {
@@ -89,13 +124,13 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
   };
 
   const handleRevert = () => {
-    clearTimers();
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
     setPhase("upload");
     setStepIdx(-1);
     setAtsAnimated(false);
   };
 
-  const matchPct = job?.match ?? 91;
   const logoChar = job?.logo ?? job?.company?.[0] ?? "?";
   const bgColor = job?.color ?? "#3b82f6";
   const gradient = job?.g ?? bgColor;
@@ -103,7 +138,7 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
   return (
     <div className={`at-overlay${open ? " at-open" : ""}`}>
       <div className="at-shell">
-        {/* ── Header ── */}
+        {/* -- Header -- */}
         <div className="at-header">
           <div className="at-header-left">
             <div
@@ -124,10 +159,17 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
           </button>
         </div>
 
-        {/* ── Upload Phase ── */}
+        {/* -- Upload Phase -- */}
         {phase === "upload" && (
           <div className="at-card">
-            <div className="at-upload-zone" onClick={handleUpload}>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,.txt,.docx"
+              style={{ display: "none" }}
+              onChange={handleFileSelect}
+            />
+            <div className="at-upload-zone" onClick={handleUploadClick}>
               <div className="at-upload-icon">
                 <svg
                   viewBox="0 0 24 24"
@@ -143,7 +185,7 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
                 </svg>
               </div>
               <h3>Upload your resume</h3>
-              <p>PDF, DOCX or TXT up to 5 MB</p>
+              <p>PDF or TXT up to 5 MB</p>
               <span className="at-upload-btn">
                 <svg
                   width="16"
@@ -164,7 +206,7 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
           </div>
         )}
 
-        {/* ── Processing Phase ── */}
+        {/* -- Processing Phase -- */}
         {phase === "processing" && (
           <div className="at-card">
             <div className="at-processing">
@@ -187,7 +229,24 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
           </div>
         )}
 
-        {/* ── Results Phase ── */}
+        {/* -- Error Phase -- */}
+        {phase === "error" && (
+          <div className="at-card">
+            <div className="at-processing">
+              <h3>Something went wrong</h3>
+              <p style={{ color: "#ef4444", margin: "12px 0" }}>{error}</p>
+              <button
+                className="at-upload-btn"
+                onClick={handleRevert}
+                style={{ cursor: "pointer" }}
+              >
+                Try again
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* -- Results Phase -- */}
         {phase === "results" && (
           <>
             <div className="at-card">
@@ -222,10 +281,10 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
                   <div className="at-ats-bar-track">
                     <div
                       className="at-ats-bar-fill at-ats-bar-fill-red"
-                      style={{ width: atsAnimated ? "54%" : "0%" }}
+                      style={{ width: atsAnimated ? `${atsBefore}%` : "0%" }}
                     />
                   </div>
-                  <span className="at-ats-pct at-ats-pct-red">54%</span>
+                  <span className="at-ats-pct at-ats-pct-red">{atsBefore}%</span>
                 </div>
 
                 <div className="at-ats-row">
@@ -233,11 +292,11 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
                   <div className="at-ats-bar-track">
                     <div
                       className="at-ats-bar-fill at-ats-bar-fill-green"
-                      style={{ width: atsAnimated ? `${matchPct}%` : "0%" }}
+                      style={{ width: atsAnimated ? `${atsAfter}%` : "0%" }}
                     />
                   </div>
                   <span className="at-ats-pct at-ats-pct-green">
-                    {matchPct}%
+                    {atsAfter}%
                   </span>
                 </div>
               </div>
@@ -259,7 +318,7 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
                   </button>
                 </div>
                 <div className="at-diff-body">
-                  {diffTab === "original" ? ORIGINAL_RESUME : TAILORED_RESUME}
+                  {diffTab === "original" ? originalText : tailoredText}
                 </div>
               </div>
 
@@ -278,14 +337,28 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
                     <path d="M12 16v-4" />
                     <path d="M12 8h.01" />
                   </svg>
-                  AI Summary &mdash; 4 changes made
+                  AI Summary &mdash; {summaryItems.length} changes made
                 </div>
                 <ul>
-                  {SUMMARY_ITEMS.map((item, i) => (
+                  {summaryItems.map((item, i) => (
                     <li key={i}>{item}</li>
                   ))}
                 </ul>
               </div>
+
+              {/* Honest gaps */}
+              {honestGaps.length > 0 && (
+                <div className="at-summary" style={{ borderColor: "#fbbf24" }}>
+                  <div className="at-summary-title">
+                    Honest Gaps &mdash; skills this role needs that you don't have yet
+                  </div>
+                  <ul>
+                    {honestGaps.map((gap, i) => (
+                      <li key={i}>{gap}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {/* Export buttons */}
               <div className="at-export-row">

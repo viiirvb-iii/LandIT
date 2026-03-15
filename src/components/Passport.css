@@ -1,10 +1,10 @@
-/* ===== Passport Overlay ===== */
+/* ===== Passport Overlay – Dark Mode ===== */
 
 .passport-overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(248, 250, 252, 0.95);
+  background: rgba(6, 9, 15, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   transform: translateY(100%);
@@ -25,15 +25,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
   flex-shrink: 0;
 }
 
 .passport-header-title {
   font-size: 17px;
   font-weight: 700;
-  color: #0f172a;
+  color: rgba(255, 255, 255, 0.90);
   letter-spacing: 0.02em;
 }
 
@@ -41,9 +41,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #64748b;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.45);
   font-size: 18px;
   display: flex;
   align-items: center;
@@ -54,8 +54,8 @@
 }
 
 .passport-close-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.90);
 }
 
 /* ----- Scrollable content ----- */
@@ -157,8 +157,8 @@
 /* ----- Generic card ----- */
 
 .passport-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   padding: 20px;
 }
@@ -168,7 +168,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.35);
   margin-bottom: 16px;
 }
 
@@ -179,7 +179,7 @@
   justify-content: space-between;
   align-items: baseline;
   padding: 10px 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .passport-info-row:last-child {
@@ -188,13 +188,13 @@
 
 .passport-info-label {
   font-size: 13px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.40);
   font-weight: 500;
 }
 
 .passport-info-value {
   font-size: 13px;
-  color: #0f172a;
+  color: rgba(255, 255, 255, 0.90);
   font-weight: 600;
   text-align: right;
   max-width: 60%;
@@ -224,17 +224,19 @@
 }
 
 .passport-stamp--filled {
-  background: #3b82f6;
-  color: #ffffff;
+  background: rgba(58,130,246,0.18);
+  color: #3a82f6;
+  border: 1px solid rgba(58,130,246,0.25);
 }
 
 .passport-stamp--gold {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #ffffff;
+  background: rgba(245,158,11,0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245,158,11,0.25);
 }
 
 .passport-stamp--empty {
-  background: #f1f5f9;
-  color: #cbd5e1;
-  border: 1px dashed #e2e8f0;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.15);
+  border: 1px dashed rgba(255, 255, 255, 0.10);
 }

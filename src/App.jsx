@@ -1,70 +1,61 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import AppLayout from './components/AppLayout'
 import SwipeFeed from './pages/SwipeFeed'
 import ReviewPage from './pages/ReviewPage'
 import WishlistPage from './pages/WishlistPage'
+import Onboarding from './pages/Onboarding'
 import './App.css'
 
-function MainApp() {
-  const [activeTab, setActiveTab] = useState('swipe')
+// Auth guard — redirects to /login if not authenticated
+function RequireAuth({ children }) {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#999' }}>
+        Loading...
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  return children
+}
+
+function WrappedPage({ Component, propName = 'showToast' }) {
+  const location = useLocation()
+  const path = location.pathname
+  const activeTab = path.includes('/review') ? 'review' : path.includes('/wishlist') ? 'wishlist' : 'swipe'
+
   return (
-    <AppLayout activeTab={activeTab} onTabChange={setActiveTab}>
-      {({ showToast }) => (
-        <>
-          {activeTab === 'swipe' && <SwipeFeed showToast={showToast} />}
-          {activeTab === 'review' && <ReviewPage onToast={showToast} />}
-          {activeTab === 'wishlist' && <WishlistPage onToast={showToast} />}
-        </>
-      )}
+    <AppLayout activeTab={activeTab}>
+      {({ showToast }) => {
+        const props = { [propName]: showToast }
+        return <Component {...props} />
+      }}
     </AppLayout>
   )
 }
 
-function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth()
-  if (loading) {
-    return (
-      <div className="loading-page">
-        <div className="loading-plane">✈</div>
-        <p>Preparing for takeoff...</p>
-      </div>
-    )
-  }
-  if (!user) return <Navigate to="/login" replace />
-  return children
-}
-
-function PublicRoute({ children }) {
-  const { user, loading } = useAuth()
-  if (loading) {
-    return (
-      <div className="loading-page">
-        <div className="loading-plane">✈</div>
-        <p>Preparing for takeoff...</p>
-      </div>
-    )
-  }
-  if (user) return <Navigate to="/app" replace />
-  return children
-}
-
-export default function App() {
+function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-          <Route path="/app" element={<ProtectedRoute><MainApp /></ProtectedRoute>} />
-          <Route path="/swipe" element={<Navigate to="/app" replace />} />
-          <Route path="/dashboard" element={<Navigate to="/app" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/onboarding" element={<RequireAuth><Onboarding /></RequireAuth>} />
+      <Route path="/app" element={<RequireAuth><WrappedPage Component={SwipeFeed} /></RequireAuth>} />
+      <Route path="/app/swipe" element={<RequireAuth><WrappedPage Component={SwipeFeed} /></RequireAuth>} />
+      <Route path="/app/review" element={<RequireAuth><WrappedPage Component={ReviewPage} propName="onToast" /></RequireAuth>} />
+      <Route path="/app/wishlist" element={<RequireAuth><WrappedPage Component={WishlistPage} propName="onToast" /></RequireAuth>} />
+      <Route path="*" element={<Navigate to="/app" />} />
+    </Routes>
   )
 }
+
+export default App

@@ -4,8 +4,8 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
-  font-family: var(--sans);
+  background: #06090f;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
   position: relative;
 }
 
@@ -15,10 +15,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 18px;
-  background: rgba(8,12,20,0.85);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border-bottom: 0.5px solid var(--border);
+  background: rgba(10,14,22,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid rgba(255,255,255,0.10);
   flex-shrink: 0;
   z-index: 20;
   position: sticky;
@@ -28,7 +28,7 @@
 .app-brand {
   font-size: 20px;
   font-weight: 700;
-  color: var(--t1);
+  color: rgba(255,255,255,0.95);
   letter-spacing: -0.03em;
   display: flex;
   align-items: center;
@@ -47,26 +47,26 @@
   gap: 5px;
   padding: 6px 13px;
   border-radius: 20px;
-  background: var(--glass);
-  border: 1px solid var(--border2);
-  color: var(--t1);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.95);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   font-family: inherit;
-  letter-spacing: -0.01em;
+  transition: all 0.2s;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  transition: background 0.2s;
+  letter-spacing: -0.01em;
 }
-.app-passport-btn:hover { background: var(--surface2); }
+.app-passport-btn:hover { background: rgba(255,255,255,0.12); }
 
 .app-signout-btn {
   padding: 6px 13px;
   border-radius: 20px;
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--t3);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.30);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -74,8 +74,8 @@
   transition: all 0.2s;
 }
 .app-signout-btn:hover {
-  border-color: rgba(255,69,58,0.4);
-  color: var(--red);
+  border-color: rgba(255,69,58,0.3);
+  color: #ff453a;
   background: rgba(255,69,58,0.08);
 }
 
@@ -96,7 +96,7 @@
   background: rgba(10,14,22,0.85);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border-top: 0.5px solid var(--border);
+  border-top: 0.5px solid rgba(255,255,255,0.10);
   flex-shrink: 0;
   z-index: 20;
   position: sticky;
@@ -110,7 +110,7 @@
   gap: 4px;
   font-size: 9px;
   font-weight: 500;
-  color: var(--t3);
+  color: rgba(255,255,255,0.30);
   cursor: pointer;
   letter-spacing: 0.02em;
   padding: 4px 12px;
@@ -122,11 +122,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 .app-bnav-item.active {
-  color: var(--blue);
+  color: #3a82f6;
   background: rgba(58,130,246,0.12);
 }
 .app-bnav-item:hover:not(.active) {
-  color: var(--t2);
+  color: rgba(255,255,255,0.55);
 }
 
 /* ===== Toast ===== */
@@ -135,18 +135,20 @@
   bottom: 90px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255,255,255,0.1);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
   padding: 9px 18px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--t1);
+  color: rgba(255,255,255,0.95);
   white-space: nowrap;
   z-index: 9999;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   animation: toastIn 0.28s cubic-bezier(0.34,1.1,0.64,1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
