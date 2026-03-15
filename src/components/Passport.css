@@ -1,14 +1,16 @@
-/* ===== Passport Overlay – Dark Mode ===== */
+/* ═══════════════════════════════════════════════════
+   PASSPORT OVERLAY — Landed Design System
+   Palette: cream #f4dfcc · tan #d49d66 · terra #894825
+            slate #607fa9 · navy #424354
+═══════════════════════════════════════════════════ */
 
 .passport-overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(6, 9, 15, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(10, 8, 6, 0.97);
   transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -18,225 +20,475 @@
   transform: translateY(0);
 }
 
-/* ----- Header bar ----- */
-
+/* ── Header ── */
 .passport-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(137, 72, 37, 0.2);
+  background: rgba(137, 72, 37, 0.06);
   flex-shrink: 0;
 }
-
-.passport-header-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.90);
-  letter-spacing: 0.02em;
+.passport-header-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
-
+.passport-header-icon {
+  color: #2b669e;
+}
+.passport-header-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ccdff4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'Playfair Display', Georgia, serif;
+}
 .passport-close-btn {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(137, 72, 37, 0.3);
+  background: rgba(137, 72, 37, 0.1);
+  color: #487dc2;
   font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
   line-height: 1;
+  transition: background 0.2s;
 }
-
 .passport-close-btn:hover {
-  background: rgba(255, 255, 255, 0.10);
-  color: rgba(255, 255, 255, 0.90);
+  background: rgba(137, 72, 37, 0.25);
+  color: #b9c1e9;
 }
 
-/* ----- Scrollable content ----- */
-
+/* ── Scrollable area ── */
 .passport-content {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 20px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
+}
+.passport-content::-webkit-scrollbar { display: none; }
+
+/* ═══════════════════════════════════════════════════
+   PASSPORT BOOKLET
+═══════════════════════════════════════════════════ */
+.pp-booklet {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 0 rgba(37, 42, 137, 0.6),
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(244, 223, 204, 0.1);
 }
 
-/* ----- Passport cover card (dark blue gradient) ----- */
+/* Left spine shadow */
+.pp-spine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 100%;
+  background: linear-gradient(to right,
+    rgba(0,0,0,0.55) 0%,
+    rgba(0,0,0,0.15) 60%,
+    transparent 100%
+  );
+  z-index: 10;
+  pointer-events: none;
+  border-right: 1px solid rgba(137, 72, 37, 0.25);
+}
 
-.passport-cover {
-  background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 50%, #3b82f6 100%);
-  border-radius: 16px;
-  padding: 28px 24px 24px;
-  color: #ffffff;
+/* ── Photo page ── */
+.pp-photo-page {
+  background: linear-gradient(160deg,
+    #0e0f2a 0%,
+    #10143d 30%,
+    #253689 65%,
+    #18446e 100%
+  );
+  padding: 16px 20px 0;
   position: relative;
   overflow: hidden;
 }
 
-.passport-cover::before {
-  content: "";
+/* Linen texture via repeating gradient */
+.pp-texture {
   position: absolute;
-  top: -40%;
-  right: -20%;
-  width: 200px;
-  height: 200px;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 50%;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.04) 2px,
+      rgba(0,0,0,0.04) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(255,255,255,0.015) 3px,
+      rgba(255,255,255,0.015) 6px
+    );
   pointer-events: none;
 }
 
-.passport-cover-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 16px;
-}
-
-.passport-cover-country {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  margin-bottom: 4px;
-}
-
-.passport-cover-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 20px;
-}
-
-.passport-cover-route {
+/* Authority bar */
+.pp-authority-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+.pp-authority-text {
+  flex: 1;
+}
+.pp-authority-country {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #cccef4;
+  line-height: 1.2;
+}
+.pp-authority-sub {
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  color: rgba(244, 223, 204, 0.45);
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+.pp-authority-type {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(244, 223, 204, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(204, 205, 244, 0.85);
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: 0.06em;
 }
 
-.passport-cover-route-city {
-  font-size: 20px;
-  font-weight: 700;
+/* Identity row — photo + fields */
+.pp-identity-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+.pp-photo-frame {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.pp-photo-inner {
+  width: 64px;
+  height: 76px;
+  border-radius: 5px;
+  border: 1.5px solid rgba(244, 223, 204, 0.4);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+/* Corner registration marks */
+.pp-photo-inner::before,
+.pp-photo-inner::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: rgba(244, 223, 204, 0.5);
+  border-style: solid;
+}
+.pp-photo-inner::before {
+  top: 3px; left: 3px;
+  border-width: 1px 0 0 1px;
+}
+.pp-photo-inner::after {
+  bottom: 3px; right: 3px;
+  border-width: 0 1px 1px 0;
+}
+.pp-photo-initials {
+  font-size: 22px;
+  font-weight: 800;
+  color: rgba(204, 210, 244, 0.7);
+  font-family: 'Playfair Display', Georgia, serif;
   letter-spacing: 0.04em;
 }
-
-.passport-cover-route-arrow {
-  flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.passport-cover-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 12px;
-}
-
-.passport-cover-field-label {
-  font-size: 9px;
-  font-weight: 600;
+.pp-photo-label {
+  font-size: 6px;
+  letter-spacing: 0.14em;
+  color: rgba(244, 223, 204, 0.3);
   text-transform: uppercase;
+}
+
+/* ID fields */
+.pp-identity-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.pp-id-field {}
+.pp-id-label {
+  font-size: 7px;
   letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 4px;
+  text-transform: uppercase;
+  color: rgba(244, 223, 204, 0.4);
+  margin-bottom: 1px;
+}
+.pp-id-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccd7f4;
+  line-height: 1.2;
+}
+.pp-id-value--lg {
+  font-size: 17px;
+  font-weight: 800;
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: 0.02em;
+}
+.pp-id-value--sm {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(204, 210, 244, 0.75);
 }
 
-.passport-cover-field-value {
-  font-size: 14px;
-  font-weight: 700;
+/* Flight strip */
+.pp-flight-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  background: rgba(0, 0, 0, 0.25);
+  margin: 0 -20px;
+  padding: 9px 20px;
+  border-top: 1px solid rgba(244, 223, 204, 0.1);
+  border-bottom: 1px solid rgba(244, 223, 204, 0.1);
+  position: relative;
+  z-index: 1;
 }
-
-/* ----- Generic card ----- */
-
-.passport-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 20px;
+.pp-flight-field {}
+.pp-flight-label {
+  font-size: 6px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 223, 204, 0.35);
+  margin-bottom: 3px;
 }
-
-.passport-card-title {
+.pp-flight-value {
   font-size: 11px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.35);
-  margin-bottom: 16px;
+  color: #ccdcf4;
+  letter-spacing: 0.03em;
 }
 
-/* ----- Info rows ----- */
+/* Tear wrap */
+.pp-tear-wrap {
+  margin: 0 -20px;
+  position: relative;
+  z-index: 1;
+  height: 12px;
+  overflow: visible;
+}
 
-.passport-info-row {
+/* MRZ / barcode section */
+.pp-mrz-section {
+  background: rgba(0, 0, 0, 0.35);
+  margin: 0 -20px;
+  padding: 10px 20px 14px;
+  position: relative;
+  z-index: 1;
+}
+.pp-barcode-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.pp-barcode-code {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: rgba(244, 223, 204, 0.35);
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+}
+.pp-mrz-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pp-mrz-line {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.07em;
+  color: rgba(244, 223, 204, 0.28);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  line-height: 1.6;
+}
+
+/* ── Stamps page ── */
+.pp-stamps-page {
+  background: linear-gradient(160deg, #1e1610 0%, #2a1e14 100%);
+  padding: 14px 20px 18px;
+  border-top: 2px solid rgba(137, 72, 37, 0.4);
+}
+.pp-stamps-page-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 14px;
 }
-
-.passport-info-row:last-child {
-  border-bottom: none;
+.pp-stamps-page-header > span:first-child {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(244, 223, 204, 0.45);
 }
-
-.passport-info-label {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.40);
-  font-weight: 500;
+.pp-stamps-page-sub {
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  color: rgba(244, 223, 204, 0.2);
+  text-transform: uppercase;
 }
-
-.passport-info-value {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.90);
-  font-weight: 600;
-  text-align: right;
-  max-width: 60%;
-}
-
-/* ----- Stamps grid ----- */
-
-.passport-stamps-grid {
+.pp-stamps-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
 }
-
-.passport-stamp {
+.pp-stamp {
   aspect-ratio: 1;
-  border-radius: 12px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.pp-stamp--filled {
+  background: rgba(96, 127, 169, 0.15);
+  border: 1.5px solid rgba(96, 127, 169, 0.35);
+}
+.pp-stamp--gold {
+  background: rgba(212, 157, 102, 0.15);
+  border: 1.5px solid rgba(212, 157, 102, 0.4);
+}
+.pp-stamp--empty {
+  background: rgba(244, 223, 204, 0.02);
+  border: 1px dashed rgba(244, 223, 204, 0.1);
+}
+.pp-stamp-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.pp-stamp-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  line-height: 1.2;
+  color: rgba(204, 204, 244, 0.8);
+}
+.pp-stamp--gold .pp-stamp-label { color: #d49d66; }
+.pp-stamp--filled .pp-stamp-label { color: #aac0da; }
+.pp-stamp-date {
+  font-size: 7px;
+  color: rgba(244, 223, 204, 0.3);
+  font-family: 'Courier New', monospace;
+}
+.pp-stamp-empty-ring {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px dashed rgba(244, 223, 204, 0.1);
+}
+
+/* ── Update button ── */
+.passport-update-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: 1px solid rgba(137, 72, 37, 0.35);
+  background: rgba(137, 72, 37, 0.1);
+  color: #6666d4;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  letter-spacing: 0.02em;
+}
+.passport-update-btn:hover {
+  background: rgba(137, 72, 37, 0.2);
+  border-color: rgba(137, 72, 37, 0.55);
+  color: #ccd5f4;
+}
+
+/* ── Info cards ── */
+.pp-info-card {
+  background: rgba(244, 223, 204, 0.04);
+  border: 1px solid rgba(137, 72, 37, 0.18);
+  border-radius: 12px;
+  padding: 16px;
+}
+.pp-info-card-title {
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  text-align: center;
-  padding: 8px;
-  line-height: 1.3;
+  letter-spacing: 0.13em;
+  color: rgba(153, 102, 212, 0.6);
+  margin-bottom: 12px;
 }
-
-.passport-stamp--filled {
-  background: rgba(58,130,246,0.18);
-  color: #3a82f6;
-  border: 1px solid rgba(58,130,246,0.25);
+.pp-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(137, 72, 37, 0.1);
+  gap: 12px;
 }
-
-.passport-stamp--gold {
-  background: rgba(245,158,11,0.15);
-  color: #f59e0b;
-  border: 1px solid rgba(245,158,11,0.25);
+.pp-info-row:last-child { border-bottom: none; }
+.pp-info-label {
+  font-size: 12px;
+  color: rgba(244, 223, 204, 0.4);
+  font-weight: 500;
+  white-space: nowrap;
 }
-
-.passport-stamp--empty {
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.15);
-  border: 1px dashed rgba(255, 255, 255, 0.10);
+.pp-info-value {
+  font-size: 12px;
+  color: rgba(204, 212, 244, 0.88);
+  font-weight: 600;
+  text-align: right;
+  min-width: 0;
+  word-break: break-word;
 }

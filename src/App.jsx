@@ -53,7 +53,8 @@ function App() {
       <Route path="/app/swipe" element={<RequireAuth><WrappedPage Component={SwipeFeed} /></RequireAuth>} />
       <Route path="/app/review" element={<RequireAuth><WrappedPage Component={ReviewPage} propName="onToast" /></RequireAuth>} />
       <Route path="/app/wishlist" element={<RequireAuth><WrappedPage Component={WishlistPage} propName="onToast" /></RequireAuth>} />
-      <Route path="*" element={<Navigate to="/app" />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }

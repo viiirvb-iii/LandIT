@@ -1,15 +1,66 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { PASSPORT_DATA } from '../data/jobs'
+import { supabase } from '../lib/supabase'
 import Passport from './Passport'
 import './AppLayout.css'
 
 export default function AppLayout({ children, activeTab }) {
   const [showPassport, setShowPassport] = useState(false)
   const [toast, setToast] = useState(null)
-  const { signOut } = useAuth()
+  const [passportData, setPassportData] = useState(null)
+  const { signOut, user } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!user) return
+    async function loadPassport() {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile) return
+
+      const { data: stamps } = await supabase
+        .from('stamps')
+        .select('label, stamp_type')
+        .eq('user_id', user.id)
+        .order('earned_at', { ascending: false })
+        .limit(6)
+
+      const { count: swipedToday } = await supabase
+        .from('swipe_history')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('swiped_at', new Date().toISOString().slice(0, 10))
+
+      setPassportData({
+        name: profile.full_name || 'Traveller',
+        country: profile.country || 'AUSTRALIA',
+        from: profile.city_from || 'MELB',
+        to: profile.city_to || 'HIRE',
+        flight: 'LD-2026',
+        gate: 'G7',
+        class: profile.searching_for || '—',
+        season: '2026',
+        degree: profile.degree || '—',
+        university: profile.university || '—',
+        year: profile.year || '—',
+        resumeUpdated: profile.resume_updated_at
+          ? `Updated ${new Date(profile.resume_updated_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}`
+          : 'Not uploaded',
+        searching: profile.searching_for || '—',
+        locations: profile.preferred_locations?.length ? profile.preferred_locations : ['Not set'],
+        fields: profile.preferred_fields?.length ? profile.preferred_fields : ['Not set'],
+        swipedToday: swipedToday ?? 0,
+        tailorsLeft: profile.ai_tailors_remaining ?? 0,
+        stamps: (stamps || []).map(s => ({ label: s.label })),
+      })
+    }
+    loadPassport()
+  }, [user])
 
   const handleSignOut = async () => {
     await signOut()
@@ -89,7 +140,7 @@ export default function AppLayout({ children, activeTab }) {
       <Passport
         open={showPassport}
         onClose={() => setShowPassport(false)}
-        data={PASSPORT_DATA}
+        data={passportData}
       />
 
       {/* Toast */}

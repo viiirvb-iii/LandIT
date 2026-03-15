@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase, supabaseConfigured } from '../lib/supabase'
 import { uploadAndParseResume } from '../services/resume'
@@ -31,7 +31,9 @@ export default function Onboarding() {
   const { user } = useAuth()
   const fileRef = useRef(null)
 
-  const [step, setStep] = useState(0)
+  const [searchParams] = useSearchParams()
+  const initialStep = STEPS.indexOf(searchParams.get('step') ?? '')
+  const [step, setStep] = useState(initialStep >= 0 ? initialStep : 0)
   const [direction, setDirection] = useState(1)
   const [saving, setSaving] = useState(false)
   const [parseStatus, setParseStatus] = useState('') // '' | 'parsing' | 'done' | 'error'
@@ -51,6 +53,24 @@ export default function Onboarding() {
   const [skipResume, setSkipResume] = useState(false)
   const [locations, setLocations] = useState([])
   const [dreamRoles, setDreamRoles] = useState([])
+
+  useEffect(() => {
+    if (!user || !supabaseConfigured) return
+    supabase
+      .from('profiles')
+      .select('full_name, degree, university, year, preferred_locations, preferred_fields')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (!data) return
+        if (data.full_name) setName(data.full_name)
+        if (data.degree) setDegree(data.degree)
+        if (data.university) setUniversity(data.university)
+        if (data.year) setYearLevel(data.year)
+        if (data.preferred_locations?.length) setLocations(data.preferred_locations)
+        if (data.preferred_fields?.length) setDreamRoles(data.preferred_fields)
+      })
+  }, [user])
 
   const currentStep = STEPS[step]
 

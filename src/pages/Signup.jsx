@@ -10,7 +10,7 @@ export default function Signup() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signUp } = useAuth()           // ← signUp not signIn
+  const { signUp } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
@@ -19,19 +19,18 @@ export default function Signup() {
     setLoading(true)
 
     try {
-      // 1. Create auth account + profiles row (AuthContext handles both)
+      // 1. Create auth account — AuthContext also handles the initial profiles upsert
       const { data, error: signUpError } = await signUp(email, password, name)
       if (signUpError) throw signUpError
       if (!data?.user) throw new Error('Signup failed — no user returned')
 
-      // 2. Create users table row
+      // 2. Update profiles with all initial fields
       if (supabaseConfigured && supabase) {
-        const { error: userError } = await supabase
-          .from('users')
-          .insert({
-            id:    data.user.id,
-            name:  name,
-            email: data.user.email,
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            name:               name,
+            email:              data.user.email,
             fields_of_interest:  [],
             industry_interests:  [],
             skills:              [],
@@ -46,14 +45,15 @@ export default function Signup() {
               stamps:      []
             }
           })
+          .eq('id', data.user.id)
 
-        if (userError) {
-          // Log but don't block — user can still proceed to onboarding
-          console.error('Users insert error:', userError.message)
+        if (profileError) {
+          // Non-fatal — log and continue to onboarding
+          console.error('Profile update error:', profileError.message)
         }
       }
 
-      // 3. Go to onboarding
+      // 3. Go to onboarding to collect degree, skills, industry
       navigate('/onboarding')
 
     } catch (err) {

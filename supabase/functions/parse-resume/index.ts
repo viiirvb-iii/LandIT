@@ -42,6 +42,17 @@ Return ONLY valid JSON with this exact structure:
   "career_level": "student|junior|mid|senior|lead"
 }`;
 
+/** Safe base64 encoding that works on any file size by processing in chunks. */
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  const chunkSize = 32768;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -106,11 +117,10 @@ Deno.serve(async (req) => {
     let claudeContent: Parameters<typeof callClaude>[1];
 
     if (isPdf) {
-      // Send PDF as base64 document to Claude (native PDF support)
+      // Send PDF as base64 document using Anthropic's native document block.
+      // Use chunked encoding — spreading a large Uint8Array crashes the runtime.
       const arrayBuffer = await fileData.arrayBuffer();
-      const base64 = btoa(
-        String.fromCharCode(...new Uint8Array(arrayBuffer))
-      );
+      const base64 = uint8ArrayToBase64(new Uint8Array(arrayBuffer));
       claudeContent = [
         {
           type: "document",
@@ -122,7 +132,7 @@ Deno.serve(async (req) => {
         },
         {
           type: "text",
-          text: "Parse this resume and extract all information into the JSON structure specified. Also provide the full plain text of the resume in your response after the JSON, delimited by ===RAWTEXT=== markers.",
+          text: "Parse this resume and extract all information into the JSON structure specified. Return ONLY the JSON object — no extra text.",
         },
       ];
     } else {
@@ -145,23 +155,9 @@ Deno.serve(async (req) => {
 
     // 4. Parse the JSON response
     let parsedData: Record<string, unknown>;
-    let responseText = claudeResponse;
-
-    // If PDF, try to extract raw text from the response
-    if (isPdf) {
-      const rawTextMarker = "===RAWTEXT===";
-      const parts = claudeResponse.split(rawTextMarker);
-      if (parts.length >= 3) {
-        responseText = parts[0];
-        rawText = parts[1].trim();
-      } else {
-        // Fallback: use the structured extraction as the text representation
-        responseText = claudeResponse;
-      }
-    }
 
     try {
-      parsedData = parseJsonResponse(responseText) as Record<string, unknown>;
+      parsedData = parseJsonResponse(claudeResponse) as Record<string, unknown>;
     } catch {
       return new Response(
         JSON.stringify({ error: "Failed to parse Claude response as JSON", raw: responseText.slice(0, 500) }),
