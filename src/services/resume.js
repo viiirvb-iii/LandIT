@@ -35,6 +35,7 @@ export async function uploadAndParseResume(file) {
   // 2. Call parse-resume Edge Function
   const { data, error } = await supabase.functions.invoke("parse-resume", {
     body: { storage_path: storagePath },
+    headers: { Authorization: `Bearer ${session.access_token}` },
   });
 
   if (error) throw new Error(`Parse failed: ${error.message}`);
@@ -50,8 +51,10 @@ export async function tailorResume(jobId) {
     throw new Error("Supabase not configured");
   }
 
+  const { data: { session } } = await supabase.auth.getSession();
   const { data, error } = await supabase.functions.invoke("tailor-resume", {
     body: { job_id: jobId },
+    headers: { Authorization: `Bearer ${session?.access_token}` },
   });
 
   if (error) throw new Error(`Tailor failed: ${error.message}`);
@@ -67,8 +70,10 @@ export async function coachResume(jobId, userAnswers = null) {
     throw new Error("Supabase not configured");
   }
 
+  const { data: { session } } = await supabase.auth.getSession();
   const { data, error } = await supabase.functions.invoke("coach-resume", {
     body: { job_id: jobId, user_answers: userAnswers },
+    headers: { Authorization: `Bearer ${session?.access_token}` },
   });
 
   if (error) throw new Error(`Coach failed: ${error.message}`);
@@ -91,7 +96,7 @@ export async function getParsedResume() {
     .from("parsed_resumes")
     .select("parsed_data, skills_extracted, parsed_at")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
   return data;
 }
@@ -124,8 +129,10 @@ export async function matchResumeToJob(jobId) {
     throw new Error("Supabase not configured");
   }
 
+  const { data: { session } } = await supabase.auth.getSession();
   const { data, error } = await supabase.functions.invoke("match-resume", {
     body: { job_id: jobId },
+    headers: { Authorization: `Bearer ${session?.access_token}` },
   });
 
   if (error) throw new Error(`Match failed: ${error.message}`);

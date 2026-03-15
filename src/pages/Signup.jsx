@@ -1,100 +1,65 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { supabase, supabaseConfigured } from '../lib/supabase'
 import './Auth.css'
 
 export default function Signup() {
-  const [fullName, setFullName] = useState('')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { signUp } = useAuth()
+  const { signUp } = useAuth()           // ← signUp not signIn
   const navigate = useNavigate()
-
-  const [needsConfirmation, setNeedsConfirmation] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
-
     setLoading(true)
 
-    const { data, error } = await signUp(email, password, fullName)
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
-      // Check if user got a session immediately (email confirmation disabled)
-      // or needs to confirm their email first
-      if (data?.session) {
-        // Session exists — user is logged in, go straight to onboarding
-        navigate('/onboarding')
-      } else if (data?.user && !data?.session) {
-        // User created but needs email confirmation
-        setNeedsConfirmation(true)
-      } else {
-        setSuccess(true)
+    try {
+      // 1. Create auth account + profiles row (AuthContext handles both)
+      const { data, error: signUpError } = await signUp(email, password, name)
+      if (signUpError) throw signUpError
+      if (!data?.user) throw new Error('Signup failed — no user returned')
+
+      // 2. Create users table row
+      if (supabaseConfigured && supabase) {
+        const { error: userError } = await supabase
+          .from('users')
+          .insert({
+            id:    data.user.id,
+            name:  name,
+            email: data.user.email,
+            fields_of_interest:  [],
+            industry_interests:  [],
+            skills:              [],
+            session_preferences: {
+              auto_updates_remaining: 5,
+              auto_updates_daily_cap: 5
+            },
+            passport_data: {
+              flight_code: 'LD-2026',
+              gate:        'G7',
+              seat:        '3A',
+              stamps:      []
+            }
+          })
+
+        if (userError) {
+          // Log but don't block — user can still proceed to onboarding
+          console.error('Users insert error:', userError.message)
+        }
       }
+
+      // 3. Go to onboarding
+      navigate('/onboarding')
+
+    } catch (err) {
+      setError(err.message)
+      setLoading(false)
     }
-  }
-
-  if (needsConfirmation) {
-    return (
-      <div className="auth-page">
-        <div className="auth-bg">
-          <div className="cloud cloud-1" />
-          <div className="cloud cloud-2" />
-          <div className="cloud cloud-3" />
-        </div>
-        <div className="auth-card">
-          <div className="auth-header">
-            <div className="success-icon">✉</div>
-            <h1>Check Your Email</h1>
-            <p>We've sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account, then come back and sign in.</p>
-          </div>
-          <Link to="/login" className="auth-btn" style={{ textAlign: 'center', display: 'block', textDecoration: 'none' }}>
-            Go to Sign In <span className="btn-arrow">→</span>
-          </Link>
-          <div className="auth-ticket-tear" />
-        </div>
-      </div>
-    )
-  }
-
-  if (success) {
-    return (
-      <div className="auth-page">
-        <div className="auth-bg">
-          <div className="cloud cloud-1" />
-          <div className="cloud cloud-2" />
-          <div className="cloud cloud-3" />
-        </div>
-        <div className="auth-card">
-          <div className="auth-header">
-            <div className="success-icon">✈</div>
-            <h1>Boarding Pass Issued!</h1>
-            <p>Let's set up your profile so we can find the best roles for you.</p>
-          </div>
-          <Link to="/onboarding" className="auth-btn" style={{ textAlign: 'center', display: 'block', textDecoration: 'none' }}>
-            Set Up Profile <span className="btn-arrow">→</span>
-          </Link>
-          <div className="auth-ticket-tear" />
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -113,21 +78,22 @@ export default function Signup() {
             <span className="auth-brand">Land<span className="brand-accent">It</span></span>
           </div>
           <h1>Get Your Boarding Pass</h1>
-          <p>Create an account to start your career journey</p>
+          <p>Create your account to start your journey</p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
           {error && <div className="auth-error">{error}</div>}
 
           <div className="input-group">
-            <label htmlFor="fullName">Full Name</label>
+            <label htmlFor="name">Full Name</label>
             <div className="input-wrapper">
+              <span className="input-icon">✈</span>
               <input
-                id="fullName"
+                id="name"
                 type="text"
-                placeholder="John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Alex Chen"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
@@ -136,6 +102,7 @@ export default function Signup() {
           <div className="input-group">
             <label htmlFor="email">Email</label>
             <div className="input-wrapper">
+              <span className="input-icon">✉</span>
               <input
                 id="email"
                 type="email"
@@ -150,27 +117,15 @@ export default function Signup() {
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <div className="input-wrapper">
+              <span className="input-icon">🔒</span>
               <input
                 id="password"
                 type="password"
-                placeholder="Min. 6 characters"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-              />
-            </div>
-          </div>
-
-          <div className="input-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <div className="input-wrapper">
-              <input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
+                minLength={6}
               />
             </div>
           </div>
