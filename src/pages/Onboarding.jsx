@@ -118,8 +118,9 @@ export default function Onboarding() {
     setErrorMsg('')
 
     try {
-      // 1. Save profile data to Supabase
-      const profileUpdate = {
+      // 1. Save profile data to Supabase (upsert in case trigger didn't fire)
+      const profileData = {
+        id: user.id,
         full_name: name.trim(),
         degree,
         university: university.trim(),
@@ -129,10 +130,14 @@ export default function Onboarding() {
         searching_for: `${yearLevel || 'Graduate'} roles`,
       }
 
-      const { error: profileErr } = await supabase
+      console.log('Saving profile for user:', user.id, profileData)
+
+      const { data: profileResult, error: profileErr } = await supabase
         .from('profiles')
-        .update(profileUpdate)
-        .eq('id', user.id)
+        .upsert(profileData, { onConflict: 'id' })
+        .select()
+
+      console.log('Profile save result:', profileResult, 'error:', profileErr)
 
       if (profileErr) {
         console.error('Profile save failed:', profileErr)

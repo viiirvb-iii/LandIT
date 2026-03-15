@@ -42,6 +42,66 @@ Return ONLY valid JSON with this exact structure:
   "career_level": "student|junior|mid|senior|lead"
 }`;
 
+/** Extract readable text from a PDF binary using basic parsing */
+function extractPdfText(bytes: Uint8Array): string {
+  // Decode the raw bytes to a string (PDF is mostly ASCII with binary streams)
+  const raw = new TextDecoder("latin1").decode(bytes);
+
+  const textParts: string[] = [];
+
+  // Method 1: Extract text between BT...ET blocks (PDF text objects)
+  const btEtRegex = /BT\s([\s\S]*?)ET/g;
+  let match;
+  while ((match = btEtRegex.exec(raw)) !== null) {
+    const block = match[1];
+    // Extract strings in parentheses: (text here)
+    const parenRegex = /\(([^)]*)\)/g;
+    let strMatch;
+    while ((strMatch = parenRegex.exec(block)) !== null) {
+      const text = strMatch[1]
+        .replace(/\\n/g, "\n")
+        .replace(/\\r/g, "")
+        .replace(/\\\(/g, "(")
+        .replace(/\\\)/g, ")")
+        .replace(/\\\\/g, "\\");
+      if (text.trim()) textParts.push(text);
+    }
+    // Extract hex strings: <hex>
+    const hexRegex = /<([0-9a-fA-F]+)>/g;
+    let hexMatch;
+    while ((hexMatch = hexRegex.exec(block)) !== null) {
+      const hex = hexMatch[1];
+      let text = "";
+      for (let i = 0; i < hex.length; i += 2) {
+        const code = parseInt(hex.substring(i, i + 2), 16);
+        if (code >= 32 && code < 127) text += String.fromCharCode(code);
+      }
+      if (text.trim()) textParts.push(text);
+    }
+  }
+
+  // Method 2: If BT/ET extraction got nothing, try stream decompression
+  if (textParts.length === 0) {
+    // Fallback: just extract any readable ASCII runs from the file
+    const asciiRegex = /[\x20-\x7E]{4,}/g;
+    let asciiMatch;
+    const seen = new Set<string>();
+    while ((asciiMatch = asciiRegex.exec(raw)) !== null) {
+      const text = asciiMatch[0].trim();
+      // Skip PDF commands and binary-looking content
+      if (text.length > 5 && !text.match(/^[\d\s.]+$/) && !text.match(/^[A-Z]{1,3}\s/) && !seen.has(text)) {
+        // Skip common PDF keywords
+        if (!/^(endobj|endstream|stream|xref|trailer|startxref|obj|\d+ \d+ obj)/.test(text)) {
+          seen.add(text);
+          textParts.push(text);
+        }
+      }
+    }
+  }
+
+  return textParts.join(" ").replace(/\s+/g, " ").trim();
+}
+
 /** Safe base64 encoding that works on any file size by processing in chunks. */
 function uint8ArrayToBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -89,10 +149,7 @@ Deno.serve(async (req) => {
     if (!storage_path) {
       return new Response(
         JSON.stringify({ error: "storage_path is required" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -104,17 +161,13 @@ Deno.serve(async (req) => {
     if (downloadError || !fileData) {
       return new Response(
         JSON.stringify({ error: "Failed to download file", details: downloadError?.message }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // 2. Determine file type and prepare for Claude
+    // 2. Extract text from the file
     const isPdf = storage_path.toLowerCase().endsWith(".pdf");
     let rawText = "";
-    let claudeContent: Parameters<typeof callClaude>[1];
 
     if (isPdf) {
       // Send PDF as base64 document using Anthropic's native document block.
@@ -136,20 +189,13 @@ Deno.serve(async (req) => {
         },
       ];
     } else {
-      // TXT or other text formats
       rawText = await fileData.text();
-      claudeContent = [
-        {
-          type: "text",
-          text: `Parse this resume and extract all information into the JSON structure specified.\n\n<resume>\n${rawText}\n</resume>`,
-        },
-      ];
     }
 
     // 3. Call Claude to extract structured data
     const claudeResponse = await callClaude(
       PARSE_SYSTEM_PROMPT,
-      claudeContent,
+      [{ type: "text", text: `Parse this resume and extract all information into the JSON structure specified.\n\n<resume>\n${rawText}\n</resume>` }],
       8192
     );
 
@@ -160,18 +206,14 @@ Deno.serve(async (req) => {
       parsedData = parseJsonResponse(claudeResponse) as Record<string, unknown>;
     } catch {
       return new Response(
-        JSON.stringify({ error: "Failed to parse Claude response as JSON", raw: responseText.slice(0, 500) }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ error: "Failed to parse Claude response as JSON", raw: claudeResponse.slice(0, 500) }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // 5. Extract flat skills list + skill details from all sources in parsed data
+    // 5. Extract skills from all sources
     const skillsMap = new Map<string, { level: number; category: string }>();
 
-    // Primary skills (with levels from Claude)
     const skills = (parsedData.skills as Array<{ name: string; level: number; category: string }>) || [];
     for (const s of skills) {
       if (typeof s === "string") {
@@ -181,53 +223,44 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Skills from experience sections
     const experience = (parsedData.experience as Array<{ skills_mentioned?: string[] }>) || [];
     for (const exp of experience) {
       if (exp.skills_mentioned) {
         for (const s of exp.skills_mentioned) {
-          if (!skillsMap.has(s)) {
-            skillsMap.set(s, { level: 60, category: "other" });
-          }
+          if (!skillsMap.has(s)) skillsMap.set(s, { level: 60, category: "other" });
         }
       }
     }
 
-    // Skills from projects
     const projects = (parsedData.projects as Array<{ technologies?: string[] }>) || [];
     for (const proj of projects) {
       if (proj.technologies) {
         for (const s of proj.technologies) {
-          if (!skillsMap.has(s)) {
-            skillsMap.set(s, { level: 50, category: "other" });
-          }
+          if (!skillsMap.has(s)) skillsMap.set(s, { level: 50, category: "other" });
         }
       }
     }
 
     const skillsExtracted = Array.from(skillsMap.keys());
 
-    // If we still don't have raw text (PDF without markers), reconstruct from structured data
-    if (!rawText && parsedData) {
-      rawText = JSON.stringify(parsedData, null, 2);
-    }
-
     // 6. Chunk the raw text for embedding
     const chunks = chunkText(rawText);
-
-    // 7. Generate embeddings for all chunks
     const chunkTexts = chunks.map((c) => c.text);
-    const embeddings = await getEmbeddings(chunkTexts);
 
-    // 8. Store everything in Supabase (using service role for writes)
+    // 7. Generate embeddings (skip if no chunks to avoid empty API call)
+    let embeddings: number[][] = [];
+    if (chunkTexts.length > 0) {
+      try {
+        embeddings = await getEmbeddings(chunkTexts);
+      } catch (embErr) {
+        console.error("Embeddings failed (non-blocking):", embErr);
+        // Continue without embeddings — skills + parsed data are more important
+      }
+    }
 
-    // Delete existing data for this user (re-parse scenario)
-    await supabase
-      .from("resume_chunks")
-      .delete()
-      .eq("user_id", user.id);
+    // 8. Store in Supabase (service role bypasses RLS)
+    await supabase.from("resume_chunks").delete().eq("user_id", user.id);
 
-    // Upsert parsed resume
     const { error: upsertError } = await supabase
       .from("parsed_resumes")
       .upsert(
@@ -245,15 +278,12 @@ Deno.serve(async (req) => {
     if (upsertError) {
       return new Response(
         JSON.stringify({ error: "Failed to store parsed resume", details: upsertError.message }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Insert chunks with embeddings
-    if (chunks.length > 0) {
+    // Insert chunks with embeddings (only if embeddings succeeded)
+    if (chunks.length > 0 && embeddings.length === chunks.length) {
       const chunkRows = chunks.map((c, i) => ({
         user_id: user.id,
         chunk_text: c.text,
@@ -261,43 +291,25 @@ Deno.serve(async (req) => {
         section_label: c.sectionLabel,
         embedding: embeddings[i],
       }));
-
-      const { error: chunksError } = await supabase
-        .from("resume_chunks")
-        .insert(chunkRows);
-
-      if (chunksError) {
-        console.error("Failed to insert chunks:", chunksError);
-      }
+      const { error: chunksError } = await supabase.from("resume_chunks").insert(chunkRows);
+      if (chunksError) console.error("Chunks insert failed:", chunksError);
     }
 
-    // 9. Auto-populate user_skills from extracted skills with levels
+    // 9. Auto-populate user_skills
     if (skillsMap.size > 0) {
-      const skillRows = Array.from(skillsMap.entries()).map(
-        ([name, { level }]) => ({
-          user_id: user.id,
-          skill_name: name,
-          level,
-          tag: (level >= 70 ? "strong" : level >= 40 ? "ok" : "gap") as
-            | "strong"
-            | "ok"
-            | "gap",
-        })
-      );
-
-      // Upsert to avoid duplicates
-      await supabase
-        .from("user_skills")
-        .upsert(skillRows, { onConflict: "user_id,skill_name" });
+      const skillRows = Array.from(skillsMap.entries()).map(([name, { level }]) => ({
+        user_id: user.id,
+        skill_name: name,
+        level,
+        tag: (level >= 70 ? "strong" : level >= 40 ? "ok" : "gap") as "strong" | "ok" | "gap",
+      }));
+      await supabase.from("user_skills").upsert(skillRows, { onConflict: "user_id,skill_name" });
     }
 
-    // 10. Update profile resume_updated_at
+    // 10. Update profile
     await supabase
       .from("profiles")
-      .update({
-        resume_url: storage_path,
-        resume_updated_at: new Date().toISOString(),
-      })
+      .update({ resume_url: storage_path, resume_updated_at: new Date().toISOString() })
       .eq("id", user.id);
 
     return new Response(
@@ -307,18 +319,14 @@ Deno.serve(async (req) => {
         chunks_count: chunks.length,
         parsed_data: parsedData,
       }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err) {
-    console.error("parse-resume error:", err);
+  } catch (err: unknown) {
+    const e = err as Error;
+    console.error("parse-resume error:", e?.message, e?.stack);
     return new Response(
-      JSON.stringify({ error: "Internal error", details: String(err) }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      JSON.stringify({ error: "Internal error", details: e?.message || String(err) }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

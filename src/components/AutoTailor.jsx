@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { uploadAndParseResume, tailorResume } from "../services/resume";
+import { uploadAndParseResume, tailorResume, exportResumePdf } from "../services/resume";
 import "./AutoTailor.css";
 
 const STEPS = [
@@ -71,8 +71,8 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
       await uploadAndParseResume(file);
       setStepIdx(1);
 
-      // Tailor the resume for this job
-      const result = await tailorResume(job.id);
+      // Tailor the resume for this job — pass description so backend can parse the JD
+      const result = await tailorResume(job.id, job.about || job.desc || "");
       clearInterval(stepTimer);
       setStepIdx(STEPS.length);
 
@@ -118,9 +118,14 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
     fileRef.current?.click();
   };
 
-  const handleExport = () => {
-    if (onToast) onToast("Tailored PDF exported");
-    onClose();
+  const handleExport = async () => {
+    try {
+      await exportResumePdf(tailoredText, job?.role, job?.company);
+      if (onToast) onToast("Tailored PDF downloaded");
+    } catch (err) {
+      console.error("Export failed:", err);
+      if (onToast) onToast("PDF export failed");
+    }
   };
 
   const handleRevert = () => {
