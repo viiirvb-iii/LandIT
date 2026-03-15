@@ -253,8 +253,8 @@ export function calculateDiff(
         confidence: "high",
       });
     } else if (origP && tailP) {
-      const origDesc = (origP.description || []).join(" ");
-      const tailDesc = (tailP.description || []).join(" ");
+      const origDesc = Array.isArray(origP.description) ? origP.description.join(" ") : String(origP.description || "");
+      const tailDesc = Array.isArray(tailP.description) ? tailP.description.join(" ") : String(tailP.description || "");
       if (origDesc !== tailDesc) {
         const sim = similarityRatio(origDesc, tailDesc);
         changes.push({

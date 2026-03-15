@@ -1,7 +1,37 @@
 import React from "react";
 import "./JobDetail.css";
+import CompanyAvatar from "./CompanyAvatar";
 
 /* ── tiny helpers ─────────────────────────── */
+
+/** Parse a description string into an array of bullet-point strings */
+const parseBullets = (text) => {
+  if (!text) return [];
+  // strip HTML tags but keep newlines from <br>, <li>, <p>
+  let cleaned = text
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
+
+  // split on newlines, bullet chars, or numbered lists
+  let lines = cleaned.split(/\n|(?:^|\n)\s*[\u2022\u2023\u25E6\u2043\u25AA•●◦-]\s*|(?:^|\n)\s*\d+[.)]\s*/);
+  lines = lines
+    .map((l) => l.trim())
+    .filter((l) => l.length > 8); // skip tiny fragments
+
+  // if we only got one big blob, split by sentences
+  if (lines.length <= 1 && cleaned.length > 60) {
+    lines = cleaned
+      .split(/(?<=[.!?])\s+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 8);
+  }
+
+  return lines.length > 0 ? lines : [text];
+};
 
 const docIcon = (name) => {
   const n = name.toLowerCase();
@@ -43,8 +73,8 @@ export default function JobDetail({
   onClose,
   onApply,
   onSave,
-  onOpenTailor,
   onOpenCoach,
+  onOpenCoverLetter,
 }) {
   if (!job) return null;
 
@@ -69,6 +99,7 @@ export default function JobDetail({
   } = job;
 
   const gradient = g || color || "#3b82f6";
+  const aboutBullets = parseBullets(about);
 
   return (
     <div className={`jd-overlay${open ? " open" : ""}`}>
@@ -95,13 +126,7 @@ export default function JobDetail({
         <h1 className="jd-role-title">{role}</h1>
 
         <div className="jd-company-badge">
-          {logoUrl ? (
-            <img className="jd-company-logo" src={logoUrl} alt={company} style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover' }} />
-          ) : (
-            <div className="jd-company-logo" style={{ background: color || "#3b82f6" }}>
-              {logo || company?.charAt(0) || "?"}
-            </div>
-          )}
+          <CompanyAvatar logoUrl={logoUrl} company={company} color={color} size={48} radius={12} />
           <div className="jd-company-info">
             <span className="jd-company-name">{company}</span>
             <span className="jd-company-loc">{location}</span>
@@ -135,30 +160,27 @@ export default function JobDetail({
 
       {/* ---- AI Actions ---- */}
       <div className="jd-ai-actions">
-        <button className="jd-ai-action" onClick={onOpenTailor}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-          </svg>
-          Tailor Resume
-        </button>
         <button className="jd-ai-action" onClick={onOpenCoach}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-          </svg>
-          Interview Coach
+          AI Coach
+        </button>
+        <button className="jd-ai-action" onClick={onOpenCoverLetter}>
+          Cover Letter
         </button>
       </div>
 
       {/* ---- Sections ---- */}
       <div className="jd-sections">
         {/* About the role */}
-        {about && (
+        {about && aboutBullets.length > 0 && (
           <div className="jd-section">
             <div className="jd-section-header">
-              <div className="jd-section-icon blue">{"\u{1F4CB}"}</div>
               <span className="jd-section-title">About the role</span>
             </div>
-            <div className="jd-section-body">{about}</div>
+            <ul className="jd-about-bullets">
+              {aboutBullets.map((bullet, i) => (
+                <li key={i} className="jd-about-bullet">{bullet}</li>
+              ))}
+            </ul>
           </div>
         )}
 
@@ -166,7 +188,6 @@ export default function JobDetail({
         {reqs && reqs.length > 0 && (
           <div className="jd-section">
             <div className="jd-section-header">
-              <div className="jd-section-icon green">{"\u2705"}</div>
               <span className="jd-section-title">Requirements</span>
             </div>
             <ul className="jd-reqs-list">
@@ -188,7 +209,6 @@ export default function JobDetail({
         {skills && skills.length > 0 && (
           <div className="jd-section">
             <div className="jd-section-header">
-              <div className="jd-section-icon amber">{"\u{1F9E9}"}</div>
               <span className="jd-section-title">Your skill match</span>
             </div>
             <div className="jd-skills-wrap">
@@ -215,7 +235,6 @@ export default function JobDetail({
         {docs && docs.length > 0 && (
           <div className="jd-section">
             <div className="jd-section-header">
-              <div className="jd-section-icon purple">{"\u{1F4C2}"}</div>
               <span className="jd-section-title">Documents required</span>
             </div>
             <div className="jd-docs-list">
@@ -242,7 +261,6 @@ export default function JobDetail({
         {timeline && timeline.length > 0 && (
           <div className="jd-section">
             <div className="jd-section-header">
-              <div className="jd-section-icon gray">{"\u{1F552}"}</div>
               <span className="jd-section-title">Timeline</span>
             </div>
             <div className="jd-timeline">
@@ -270,7 +288,6 @@ export default function JobDetail({
         {companyAbout && (
           <div className="jd-section">
             <div className="jd-section-header">
-              <div className="jd-section-icon blue">{"\u{1F3E2}"}</div>
               <span className="jd-section-title">About {company}</span>
             </div>
             <div className="jd-section-body">{companyAbout}</div>
@@ -278,7 +295,7 @@ export default function JobDetail({
         )}
       </div>
 
-      {/* ---- CTA Footer ---- */}
+      {/* ---- CTA Footer — always at the end ---- */}
       <div className="jd-cta">
         <div className="jd-cta-inner">
           <button className="jd-btn-apply" onClick={onApply}>

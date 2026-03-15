@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { exportResumePdf } from "../services/resume";
 import "./Passport.css";
 
 function getStampVariant(stamp) {
@@ -36,7 +37,7 @@ function TearLine({ color = "rgba(255,255,255,0.12)" }) {
     <svg width="100%" height="12" viewBox="0 0 300 12" preserveAspectRatio="none" style={{ display: "block", margin: "0 -20px", width: "calc(100% + 40px)" }}>
       <line x1="0" y1="6" x2="300" y2="6" stroke={color} strokeWidth="1" strokeDasharray="4 4" />
       {[0, 40, 80, 120, 160, 200, 240, 280].map(cx => (
-        <circle key={cx} cx={cx} cy="6" r="5" fill="#0f1320" />
+        <circle key={cx} cx={cx} cy="6" r="5" fill="#f5ebe0" />
       ))}
     </svg>
   );
@@ -44,6 +45,7 @@ function TearLine({ color = "rgba(255,255,255,0.12)" }) {
 
 export default function Passport({ open, onClose, data }) {
   const navigate = useNavigate();
+  const [resumeExpanded, setResumeExpanded] = useState(false);
   if (!data) return null;
 
   const {
@@ -51,7 +53,16 @@ export default function Passport({ open, onClose, data }) {
     class: seatClass, season, degree, university,
     year, resumeUpdated, searching, locations,
     fields, swipedToday, tailorsLeft, stamps = [],
+    resume,
   } = data;
+
+  const parsed = resume?.parsed_data;
+
+  const handleDownloadResume = async () => {
+    const rawText = resume?.raw_text;
+    if (!rawText) return;
+    await exportResumePdf(rawText, null, null, true);
+  };
 
   const initials = (name || "?")
     .split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
@@ -67,10 +78,14 @@ export default function Passport({ open, onClose, data }) {
       {/* Header */}
       <div className="passport-header">
         <div className="passport-header-left">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="passport-header-icon">
-            <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor"/>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="passport-header-icon">
+            <rect x="3" y="2" width="18" height="20" rx="2" stroke="currentColor" strokeWidth="1.8" fill="none"/>
+            <circle cx="12" cy="10" r="3.5" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+            <path d="M7 18c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+            <line x1="8" y1="4.5" x2="16" y2="4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
           </svg>
           <span className="passport-header-title">Passport</span>
+          {name && <span className="passport-header-name">{name}</span>}
         </div>
         <button className="passport-close-btn" onClick={onClose} aria-label="Close passport">×</button>
       </div>
@@ -245,6 +260,163 @@ export default function Passport({ open, onClose, data }) {
             </div>
           ))}
         </div>
+
+        {/* Resume card */}
+        {parsed ? (
+          <div className="pp-info-card pp-resume-card">
+            <div className="pp-info-card-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span>My Resume</span>
+              <button className="pp-resume-toggle" onClick={() => setResumeExpanded(!resumeExpanded)}>
+                {resumeExpanded ? "Collapse" : "Expand"}
+              </button>
+            </div>
+
+            {/* Contact */}
+            {parsed.contact && (
+              <div className="pp-resume-section">
+                <div className="pp-resume-section-title">Contact</div>
+                <div className="pp-resume-contact">
+                  {parsed.contact.name && <span>{parsed.contact.name}</span>}
+                  {parsed.contact.email && <span>{parsed.contact.email}</span>}
+                  {parsed.contact.phone && <span>{parsed.contact.phone}</span>}
+                  {parsed.contact.location && <span>{parsed.contact.location}</span>}
+                  {parsed.contact.linkedin && <span>{parsed.contact.linkedin}</span>}
+                </div>
+              </div>
+            )}
+
+            {/* Summary */}
+            {parsed.summary && (
+              <div className="pp-resume-section">
+                <div className="pp-resume-section-title">Summary</div>
+                <p className="pp-resume-text">{parsed.summary}</p>
+              </div>
+            )}
+
+            {/* Skills */}
+            {parsed.skills?.length > 0 && (
+              <div className="pp-resume-section">
+                <div className="pp-resume-section-title">Skills</div>
+                <div className="pp-resume-skills">
+                  {parsed.skills.map((s, i) => (
+                    <span key={i} className="pp-resume-skill-tag">
+                      {typeof s === "string" ? s : s.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Experience — show all if expanded, first 2 otherwise */}
+            {parsed.experience?.length > 0 && (
+              <div className="pp-resume-section">
+                <div className="pp-resume-section-title">Experience</div>
+                {(resumeExpanded ? parsed.experience : parsed.experience.slice(0, 2)).map((exp, i) => (
+                  <div key={i} className="pp-resume-exp">
+                    <div className="pp-resume-exp-header">
+                      <strong>{exp.title || exp.role}</strong>
+                      {exp.company && <span> at {exp.company}</span>}
+                    </div>
+                    {(exp.start_date || exp.end_date) && (
+                      <div className="pp-resume-exp-dates">
+                        {exp.start_date || ""} {exp.end_date ? `— ${exp.end_date}` : ""}
+                      </div>
+                    )}
+                    {exp.bullets?.length > 0 && (
+                      <ul className="pp-resume-exp-bullets">
+                        {(resumeExpanded ? exp.bullets : exp.bullets.slice(0, 2)).map((b, j) => (
+                          <li key={j}>{b}</li>
+                        ))}
+                        {!resumeExpanded && exp.bullets.length > 2 && (
+                          <li className="pp-resume-more">+{exp.bullets.length - 2} more</li>
+                        )}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+                {!resumeExpanded && parsed.experience.length > 2 && (
+                  <div className="pp-resume-more-hint">
+                    +{parsed.experience.length - 2} more positions
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Education */}
+            {parsed.education?.length > 0 && (
+              <div className="pp-resume-section">
+                <div className="pp-resume-section-title">Education</div>
+                {parsed.education.map((edu, i) => (
+                  <div key={i} className="pp-resume-exp">
+                    <div className="pp-resume-exp-header">
+                      <strong>{edu.degree || edu.field}</strong>
+                      {edu.institution && <span> — {edu.institution}</span>}
+                    </div>
+                    {(edu.start_date || edu.end_date || edu.year) && (
+                      <div className="pp-resume-exp-dates">
+                        {edu.start_date || edu.year || ""} {edu.end_date ? `— ${edu.end_date}` : ""}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Projects — only when expanded */}
+            {resumeExpanded && parsed.projects?.length > 0 && (
+              <div className="pp-resume-section">
+                <div className="pp-resume-section-title">Projects</div>
+                {parsed.projects.map((proj, i) => (
+                  <div key={i} className="pp-resume-exp">
+                    <div className="pp-resume-exp-header">
+                      <strong>{proj.name || proj.title}</strong>
+                    </div>
+                    {proj.description && <p className="pp-resume-text">{proj.description}</p>}
+                    {proj.technologies?.length > 0 && (
+                      <div className="pp-resume-skills" style={{ marginTop: 4 }}>
+                        {proj.technologies.map((t, j) => (
+                          <span key={j} className="pp-resume-skill-tag">{t}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Certifications — only when expanded */}
+            {resumeExpanded && parsed.certifications?.length > 0 && (
+              <div className="pp-resume-section">
+                <div className="pp-resume-section-title">Certifications</div>
+                {parsed.certifications.map((cert, i) => (
+                  <div key={i} className="pp-resume-exp">
+                    <div className="pp-resume-exp-header">
+                      <strong>{typeof cert === "string" ? cert : cert.name || cert.title}</strong>
+                      {cert.issuer && <span> — {cert.issuer}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Download button */}
+            <button className="pp-resume-download-btn" onClick={handleDownloadResume}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download Resume PDF
+            </button>
+          </div>
+        ) : (
+          <div className="pp-info-card">
+            <div className="pp-info-card-title">My Resume</div>
+            <div className="pp-resume-empty">
+              <p>No resume uploaded yet. Upload one from the swipe screen to see it here.</p>
+            </div>
+          </div>
+        )}
 
         <div style={{ height: 24 }} />
       </div>

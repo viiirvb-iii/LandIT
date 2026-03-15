@@ -1,15 +1,15 @@
-/* ===== Onboarding – Dark Glass ===== */
+/* ===== Onboarding – Light Mode ===== */
 
 .onb-page {
   min-height: 100vh;
   min-height: 100dvh;
-  background: #06090f;
+  background: #f5f5f7;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  color: rgba(255,255,255,0.95);
+  color: rgba(0,0,0,0.90);
 }
 
 /* Background glows */
@@ -18,17 +18,17 @@
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
-  opacity: 0.35;
+  opacity: 0.15;
 }
 .onb-glow-1 {
   width: 300px; height: 300px;
   top: -80px; right: -60px;
-  background: radial-gradient(circle, #3a82f6 0%, transparent 70%);
+  background: radial-gradient(circle, #2563eb 0%, transparent 70%);
 }
 .onb-glow-2 {
   width: 250px; height: 250px;
   bottom: 10%; left: -50px;
-  background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+  background: radial-gradient(circle, #7c3aed 0%, transparent 70%);
 }
 
 /* ── Progress ── */
@@ -45,26 +45,26 @@
 .onb-progress-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.10);
   transition: all 0.3s;
   flex-shrink: 0;
 }
-.onb-progress-dot.active { background: #3a82f6; }
+.onb-progress-dot.active { background: #2563eb; }
 .onb-progress-dot.current {
   width: 10px; height: 10px;
-  box-shadow: 0 0 8px rgba(58,130,246,0.5);
+  box-shadow: 0 0 8px rgba(37,99,235,0.4);
 }
 
 .onb-progress-bar {
   flex: 1;
   height: 2px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.06);
   border-radius: 2px;
   overflow: hidden;
 }
 .onb-progress-fill {
   height: 100%;
-  background: #3a82f6;
+  background: #2563eb;
   border-radius: 2px;
   transition: width 0.4s ease;
 }
@@ -100,7 +100,7 @@
 
 .onb-subtitle {
   font-size: 14px;
-  color: rgba(255,255,255,0.45);
+  color: rgba(0,0,0,0.50);
   font-weight: 400;
 }
 
@@ -117,8 +117,8 @@
 .onb-avatar-btn {
   width: 80px; height: 80px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.06);
-  border: 2px dashed rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.04);
+  border: 2px dashed rgba(0,0,0,0.12);
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -127,7 +127,7 @@
   justify-content: center;
   transition: border-color 0.2s;
 }
-.onb-avatar-btn:hover { border-color: #3a82f6; }
+.onb-avatar-btn:hover { border-color: #2563eb; }
 
 .onb-avatar-img {
   width: 100%; height: 100%;
@@ -138,7 +138,7 @@
 .onb-avatar-placeholder {
   font-size: 28px;
   font-weight: 700;
-  color: rgba(255,255,255,0.30);
+  color: rgba(0,0,0,0.25);
 }
 
 .onb-avatar-edit {
@@ -146,7 +146,7 @@
   bottom: 2px; right: 2px;
   width: 22px; height: 22px;
   border-radius: 50%;
-  background: #3a82f6;
+  background: #2563eb;
   color: #fff;
   font-size: 14px;
   font-weight: 700;
@@ -158,7 +158,7 @@
 
 .onb-avatar-hint {
   font-size: 11px;
-  color: rgba(255,255,255,0.30);
+  color: rgba(0,0,0,0.35);
 }
 
 /* ── Fields ── */
@@ -176,7 +176,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(255,255,255,0.40);
+  color: rgba(0,0,0,0.45);
 }
 
 .onb-input {
@@ -184,35 +184,35 @@
   padding: 12px 14px;
   font-size: 15px;
   font-family: inherit;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.80);
+  border: 1px solid rgba(0,0,0,0.10);
   border-radius: 12px;
-  color: rgba(255,255,255,0.95);
+  color: rgba(0,0,0,0.90);
   transition: all 0.2s;
   box-sizing: border-box;
   -webkit-appearance: none;
 }
 .onb-input:focus {
   outline: none;
-  border-color: #3a82f6;
-  background: rgba(255,255,255,0.07);
-  box-shadow: 0 0 0 3px rgba(58,130,246,0.12);
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
 }
 .onb-input:disabled {
-  color: rgba(255,255,255,0.30);
+  color: rgba(0,0,0,0.30);
   cursor: not-allowed;
 }
-.onb-input::placeholder { color: rgba(255,255,255,0.20); }
+.onb-input::placeholder { color: rgba(0,0,0,0.25); }
 
 .onb-textarea {
   width: 100%;
   padding: 12px 14px;
   font-size: 14px;
   font-family: inherit;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.80);
+  border: 1px solid rgba(0,0,0,0.10);
   border-radius: 12px;
-  color: rgba(255,255,255,0.95);
+  color: rgba(0,0,0,0.90);
   resize: vertical;
   min-height: 80px;
   box-sizing: border-box;
@@ -220,11 +220,11 @@
 }
 .onb-textarea:focus {
   outline: none;
-  border-color: #3a82f6;
-  background: rgba(255,255,255,0.07);
-  box-shadow: 0 0 0 3px rgba(58,130,246,0.12);
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
 }
-.onb-textarea::placeholder { color: rgba(255,255,255,0.20); }
+.onb-textarea::placeholder { color: rgba(0,0,0,0.25); }
 
 /* ── Chips ── */
 
@@ -246,21 +246,21 @@
   font-size: 12px;
   font-weight: 500;
   font-family: inherit;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: rgba(255,255,255,0.60);
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.08);
+  color: rgba(0,0,0,0.60);
   cursor: pointer;
   transition: all 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
 .onb-chip:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.12);
 }
 .onb-chip.selected {
-  background: rgba(58,130,246,0.18);
-  border-color: rgba(58,130,246,0.35);
-  color: #3a82f6;
+  background: rgba(37,99,235,0.10);
+  border-color: rgba(37,99,235,0.30);
+  color: #2563eb;
 }
 
 /* ── Resume upload ── */
@@ -272,27 +272,27 @@
   justify-content: center;
   gap: 8px;
   padding: 32px 20px;
-  border: 2px dashed rgba(255,255,255,0.12);
+  border: 2px dashed rgba(0,0,0,0.10);
   border-radius: 18px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.50);
   cursor: pointer;
   transition: all 0.2s;
   text-align: center;
 }
 .onb-resume-zone:hover {
-  border-color: rgba(58,130,246,0.3);
-  background: rgba(58,130,246,0.05);
+  border-color: rgba(37,99,235,0.30);
+  background: rgba(37,99,235,0.04);
 }
 
 .onb-resume-upload-icon { font-size: 36px; }
 .onb-resume-upload-text {
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255,255,255,0.70);
+  color: rgba(0,0,0,0.65);
 }
 .onb-resume-upload-hint {
   font-size: 11px;
-  color: rgba(255,255,255,0.30);
+  color: rgba(0,0,0,0.35);
 }
 
 .onb-resume-uploaded {
@@ -304,14 +304,14 @@
 .onb-resume-name {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255,255,255,0.85);
+  color: rgba(0,0,0,0.80);
 }
 .onb-resume-remove {
   width: 24px; height: 24px;
   border-radius: 50%;
-  background: rgba(255,69,58,0.12);
-  border: 1px solid rgba(255,69,58,0.2);
-  color: #ff453a;
+  background: rgba(220,38,38,0.08);
+  border: 1px solid rgba(220,38,38,0.15);
+  color: #dc2626;
   font-size: 16px;
   cursor: pointer;
   display: flex;
@@ -330,11 +330,11 @@
 .onb-resume-divider-line {
   flex: 1;
   height: 1px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.06);
 }
 .onb-resume-divider-text {
   font-size: 12px;
-  color: rgba(255,255,255,0.25);
+  color: rgba(0,0,0,0.30);
   font-weight: 500;
 }
 
@@ -346,20 +346,20 @@
   width: 100%;
   padding: 16px;
   border-radius: 16px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.08);
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
   font-family: inherit;
 }
 .onb-skip-resume-btn:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.12);
 }
 .onb-skip-resume-btn.active {
-  background: rgba(58,130,246,0.12);
-  border-color: rgba(58,130,246,0.3);
+  background: rgba(37,99,235,0.08);
+  border-color: rgba(37,99,235,0.25);
 }
 
 .onb-skip-icon { font-size: 28px; }
@@ -371,11 +371,11 @@
 .onb-skip-text strong {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255,255,255,0.85);
+  color: rgba(0,0,0,0.80);
 }
 .onb-skip-text span {
   font-size: 11px;
-  color: rgba(255,255,255,0.40);
+  color: rgba(0,0,0,0.45);
 }
 
 /* ── Navigation ── */
@@ -408,26 +408,26 @@
 }
 
 .onb-nav-btn.back {
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.55);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.04);
+  color: rgba(0,0,0,0.55);
+  border: 1px solid rgba(0,0,0,0.08);
 }
 .onb-nav-btn.back:hover {
-  background: rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.06);
 }
 
 .onb-nav-btn.next,
 .onb-nav-btn.finish {
-  background: #3a82f6;
+  background: #2563eb;
   color: #fff;
 }
 .onb-nav-btn.next:hover,
 .onb-nav-btn.finish:hover {
-  background: #2563eb;
+  background: #1d4ed8;
 }
 
 .onb-nav-btn.finish {
-  background: linear-gradient(135deg, #3a82f6, #8b5cf6);
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
 }
 
 .onb-nav-btn:disabled {

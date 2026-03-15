@@ -44,9 +44,7 @@ Return ONLY valid JSON with this exact structure:
 
 /** Extract readable text from a PDF binary using basic parsing */
 function extractPdfText(bytes: Uint8Array): string {
-  // Decode the raw bytes to a string (PDF is mostly ASCII with binary streams)
   const raw = new TextDecoder("latin1").decode(bytes);
-
   const textParts: string[] = [];
 
   // Method 1: Extract text between BT...ET blocks (PDF text objects)
@@ -54,7 +52,6 @@ function extractPdfText(bytes: Uint8Array): string {
   let match;
   while ((match = btEtRegex.exec(raw)) !== null) {
     const block = match[1];
-    // Extract strings in parentheses: (text here)
     const parenRegex = /\(([^)]*)\)/g;
     let strMatch;
     while ((strMatch = parenRegex.exec(block)) !== null) {
@@ -66,7 +63,6 @@ function extractPdfText(bytes: Uint8Array): string {
         .replace(/\\\\/g, "\\");
       if (text.trim()) textParts.push(text);
     }
-    // Extract hex strings: <hex>
     const hexRegex = /<([0-9a-fA-F]+)>/g;
     let hexMatch;
     while ((hexMatch = hexRegex.exec(block)) !== null) {
@@ -80,17 +76,14 @@ function extractPdfText(bytes: Uint8Array): string {
     }
   }
 
-  // Method 2: If BT/ET extraction got nothing, try stream decompression
+  // Method 2: Fallback — extract readable ASCII runs
   if (textParts.length === 0) {
-    // Fallback: just extract any readable ASCII runs from the file
     const asciiRegex = /[\x20-\x7E]{4,}/g;
     let asciiMatch;
     const seen = new Set<string>();
     while ((asciiMatch = asciiRegex.exec(raw)) !== null) {
       const text = asciiMatch[0].trim();
-      // Skip PDF commands and binary-looking content
       if (text.length > 5 && !text.match(/^[\d\s.]+$/) && !text.match(/^[A-Z]{1,3}\s/) && !seen.has(text)) {
-        // Skip common PDF keywords
         if (!/^(endobj|endstream|stream|xref|trailer|startxref|obj|\d+ \d+ obj)/.test(text)) {
           seen.add(text);
           textParts.push(text);
@@ -132,7 +125,6 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Get the user from the JWT
     const jwt = authHeader.replace("Bearer ", "");
     const {
       data: { user },
@@ -165,43 +157,45 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 2. Extract text from the file
+    // 2. Extract text and build Claude content
     const isPdf = storage_path.toLowerCase().endsWith(".pdf");
     let rawText = "";
+    // deno-lint-ignore no-explicit-any
+    let claudeContent: any[];
 
     if (isPdf) {
-      // Send PDF as base64 document using Anthropic's native document block.
-      // Use chunked encoding — spreading a large Uint8Array crashes the runtime.
       const arrayBuffer = await fileData.arrayBuffer();
-      const base64 = uint8ArrayToBase64(new Uint8Array(arrayBuffer));
-      claudeContent = [
-        {
-          type: "document",
-          source: {
-            type: "base64",
-            media_type: "application/pdf",
-            data: base64,
-          },
-        },
-        {
-          type: "text",
-          text: "Parse this resume and extract all information into the JSON structure specified. Return ONLY the JSON object — no extra text.",
-        },
-      ];
+      const pdfBytes = new Uint8Array(arrayBuffer);
+      rawText = extractPdfText(pdfBytes);
+
+      if (rawText && rawText.length >= 20) {
+        // Text extraction succeeded — send as text
+        claudeContent = [
+          { type: "text", text: `Parse this resume and extract all information into the JSON structure specified.\n\n<resume>\n${rawText}\n</resume>` },
+        ];
+      } else {
+        // Text extraction got very little — still send what we have
+        rawText = rawText || "[Unable to extract text from PDF]";
+        claudeContent = [
+          { type: "text", text: `Parse this resume and extract all information into the JSON structure specified. The text extraction was limited, do your best.\n\n<resume>\n${rawText}\n</resume>` },
+        ];
+      }
     } else {
       rawText = await fileData.text();
+      claudeContent = [
+        { type: "text", text: `Parse this resume and extract all information into the JSON structure specified.\n\n<resume>\n${rawText}\n</resume>` },
+      ];
     }
 
     // 3. Call Claude to extract structured data
     const claudeResponse = await callClaude(
       PARSE_SYSTEM_PROMPT,
-      [{ type: "text", text: `Parse this resume and extract all information into the JSON structure specified.\n\n<resume>\n${rawText}\n</resume>` }],
+      claudeContent,
       8192
     );
 
     // 4. Parse the JSON response
     let parsedData: Record<string, unknown>;
-
     try {
       parsedData = parseJsonResponse(claudeResponse) as Record<string, unknown>;
     } catch {
@@ -254,7 +248,6 @@ Deno.serve(async (req) => {
         embeddings = await getEmbeddings(chunkTexts);
       } catch (embErr) {
         console.error("Embeddings failed (non-blocking):", embErr);
-        // Continue without embeddings — skills + parsed data are more important
       }
     }
 

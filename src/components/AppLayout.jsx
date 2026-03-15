@@ -15,26 +15,32 @@ export default function AppLayout({ children, activeTab }) {
   useEffect(() => {
     if (!user) return
     async function loadPassport() {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
+      const [{ data: profile }, { data: parsedResume }, { data: stamps }, { count: swipedToday }] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single(),
+        supabase
+          .from('parsed_resumes')
+          .select('parsed_data, skills_extracted, raw_text, parsed_at')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('stamps')
+          .select('label, stamp_type')
+          .eq('user_id', user.id)
+          .order('earned_at', { ascending: false })
+          .limit(6),
+        supabase
+          .from('swipe_history')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('swiped_at', new Date().toISOString().slice(0, 10))
+          .then(r => r),
+      ])
 
       if (!profile) return
-
-      const { data: stamps } = await supabase
-        .from('stamps')
-        .select('label, stamp_type')
-        .eq('user_id', user.id)
-        .order('earned_at', { ascending: false })
-        .limit(6)
-
-      const { count: swipedToday } = await supabase
-        .from('swipe_history')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('swiped_at', new Date().toISOString().slice(0, 10))
 
       setPassportData({
         name: profile.full_name || 'Traveller',
@@ -57,6 +63,7 @@ export default function AppLayout({ children, activeTab }) {
         swipedToday: swipedToday ?? 0,
         tailorsLeft: profile.ai_tailors_remaining ?? 0,
         stamps: (stamps || []).map(s => ({ label: s.label })),
+        resume: parsedResume || null,
       })
     }
     loadPassport()

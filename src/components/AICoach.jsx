@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { uploadAndParseResume, coachResume, getParsedResume, exportResumePdf } from "../services/resume";
+import {
+  uploadAndParseResume,
+  coachResume,
+  getParsedResume,
+  getResumeRawText,
+  exportResumePdf,
+} from "../services/resume";
 import "./AICoach.css";
 
 /* ------------------------------------------------------------------ */
@@ -48,6 +54,10 @@ export default function AICoach({ job, open, onClose, onToast }) {
   /* Has a parsed resume already? */
   const [hasResume, setHasResume] = useState(false);
 
+  /* Resume text for comparison */
+  const [originalText, setOriginalText] = useState("");
+  const [modifiedText, setModifiedText] = useState("");
+
   /* ---- reset when overlay opens ---- */
   useEffect(() => {
     if (open) {
@@ -69,10 +79,18 @@ export default function AICoach({ job, open, onClose, onToast }) {
       setScore(52);
       setError("");
       setHasResume(false);
+      setOriginalText("");
+      setModifiedText("");
 
-      // Check if user already has a parsed resume
+      // Check if user already has a parsed resume & fetch raw text
       getParsedResume().then((data) => {
         if (data) setHasResume(true);
+      });
+      getResumeRawText().then((text) => {
+        if (text) {
+          setOriginalText(text);
+          setModifiedText(text);
+        }
       });
     }
   }, [open]);
@@ -237,8 +255,30 @@ export default function AICoach({ job, open, onClose, onToast }) {
   /* ---- Phase 4 coaching actions ---- */
   const approveCard = () => {
     const sug = suggestions[sugIndex];
-    setHistory((h) => [...h, { title: sug.title, status: "approved" }]);
+    setHistory((h) => [...h, { title: sug.title, status: "approved", before: sug.before, after: sug.after }]);
     setScore((s) => s + sug.points);
+
+    // Apply the before→after change to the modified resume text
+    if (sug.before && sug.after) {
+      setModifiedText((prev) => {
+        // Try exact match first, then fuzzy line-by-line
+        if (prev.includes(sug.before)) {
+          return prev.replace(sug.before, sug.after);
+        }
+        // Fuzzy: find the closest matching substring and replace
+        const beforeLines = sug.before.split("\n").map((l) => l.trim()).filter(Boolean);
+        let result = prev;
+        for (const line of beforeLines) {
+          if (line.length > 10 && result.includes(line)) {
+            const afterLine = sug.after.split("\n").find((al) => al.trim().length > 10) || sug.after;
+            result = result.replace(line, afterLine.trim());
+            break;
+          }
+        }
+        return result;
+      });
+    }
+
     if (onToast) onToast(`+${sug.points} ATS points -- "${sug.title}" applied`);
     advanceCard();
   };
@@ -255,6 +295,14 @@ export default function AICoach({ job, open, onClose, onToast }) {
       setSugIndex(next);
     } else {
       setTimeout(() => setPhase("complete"), 400);
+    }
+  };
+
+  const handleRegenerate = async (sug) => {
+    try {
+      if (onToast) onToast("Feature not available");
+    } catch (err) {
+      console.error("Regenerate error:", err);
     }
   };
 
@@ -539,7 +587,9 @@ export default function AICoach({ job, open, onClose, onToast }) {
                     <button className="coach-btn-approve" onClick={approveCard}>
                       Approve change
                     </button>
-                    <button className="coach-btn-edit">Edit</button>
+                    <button className="coach-btn-edit" onClick={() => handleRegenerate(sug)}>
+                      Regenerate
+                    </button>
                     <button className="coach-btn-skip" onClick={skipCard}>
                       Skip
                     </button>
@@ -554,13 +604,13 @@ export default function AICoach({ job, open, onClose, onToast }) {
           </div>
         )}
 
-        {/* ===================== Phase 5: Complete ===================== */}
+        {/* ===================== Phase 5: Complete — Comparison ===================== */}
         {phase === "complete" && (
-          <div className="coach-complete-wrap">
+          <div className="coach-complete-wrap coach-compare-layout">
             <div className="coach-complete-check">✓</div>
             <div className="coach-complete-title">Coaching complete</div>
             <div className="coach-complete-sub">
-              Your resume has been reviewed and improved. Here's your summary.
+              Compare your original resume with the improved version below.
             </div>
 
             <div className="coach-score-summary">
@@ -569,6 +619,44 @@ export default function AICoach({ job, open, onClose, onToast }) {
               <span className="coach-score-new">{score}</span>
               <span>ATS score</span>
             </div>
+
+            {/* Side-by-side comparison */}
+            <div className="coach-compare-container">
+              <div className="coach-compare-panel coach-compare-original">
+                <div className="coach-compare-panel-header">
+                  <span className="coach-compare-dot" style={{ background: "#ff453a" }} />
+                  Original Resume
+                </div>
+                <div className="coach-compare-content">
+                  {originalText || "No resume uploaded yet."}
+                </div>
+              </div>
+              <div className="coach-compare-panel coach-compare-modified">
+                <div className="coach-compare-panel-header">
+                  <span className="coach-compare-dot" style={{ background: "#30d158" }} />
+                  Improved Resume
+                </div>
+                <div className="coach-compare-content">
+                  {modifiedText || "No changes applied."}
+                </div>
+              </div>
+            </div>
+
+            {/* Changes applied summary */}
+            {history.filter((h) => h.status === "approved").length > 0 && (
+              <div className="coach-lesson-box">
+                <div className="coach-lesson-heading">
+                  Changes applied ({history.filter((h) => h.status === "approved").length})
+                </div>
+                <ul>
+                  {history
+                    .filter((h) => h.status === "approved")
+                    .map((h, i) => (
+                      <li key={i}>{h.title}</li>
+                    ))}
+                </ul>
+              </div>
+            )}
 
             {/* Genuine gaps */}
             {genuineGaps.length > 0 && (
@@ -584,38 +672,35 @@ export default function AICoach({ job, open, onClose, onToast }) {
               </div>
             )}
 
-            <div className="coach-lesson-box">
-              <div className="coach-lesson-heading">
-                What you learned today
-              </div>
-              <ul>
-                {history
-                  .filter((h) => h.status === "approved")
-                  .map((h, i) => (
-                    <li key={i}>{h.title}</li>
-                  ))}
-                {history.filter((h) => h.status === "approved").length === 0 && (
-                  <li>Review the suggestions above and try applying them to your resume.</li>
-                )}
-              </ul>
-            </div>
-
             <div className="coach-complete-actions">
               <button
                 className="coach-btn-export"
                 onClick={async () => {
                   try {
-                    // Build content from accepted suggestions
-                    const accepted = history.filter(h => h.status === "accepted");
-                    const content = accepted.map(h => `${h.title}\n${suggestions.find(s => s.title === h.title)?.after || ""}`).join("\n\n");
-                    await exportResumePdf(content || "No changes applied yet", job?.role, job?.company);
-                    if (onToast) onToast("Resume exported successfully");
+                    const approvedChanges = history
+                      .filter((h) => h.status === "approved" && h.before && h.after)
+                      .map((h) => ({ before: h.before, after: h.after }));
+                    await exportResumePdf(modifiedText || originalText, job?.role, job?.company, false, approvedChanges);
+                    if (onToast) onToast("Improved resume downloaded");
                   } catch {
                     if (onToast) onToast("PDF export failed");
                   }
                 }}
               >
-                Export Resume
+                Download Improved
+              </button>
+              <button
+                className="coach-btn-restart"
+                onClick={async () => {
+                  try {
+                    await exportResumePdf(originalText, job?.role, job?.company, true);
+                    if (onToast) onToast("Original resume downloaded");
+                  } catch {
+                    if (onToast) onToast("PDF export failed");
+                  }
+                }}
+              >
+                Download Original
               </button>
               <button
                 className="coach-btn-restart"

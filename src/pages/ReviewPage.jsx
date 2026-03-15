@@ -1,6 +1,7 @@
 import { useRef, useEffect, useMemo, useState } from 'react'
 import { useJobActions } from '../context/JobActionsContext'
 import JobDetail from '../components/JobDetail'
+import CompanyAvatar from '../components/CompanyAvatar'
 import './ReviewPage.css'
 
 const STATUS_META = {
@@ -14,15 +15,37 @@ const STATUS_META = {
 const STATUS_FLOW = ['inflight', 'uploaded', 'downloaded', 'landed']
 
 const STATUS_COLORS = {
-  landed:     '#30d158',
-  inflight:   '#ffd60a',
-  uploaded:   '#3a82f6',
-  downloaded: '#a78bfa',
-  departed:   '#ff453a',
-  saved:      '#3a82f6',
+  landed:     '#16a34a',
+  inflight:   '#d97706',
+  uploaded:   '#2563eb',
+  downloaded: '#7c3aed',
+  departed:   '#dc2626',
+  saved:      '#2563eb',
 }
 
-/* ── Earth Radar Globe ── */
+/* ── Earth Globe Radar ── */
+
+/* Simplified continent outlines in [longitude, latitude] degrees */
+const CONTINENTS = [
+  { pts: [[-17,15],[-8,30],[5,37],[18,33],[35,25],[43,10],[50,-2],[42,-12],[30,-30],[18,-35],[12,-28],[10,-5],[-5,5]], fill: '#1a6b3c' },
+  { pts: [[-10,36],[0,43],[5,48],[15,55],[25,60],[32,55],[28,45],[22,38],[10,36],[-5,38]], fill: '#1f7a45' },
+  { pts: [[30,42],[40,52],[55,55],[70,60],[90,62],[110,55],[125,48],[135,38],[130,22],[115,25],[95,30],[75,35],[55,38],[40,38]], fill: '#1a6b3c' },
+  { pts: [[-160,62],[-140,68],[-120,58],[-105,55],[-85,48],[-78,38],[-82,28],[-95,22],[-105,28],[-115,33],[-125,48],[-145,58]], fill: '#1f7a45' },
+  { pts: [[-82,10],[-73,5],[-58,-8],[-48,-18],[-48,-28],[-55,-38],[-68,-52],[-73,-48],[-78,-22],[-82,-5]], fill: '#1a6b3c' },
+  { pts: [[115,-14],[125,-13],[138,-15],[150,-23],[152,-30],[145,-37],[132,-35],[118,-28],[114,-20]], fill: '#b87a3a' },
+]
+const GRID_LATS = [-60, -30, 0, 30, 60]
+const GRID_LONS = Array.from({ length: 12 }, (_, i) => i * 30)
+
+function project(lonDeg, latDeg, rotation, cx, cy, R) {
+  const lon = (lonDeg * Math.PI) / 180 + rotation
+  const lat = (latDeg * Math.PI) / 180
+  const x = Math.cos(lat) * Math.sin(lon)
+  const y = -Math.sin(lat)
+  const z = Math.cos(lat) * Math.cos(lon)
+  return { x: cx + x * R, y: cy + y * R, z }
+}
+
 function EarthRadar({ applied, saved }) {
   const canvasRef = useRef(null)
   const rafRef = useRef(null)
@@ -39,7 +62,7 @@ function EarthRadar({ applied, saved }) {
     const ctx = canvas.getContext('2d')
     const dpr = window.devicePixelRatio || 1
     const W = canvas.parentElement?.clientWidth || 480
-    const H = 280
+    const H = 320
     canvas.width = W * dpr
     canvas.height = H * dpr
     canvas.style.width = '100%'
@@ -47,33 +70,19 @@ function EarthRadar({ applied, saved }) {
     ctx.scale(dpr, dpr)
 
     const cx = W / 2, cy = H / 2
-    const R = Math.min(W, H) * 0.36
+    const R = Math.min(W, H) * 0.38
 
-    /* continent-like land masses (simplified arcs) */
-    const continents = [
-      { cx: -0.15, cy: -0.25, rx: 0.22, ry: 0.18 },
-      { cx: 0.25, cy: -0.15, rx: 0.28, ry: 0.22 },
-      { cx: -0.30, cy: 0.15, rx: 0.12, ry: 0.18 },
-      { cx: 0.10, cy: 0.30, rx: 0.18, ry: 0.10 },
-      { cx: 0.35, cy: 0.20, rx: 0.14, ry: 0.16 },
-      { cx: -0.05, cy: 0.05, rx: 0.08, ry: 0.06 },
-    ]
-
-    /* grid lines */
-    const gridLats = [-0.6, -0.3, 0, 0.3, 0.6]
-    const gridLons = [-0.6, -0.3, 0, 0.3, 0.6]
-
-    /* stars / ambient dots */
-    const stars = Array.from({ length: 60 }, () => ({
+    /* stars */
+    const stars = Array.from({ length: 90 }, () => ({
       x: Math.random() * W, y: Math.random() * H,
-      r: 0.5 + Math.random() * 1.2, phase: Math.random() * Math.PI * 2,
+      r: 0.3 + Math.random() * 1.4, phase: Math.random() * Math.PI * 2,
     }))
 
-    /* place nodes in orbit around the globe */
+    /* place job nodes in orbit */
     const placed = allNodes.map((n, i) => {
       const total = Math.max(allNodes.length, 1)
       const angle = (i / total) * Math.PI * 2 - Math.PI / 2
-      const dist = R + 28 + (i % 3) * 14
+      const dist = R + 30 + (i % 3) * 14
       return {
         x: cx + Math.cos(angle) * dist,
         y: cy + Math.sin(angle) * dist,
@@ -82,131 +91,220 @@ function EarthRadar({ applied, saved }) {
         statusColor: n.kind === 'saved' ? STATUS_COLORS.saved : (STATUS_COLORS[n.status] || STATUS_COLORS.inflight),
         phase: Math.random() * Math.PI * 2,
         kind: n.kind,
-        location: n.location || '',
-        company: n.company || '',
       }
     })
 
-    /* radar sweep */
     let t = 0
     function draw() {
-      t += 0.006
+      t += 0.004
       ctx.clearRect(0, 0, W, H)
 
-      /* stars */
+      /* ── Space background ── */
+      ctx.fillStyle = '#050a18'
+      ctx.fillRect(0, 0, W, H)
+
+      /* twinkling stars */
       stars.forEach(s => {
-        const a = 0.15 + 0.1 * Math.sin(t * 2 + s.phase)
-        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(148,163,184,${a})`; ctx.fill()
+        const a = 0.25 + 0.45 * Math.sin(t * 2.5 + s.phase)
+        ctx.beginPath()
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(200,220,255,${a})`
+        ctx.fill()
       })
 
-      /* globe fill */
-      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2)
-      const grd = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.3, R * 0.1, cx, cy, R)
-      grd.addColorStop(0, 'rgba(20,40,80,0.6)')
-      grd.addColorStop(0.5, 'rgba(10,20,50,0.4)')
-      grd.addColorStop(1, 'rgba(6,9,15,0.3)')
-      ctx.fillStyle = grd; ctx.fill()
+      /* ── Atmospheric glow ── */
+      const atmoGrd = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.35)
+      atmoGrd.addColorStop(0, 'rgba(80,160,255,0.18)')
+      atmoGrd.addColorStop(0.5, 'rgba(60,140,255,0.07)')
+      atmoGrd.addColorStop(1, 'rgba(40,120,255,0)')
+      ctx.beginPath()
+      ctx.arc(cx, cy, R * 1.35, 0, Math.PI * 2)
+      ctx.fillStyle = atmoGrd
+      ctx.fill()
+
+      /* ── Ocean sphere ── */
+      ctx.beginPath()
+      ctx.arc(cx, cy, R, 0, Math.PI * 2)
+      const oceanGrd = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.3, R * 0.1, cx + R * 0.2, cy + R * 0.2, R)
+      oceanGrd.addColorStop(0, '#1a5090')
+      oceanGrd.addColorStop(0.5, '#0d3a6e')
+      oceanGrd.addColorStop(1, '#082040')
+      ctx.fillStyle = oceanGrd
+      ctx.fill()
 
       /* globe outline */
-      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2)
-      ctx.strokeStyle = 'rgba(58,130,246,0.25)'; ctx.lineWidth = 1.5; ctx.stroke()
+      ctx.beginPath()
+      ctx.arc(cx, cy, R, 0, Math.PI * 2)
+      ctx.strokeStyle = 'rgba(80,160,255,0.30)'
+      ctx.lineWidth = 1.5
+      ctx.stroke()
 
-      /* grid lines (latitude) */
-      ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip()
-      gridLats.forEach(lat => {
-        const y = cy + lat * R
-        const halfW = Math.sqrt(Math.max(0, R * R - (lat * R) * (lat * R)))
-        ctx.beginPath(); ctx.moveTo(cx - halfW, y); ctx.lineTo(cx + halfW, y)
-        ctx.strokeStyle = 'rgba(58,130,246,0.08)'; ctx.lineWidth = 0.5; ctx.stroke()
-      })
-      /* grid lines (longitude) */
-      gridLons.forEach(lon => {
-        const offset = lon * R
+      /* ── Grid + continents (clipped to globe) ── */
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(cx, cy, R, 0, Math.PI * 2)
+      ctx.clip()
+
+      const rotation = t * 0.3
+
+      /* latitude lines */
+      GRID_LATS.forEach(lat => {
         ctx.beginPath()
-        ctx.ellipse(cx + offset * 0.5, cy, Math.abs(offset) * 0.3 + 2, R, 0, 0, Math.PI * 2)
-        ctx.strokeStyle = 'rgba(58,130,246,0.06)'; ctx.lineWidth = 0.5; ctx.stroke()
+        let started = false
+        for (let lon = -180; lon <= 180; lon += 4) {
+          const p = project(lon, lat, rotation, cx, cy, R)
+          if (p.z > -0.1) {
+            if (!started) { ctx.moveTo(p.x, p.y); started = true }
+            else ctx.lineTo(p.x, p.y)
+          } else started = false
+        }
+        ctx.strokeStyle = 'rgba(80,160,255,0.10)'
+        ctx.lineWidth = 0.5
+        ctx.stroke()
       })
 
-      /* continents */
-      const rotOffset = t * 0.3
-      continents.forEach(c => {
-        const lx = cx + (c.cx + Math.sin(rotOffset) * 0.05) * R * 2
-        const ly = cy + c.cy * R * 2
+      /* longitude lines */
+      GRID_LONS.forEach(lon => {
         ctx.beginPath()
-        ctx.ellipse(lx, ly, c.rx * R, c.ry * R, 0.2, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(58,130,246,0.12)'; ctx.fill()
-        ctx.strokeStyle = 'rgba(58,130,246,0.18)'; ctx.lineWidth = 0.5; ctx.stroke()
+        let started = false
+        for (let lat = -90; lat <= 90; lat += 4) {
+          const p = project(lon, lat, rotation, cx, cy, R)
+          if (p.z > -0.1) {
+            if (!started) { ctx.moveTo(p.x, p.y); started = true }
+            else ctx.lineTo(p.x, p.y)
+          } else started = false
+        }
+        ctx.strokeStyle = 'rgba(80,160,255,0.07)'
+        ctx.lineWidth = 0.5
+        ctx.stroke()
       })
+
+      /* ── Continents (3D projected) ── */
+      CONTINENTS.forEach(cont => {
+        const projected = cont.pts.map(([lon, lat]) => project(lon, lat, rotation, cx, cy, R))
+        const visible = projected.filter(p => p.z > 0)
+        if (visible.length < 3) return
+
+        ctx.beginPath()
+        let started = false
+        projected.forEach(p => {
+          if (p.z > -0.05) {
+            if (!started) { ctx.moveTo(p.x, p.y); started = true }
+            else ctx.lineTo(p.x, p.y)
+          }
+        })
+        ctx.closePath()
+
+        const avgZ = visible.reduce((s, p) => s + p.z, 0) / visible.length
+        ctx.globalAlpha = (0.5 + avgZ * 0.5) * 0.85
+        ctx.fillStyle = cont.fill
+        ctx.fill()
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)'
+        ctx.lineWidth = 0.5
+        ctx.stroke()
+        ctx.globalAlpha = 1
+      })
+
       ctx.restore()
 
-      /* radar sweep line */
-      const sweepAngle = t * 1.2
-      ctx.beginPath(); ctx.moveTo(cx, cy)
-      ctx.lineTo(cx + Math.cos(sweepAngle) * R, cy + Math.sin(sweepAngle) * R)
-      ctx.strokeStyle = 'rgba(58,130,246,0.35)'; ctx.lineWidth = 1.5; ctx.stroke()
+      /* ── Specular highlight ── */
+      const specGrd = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.35, 0, cx - R * 0.35, cy - R * 0.35, R * 0.6)
+      specGrd.addColorStop(0, 'rgba(255,255,255,0.10)')
+      specGrd.addColorStop(1, 'rgba(255,255,255,0)')
+      ctx.beginPath()
+      ctx.arc(cx, cy, R, 0, Math.PI * 2)
+      ctx.fillStyle = specGrd
+      ctx.fill()
 
-      /* radar sweep glow */
+      /* ── Radar sweep ── */
+      const sweepAngle = t * 1.2
+
+      /* sweep glow trail */
       ctx.beginPath()
       ctx.moveTo(cx, cy)
-      ctx.arc(cx, cy, R, sweepAngle - 0.4, sweepAngle, false)
+      ctx.arc(cx, cy, R, sweepAngle - 0.5, sweepAngle, false)
       ctx.closePath()
       const sg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R)
-      sg.addColorStop(0, 'rgba(58,130,246,0.0)')
-      sg.addColorStop(0.5, 'rgba(58,130,246,0.06)')
-      sg.addColorStop(1, 'rgba(58,130,246,0.12)')
-      ctx.fillStyle = sg; ctx.fill()
+      sg.addColorStop(0, 'rgba(0,255,136,0.0)')
+      sg.addColorStop(0.4, 'rgba(0,255,136,0.05)')
+      sg.addColorStop(1, 'rgba(0,255,136,0.12)')
+      ctx.fillStyle = sg
+      ctx.fill()
 
-      /* center hub - Melbourne */
-      ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2)
-      ctx.fillStyle = '#3a82f6'; ctx.fill()
-      ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI * 2)
-      ctx.strokeStyle = 'rgba(58,130,246,0.4)'; ctx.lineWidth = 1; ctx.stroke()
-      /* pulse ring */
-      const pulseR = 8 + (1 + Math.sin(t * 3)) * 6
-      ctx.beginPath(); ctx.arc(cx, cy, pulseR, 0, Math.PI * 2)
-      ctx.strokeStyle = `rgba(58,130,246,${0.2 - (pulseR - 8) * 0.015})`; ctx.lineWidth = 1; ctx.stroke()
+      /* sweep line */
+      ctx.beginPath()
+      ctx.moveTo(cx, cy)
+      ctx.lineTo(cx + Math.cos(sweepAngle) * R, cy + Math.sin(sweepAngle) * R)
+      ctx.strokeStyle = 'rgba(0,255,136,0.55)'
+      ctx.lineWidth = 1.5
+      ctx.stroke()
 
-      /* MELB label */
+      /* ── Center hub ── */
+      ctx.beginPath()
+      ctx.arc(cx, cy, 4, 0, Math.PI * 2)
+      ctx.fillStyle = '#00ff88'
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(cx, cy, 7, 0, Math.PI * 2)
+      ctx.strokeStyle = 'rgba(0,255,136,0.5)'
+      ctx.lineWidth = 1
+      ctx.stroke()
+
+      /* pulse */
+      const pulseR = 7 + (1 + Math.sin(t * 3)) * 5
+      ctx.beginPath()
+      ctx.arc(cx, cy, pulseR, 0, Math.PI * 2)
+      ctx.strokeStyle = `rgba(0,255,136,${0.3 - (pulseR - 7) * 0.025})`
+      ctx.lineWidth = 1
+      ctx.stroke()
+
+      /* label */
       ctx.font = '600 8px -apple-system, sans-serif'
-      ctx.fillStyle = 'rgba(58,130,246,0.6)'
-      ctx.textAlign = 'center'; ctx.textBaseline = 'top'
-      ctx.fillText('MELB', cx, cy + 13)
+      ctx.fillStyle = 'rgba(0,255,136,0.7)'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'top'
+      ctx.fillText('YOU', cx, cy + 14)
 
-      /* connection lines + nodes */
+      /* ── Connection lines + job nodes ── */
       placed.forEach(n => {
         const wobX = Math.sin(t + n.phase) * 2.5
         const wobY = Math.cos(t * 0.7 + n.phase) * 2.5
         const nx = n.x + wobX, ny = n.y + wobY
 
         /* curved connection */
-        ctx.beginPath(); ctx.moveTo(cx, cy)
+        ctx.beginPath()
+        ctx.moveTo(cx, cy)
         const cpx = (cx + nx) / 2 + (ny - cy) * 0.15
         const cpy = (cy + ny) / 2 - (nx - cx) * 0.15
         ctx.quadraticCurveTo(cpx, cpy, nx, ny)
-        const lineAlpha = 0.08 + 0.05 * Math.sin(t * 1.5 + n.phase)
+        const lineAlpha = 0.15 + 0.08 * Math.sin(t * 1.5 + n.phase)
         ctx.strokeStyle = n.kind === 'saved'
-          ? `rgba(58,130,246,${lineAlpha})`
-          : `rgba(255,255,255,${lineAlpha})`
+          ? `rgba(80,160,255,${lineAlpha})`
+          : `rgba(0,255,136,${lineAlpha})`
         ctx.lineWidth = 0.8
         ctx.setLineDash(n.kind === 'saved' ? [3, 3] : [])
         ctx.stroke()
         ctx.setLineDash([])
 
         /* node glow */
-        const glowGrd = ctx.createRadialGradient(nx, ny, 0, nx, ny, 12)
-        glowGrd.addColorStop(0, n.statusColor + '20')
+        const glowGrd = ctx.createRadialGradient(nx, ny, 0, nx, ny, 14)
+        glowGrd.addColorStop(0, n.statusColor + '30')
         glowGrd.addColorStop(1, n.statusColor + '00')
         ctx.fillStyle = glowGrd
-        ctx.fillRect(nx - 12, ny - 12, 24, 24)
+        ctx.fillRect(nx - 14, ny - 14, 28, 28)
 
         /* node dot */
-        ctx.beginPath(); ctx.arc(nx, ny, 5, 0, Math.PI * 2)
-        ctx.fillStyle = n.color; ctx.fill()
+        ctx.beginPath()
+        ctx.arc(nx, ny, 5, 0, Math.PI * 2)
+        ctx.fillStyle = n.color
+        ctx.fill()
 
         /* status ring */
-        ctx.beginPath(); ctx.arc(nx, ny, 7, 0, Math.PI * 2)
-        ctx.strokeStyle = n.statusColor; ctx.lineWidth = 1.5; ctx.stroke()
+        ctx.beginPath()
+        ctx.arc(nx, ny, 7.5, 0, Math.PI * 2)
+        ctx.strokeStyle = n.statusColor
+        ctx.lineWidth = 1.5
+        ctx.stroke()
       })
 
       rafRef.current = requestAnimationFrame(draw)
@@ -230,12 +328,7 @@ function BoardingPassCard({ job, onToast, onOpenDetail, onDelete, onAdvanceStatu
   return (
     <div className={`review-card ${job.status === 'inflight' ? 'review-card--inflight' : ''}`}>
       <div className="review-card-top">
-        <div className="review-card-logo" style={{ background: job.color }}>
-          {job.logoUrl
-            ? <img src={job.logoUrl} alt={job.company} style={{ width: '100%', height: '100%', borderRadius: 10, objectFit: 'cover' }}
-                onError={e => { e.target.style.display = 'none'; e.target.parentNode.textContent = job.logo }} />
-            : job.logo}
-        </div>
+        <CompanyAvatar logoUrl={job.logoUrl} company={job.company} color={job.color} size={44} radius={12} />
         <div className="review-card-info">
           <div className="review-card-company">{job.company}</div>
           <div className="review-card-role">{job.role}</div>
@@ -272,10 +365,8 @@ function BoardingPassCard({ job, onToast, onOpenDetail, onDelete, onAdvanceStatu
         </div>
       </div>
 
-      {/* Description preview */}
-      {job.desc && (
-        <div className="review-card-desc">{job.desc}</div>
-      )}
+      {/* Job summary — always on top of skills */}
+      <div className="review-card-desc">{job.desc || job.role}</div>
 
       {/* Skill tags */}
       {skillsToShow.length > 0 && (
@@ -328,12 +419,7 @@ function BoardingPassCard({ job, onToast, onOpenDetail, onDelete, onAdvanceStatu
 function SavedCard({ job, onBoard, onRemove }) {
   return (
     <div className="review-saved-card">
-      <div className="review-saved-avatar" style={{ background: job.color }}>
-        {job.logoUrl
-          ? <img src={job.logoUrl} alt={job.company} style={{ width: '100%', height: '100%', borderRadius: 12, objectFit: 'cover' }}
-              onError={e => { e.target.style.display = 'none'; e.target.parentNode.textContent = job.logo }} />
-          : job.logo}
-      </div>
+      <CompanyAvatar logoUrl={job.logoUrl} company={job.company} color={job.color} size={44} radius={12} />
       <div className="review-saved-info">
         <div className="review-saved-role">{job.role}</div>
         <div className="review-saved-company">{job.company}</div>
@@ -417,7 +503,6 @@ export default function ReviewPage({ onToast }) {
         onClose={() => setDetailJob(null)}
         onApply={() => { onToast?.(`Applied to ${detailJob?.company}`); setDetailJob(null) }}
         onSave={() => { onToast?.(`Saved ${detailJob?.company}`); setDetailJob(null) }}
-        onOpenTailor={() => onToast?.('Opening resume tailor...')}
         onOpenCoach={() => onToast?.('Opening interview coach...')}
       />
     </div>

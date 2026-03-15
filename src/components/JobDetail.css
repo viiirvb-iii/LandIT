@@ -1,5 +1,5 @@
 /* ============================================
-   JobDetail Overlay - Dark Mode
+   JobDetail Overlay - Light Mode
    ============================================ */
 
 /* --- Overlay --- */
@@ -7,7 +7,7 @@
   position: fixed;
   inset: 0;
   z-index: 900;
-  background: rgba(6, 9, 15, 0.97);
+  background: rgba(245, 245, 247, 0.97);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   transform: translateY(100%);
@@ -25,7 +25,7 @@
 .jd-inner {
   max-width: 600px;
   margin: 0 auto;
-  padding-bottom: 120px;
+  padding-bottom: 0;
 }
 
 /* ============================================
@@ -41,7 +41,7 @@
 .jd-hero-gradient {
   position: absolute;
   inset: 0;
-  opacity: 0.25;
+  opacity: 0.12;
   z-index: 0;
 }
 
@@ -54,14 +54,14 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   padding: 8px 14px;
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(0, 0, 0, 0.70);
   cursor: pointer;
   transition: background 0.2s;
   margin-bottom: 20px;
@@ -69,7 +69,7 @@
 }
 
 .jd-back-btn:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .jd-back-btn svg {
@@ -89,7 +89,7 @@
 .jd-role-title {
   font-size: 28px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(0, 0, 0, 0.90);
   line-height: 1.2;
   letter-spacing: -0.02em;
   margin: 0 0 14px;
@@ -99,8 +99,8 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 14px;
   padding: 8px 16px 8px 8px;
 }
@@ -126,12 +126,12 @@
 .jd-company-name {
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.90);
+  color: rgba(0, 0, 0, 0.85);
 }
 
 .jd-company-loc {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(0, 0, 0, 0.45);
 }
 
 /* ============================================
@@ -145,11 +145,12 @@
 }
 
 .jd-stat-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 16px;
   padding: 14px 12px;
   text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .jd-stat-icon {
@@ -160,13 +161,13 @@
 .jd-stat-value {
   font-size: 16px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(0, 0, 0, 0.85);
   line-height: 1.3;
 }
 
 .jd-stat-label {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(0, 0, 0, 0.40);
   margin-top: 2px;
 }
 
@@ -181,10 +182,11 @@
 }
 
 .jd-section {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 20px;
   padding: 22px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .jd-section-header {
@@ -205,22 +207,51 @@
   flex-shrink: 0;
 }
 
-.jd-section-icon.blue   { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
-.jd-section-icon.green  { background: rgba(48, 209, 88, 0.15);  color: #30d158; }
-.jd-section-icon.amber  { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-.jd-section-icon.purple { background: rgba(167, 139, 250, 0.15); color: #a78bfa; }
-.jd-section-icon.gray   { background: rgba(148, 163, 184, 0.12); color: #94a3b8; }
+.jd-section-icon.blue   { background: rgba(37, 99, 235, 0.10); color: #2563eb; }
+.jd-section-icon.green  { background: rgba(22, 163, 74, 0.10);  color: #16a34a; }
+.jd-section-icon.amber  { background: rgba(217, 119, 6, 0.10); color: #d97706; }
+.jd-section-icon.purple { background: rgba(124, 58, 237, 0.10); color: #7c3aed; }
+.jd-section-icon.gray   { background: rgba(100, 116, 139, 0.10); color: #64748b; }
 
 .jd-section-title {
-  font-size: 17px;
-  font-weight: 650;
-  color: rgba(255, 255, 255, 0.90);
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.88);
 }
 
 .jd-section-body {
   font-size: 14px;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.50);
+  color: rgba(0, 0, 0, 0.55);
+}
+
+/* ── About the role – bullet list ── */
+.jd-about-bullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jd-about-bullet {
+  position: relative;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(0, 0, 0, 0.60);
+}
+
+.jd-about-bullet::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.5);
 }
 
 /* ============================================
@@ -241,7 +272,7 @@
   gap: 10px;
   font-size: 14px;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(0, 0, 0, 0.70);
 }
 
 .jd-req-dot {
@@ -252,8 +283,8 @@
   margin-top: 6px;
 }
 
-.jd-req-dot.met   { background: #30d158; }
-.jd-req-dot.unmet { background: rgba(255, 255, 255, 0.15); }
+.jd-req-dot.met   { background: #16a34a; }
+.jd-req-dot.unmet { background: rgba(0, 0, 0, 0.12); }
 
 /* ============================================
    Skill chips
@@ -269,21 +300,21 @@
 }
 
 .jd-skill-chip.have {
-  background: rgba(48, 209, 88, 0.12);
-  color: #30d158;
-  border-color: rgba(48, 209, 88, 0.20);
+  background: rgba(22, 163, 74, 0.10);
+  color: #16a34a;
+  border-color: rgba(22, 163, 74, 0.18);
 }
 
 .jd-skill-chip.ok {
-  background: rgba(255, 214, 10, 0.10);
-  color: #ffd60a;
-  border-color: rgba(255, 214, 10, 0.18);
+  background: rgba(217, 119, 6, 0.10);
+  color: #d97706;
+  border-color: rgba(217, 119, 6, 0.16);
 }
 
 .jd-skill-chip.miss {
-  background: rgba(255, 69, 58, 0.10);
-  color: #ff453a;
-  border-color: rgba(255, 69, 58, 0.18);
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.15);
 }
 
 /* ============================================
@@ -295,8 +326,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.50);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 14px;
   padding: 14px 16px;
 }
@@ -314,7 +345,7 @@
 .jd-doc-name {
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.80);
+  color: rgba(0, 0, 0, 0.75);
 }
 
 .jd-doc-badge {
@@ -327,18 +358,18 @@
 }
 
 .jd-doc-badge.ready {
-  background: rgba(48, 209, 88, 0.12);
-  color: #30d158;
+  background: rgba(22, 163, 74, 0.10);
+  color: #16a34a;
 }
 
 .jd-doc-badge.required {
-  background: rgba(255, 69, 58, 0.10);
-  color: #ff453a;
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
 }
 
 .jd-doc-badge.ai-draft {
-  background: rgba(58, 130, 246, 0.12);
-  color: #3a82f6;
+  background: rgba(37, 99, 235, 0.10);
+  color: #2563eb;
 }
 
 /* ============================================
@@ -368,7 +399,7 @@
   top: 14px;
   bottom: -4px;
   width: 2px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .jd-timeline-dot {
@@ -380,10 +411,10 @@
   z-index: 1;
 }
 
-.jd-timeline-dot.blue   { background: #3b82f6; }
-.jd-timeline-dot.green  { background: #30d158; }
-.jd-timeline-dot.amber  { background: #f59e0b; }
-.jd-timeline-dot.gray   { background: rgba(255, 255, 255, 0.15); }
+.jd-timeline-dot.blue   { background: #2563eb; }
+.jd-timeline-dot.green  { background: #16a34a; }
+.jd-timeline-dot.amber  { background: #d97706; }
+.jd-timeline-dot.gray   { background: rgba(0, 0, 0, 0.12); }
 
 .jd-timeline-content {
   display: flex;
@@ -393,12 +424,12 @@
 .jd-timeline-label {
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(0, 0, 0, 0.80);
 }
 
 .jd-timeline-date {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(0, 0, 0, 0.40);
   margin-top: 2px;
 }
 
@@ -406,31 +437,21 @@
    CTA Footer
    ============================================ */
 .jd-cta {
-  position: fixed;
+  position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 910;
-  background: rgba(6, 9, 15, 0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
   padding: 16px 24px;
   padding-bottom: max(16px, env(safe-area-inset-bottom));
   display: flex;
   gap: 12px;
   justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(20px);
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
-
-.jd-overlay.open .jd-cta {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-  transition-delay: 0.15s;
+  margin-top: auto;
 }
 
 .jd-cta-inner { max-width: 600px; width: 100%; display: flex; gap: 12px; }
@@ -448,15 +469,15 @@
   transition: background 0.2s, transform 0.15s;
   font-family: inherit;
 }
-.jd-btn-apply:hover  { background: #2563eb; }
+.jd-btn-apply:hover  { background: #1d4ed8; }
 .jd-btn-apply:active { transform: scale(0.97); }
 
 .jd-btn-save {
   padding: 16px 24px;
   border-radius: 16px;
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid rgba(0, 0, 0, 0.10);
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.70);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -464,8 +485,8 @@
 }
 
 .jd-btn-save:hover {
-  background: rgba(255, 255, 255, 0.10);
-  border-color: rgba(255, 255, 255, 0.20);
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.15);
 }
 
 .jd-btn-save:active {
@@ -486,23 +507,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px 20px;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.12);
   border-radius: 16px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: var(--blue);
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
   font-family: inherit;
 }
 .jd-ai-action:hover {
-  background: rgba(58, 130, 246, 0.10);
-  border-color: rgba(58, 130, 246, 0.25);
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.22);
 }
-.jd-ai-action svg { width: 18px; height: 18px; }
 
 /* ============================================
    Responsive
