@@ -56,13 +56,13 @@
   margin-left: 4px;
 }
 .passport-close-btn {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 1px solid rgba(137, 72, 37, 0.2);
   background: rgba(137, 72, 37, 0.06);
   color: #607fa9;
-  font-size: 18px;
+  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -446,12 +446,12 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 13px;
-  border-radius: 12px;
+  padding: 15px;
+  border-radius: 14px;
   border: 1px solid rgba(137, 72, 37, 0.2);
   background: #fff;
   color: #607fa9;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
@@ -510,9 +510,9 @@
 .pp-resume-toggle {
   background: rgba(96, 127, 169, 0.08);
   border: 1px solid rgba(96, 127, 169, 0.2);
-  border-radius: 6px;
-  padding: 3px 10px;
-  font-size: 10px;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
   font-weight: 600;
   color: #607fa9;
   cursor: pointer;
@@ -633,12 +633,12 @@
   gap: 8px;
   width: 100%;
   margin-top: 16px;
-  padding: 11px;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(96, 127, 169, 0.2);
   background: rgba(96, 127, 169, 0.06);
   color: #607fa9;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
