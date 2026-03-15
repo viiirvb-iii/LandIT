@@ -102,6 +102,17 @@ function extractPdfText(bytes: Uint8Array): string {
   return textParts.join(" ").replace(/\s+/g, " ").trim();
 }
 
+/** Safe base64 encoding that works on any file size by processing in chunks. */
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  const chunkSize = 32768;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -159,18 +170,24 @@ Deno.serve(async (req) => {
     let rawText = "";
 
     if (isPdf) {
+      // Send PDF as base64 document using Anthropic's native document block.
+      // Use chunked encoding — spreading a large Uint8Array crashes the runtime.
       const arrayBuffer = await fileData.arrayBuffer();
-      rawText = extractPdfText(new Uint8Array(arrayBuffer));
-
-      if (!rawText || rawText.length < 20) {
-        return new Response(
-          JSON.stringify({
-            error: "Could not extract enough text from PDF. Try uploading a .txt version instead.",
-            extracted_length: rawText.length,
-          }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      const base64 = uint8ArrayToBase64(new Uint8Array(arrayBuffer));
+      claudeContent = [
+        {
+          type: "document",
+          source: {
+            type: "base64",
+            media_type: "application/pdf",
+            data: base64,
+          },
+        },
+        {
+          type: "text",
+          text: "Parse this resume and extract all information into the JSON structure specified. Return ONLY the JSON object — no extra text.",
+        },
+      ];
     } else {
       rawText = await fileData.text();
     }
@@ -184,6 +201,7 @@ Deno.serve(async (req) => {
 
     // 4. Parse the JSON response
     let parsedData: Record<string, unknown>;
+
     try {
       parsedData = parseJsonResponse(claudeResponse) as Record<string, unknown>;
     } catch {

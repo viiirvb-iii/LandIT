@@ -9,13 +9,10 @@
 
 /* ── Globe Section ── */
 
-.review-globe-section {
-  position: relative;
-  width: 100%;
+.review-top {
   height: 260px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
   overflow: hidden;
   background: #060910;
   border-bottom: 0.5px solid rgba(255,255,255,0.10);
@@ -47,7 +44,7 @@
   backdrop-filter: blur(20px);
 }
 
-.review-legend-item {
+.leg-item {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -67,10 +64,10 @@
 .review-legend-dot.departed { background: #ff453a; }
 .review-legend-dot.saved    { background: #3a82f6; }
 
-/* ── Cards List ── */
+/* ── Header ── */
 
-.review-cards-list {
-  padding: 16px;
+.passes-header {
+  padding: 14px 16px 8px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -418,15 +415,15 @@
   letter-spacing: -0.01em;
 }
 
-/* ── Action Buttons ── */
-
-.review-actions {
+/* action buttons */
+.pass-actions {
+  padding: 8px 13px 12px;
   display: flex;
   gap: 7px;
   padding: 8px 14px 12px;
 }
 
-.review-action-btn {
+.pa-btn {
   flex: 1;
   padding: 8px;
   border-radius: 12px;

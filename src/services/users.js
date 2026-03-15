@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase.js'
 // Fetch the current user's profile
 export async function getUserProfile(userId) {
   const { data, error } = await supabase
-    .from('users')
+    .from('profiles')
     .select('*')
     .eq('id', userId)
     .single()
@@ -15,7 +15,7 @@ export async function getUserProfile(userId) {
 // Update session preferences (called at start of each session)
 export async function updateSessionPreferences(userId, preferences) {
   const { data, error } = await supabase
-    .from('users')
+    .from('profiles')
     .update({ session_preferences: preferences })
     .eq('id', userId)
     .select()
@@ -29,7 +29,7 @@ export async function updateSessionPreferences(userId, preferences) {
 export async function updateSkills(userId, skills) {
   // skills = [{ name: 'React', level: 'intermediate' }, ...]
   const { data, error } = await supabase
-    .from('users')
+    .from('profiles')
     .update({ skills })
     .eq('id', userId)
     .select('skills')
@@ -45,7 +45,7 @@ export async function addPassportStamp(userId, stamp) {
 
   // Fetch current passport data first
   const { data: user, error: fetchError } = await supabase
-    .from('users')
+    .from('profiles')
     .select('passport_data')
     .eq('id', userId)
     .single()
@@ -58,7 +58,7 @@ export async function addPassportStamp(userId, stamp) {
   }
 
   const { data, error } = await supabase
-    .from('users')
+    .from('profiles')
     .update({ passport_data: updatedPassport })
     .eq('id', userId)
     .select('passport_data')
@@ -71,7 +71,7 @@ export async function addPassportStamp(userId, stamp) {
 // Decrement daily auto-update quota
 export async function decrementAutoUpdates(userId) {
   const { data: user, error: fetchError } = await supabase
-    .from('users')
+    .from('profiles')
     .select('session_preferences')
     .eq('id', userId)
     .single()
@@ -82,7 +82,7 @@ export async function decrementAutoUpdates(userId) {
   if (current <= 0) throw new Error('Daily auto-update limit reached')
 
   const { data, error } = await supabase
-    .from('users')
+    .from('profiles')
     .update({
       session_preferences: {
         ...user.session_preferences,

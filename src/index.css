@@ -2,31 +2,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Light mode palette */
-  --bg: #f1f5f9;
-  --bg-card: #ffffff;
-  --surface: #f8fafc;
-  --surface2: #f1f5f9;
-  --border: #e2e8f0;
-  --border2: #cbd5e1;
-  --blue: #3b82f6;
-  --blue-soft: rgba(59,130,246,0.08);
-  --green: #22c55e;
-  --amber: #f59e0b;
-  --red: #ef4444;
-  --t1: #0f172a;
-  --t2: #64748b;
-  --t3: #94a3b8;
-  --t4: #cbd5e1;
-  --r-sm: 12px;
-  --r-md: 18px;
-  --r-lg: 22px;
+  --bg:        #06090f;
+  --surface:   rgba(255,255,255,0.06);
+  --surface2:  rgba(255,255,255,0.10);
+  --glass:     rgba(255,255,255,0.08);
+  --glass-b:   rgba(255,255,255,0.14);
+  --border:    rgba(255,255,255,0.10);
+  --border2:   rgba(255,255,255,0.18);
+  --blue:      #3a82f6;
+  --blue-soft: rgba(58,130,246,0.18);
+  --green:     #30d158;
+  --amber:     #ffd60a;
+  --red:       #ff453a;
+  --t1:        rgba(255,255,255,0.95);
+  --t2:        rgba(255,255,255,0.55);
+  --t3:        rgba(255,255,255,0.30);
+  --t4:        rgba(255,255,255,0.16);
+  --r-sm:      12px;
+  --r-md:      18px;
+  --r-lg:      26px;
+  --r-xl:      32px;
 
   --sans: 'Inter', -apple-system, system-ui, sans-serif;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
 }
 
 *, *::before, *::after {
@@ -62,11 +59,6 @@ a {
   text-decoration: none;
 }
 
-img {
-  max-width: 100%;
-  height: auto;
-}
-
 /* Loading page */
 .loading-page {
   min-height: 100vh;
@@ -77,10 +69,11 @@ img {
   background: var(--bg);
   color: var(--t2);
   gap: 12px;
+  font-family: var(--sans);
 }
 .loading-plane {
   font-size: 32px;
-  animation: loadBounce 1s ease infinite;
+  animation: loadBounce 1.2s ease-in-out infinite;
 }
 @keyframes loadBounce {
   0%, 100% { transform: translateY(0); }

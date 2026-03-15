@@ -65,6 +65,7 @@
   cursor: pointer;
   transition: background 0.2s;
   margin-bottom: 20px;
+  font-family: inherit;
 }
 
 .jd-back-btn:hover {
@@ -81,7 +82,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #3b82f6;
+  color: var(--blue);
   margin-bottom: 8px;
 }
 
@@ -257,11 +258,7 @@
 /* ============================================
    Skill chips
    ============================================ */
-.jd-skills-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+.jd-skills-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .jd-skill-chip {
   padding: 6px 14px;
@@ -292,11 +289,7 @@
 /* ============================================
    Documents checklist
    ============================================ */
-.jd-docs-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+.jd-docs-list { display: flex; flex-direction: column; gap: 10px; }
 
 .jd-doc-card {
   display: flex;
@@ -366,12 +359,8 @@
   position: relative;
   padding-bottom: 22px;
 }
+.jd-timeline-item:last-child { padding-bottom: 0; }
 
-.jd-timeline-item:last-child {
-  padding-bottom: 0;
-}
-
-/* vertical line */
 .jd-timeline-item:not(:last-child)::before {
   content: "";
   position: absolute;
@@ -444,33 +433,23 @@
   transition-delay: 0.15s;
 }
 
-.jd-cta-inner {
-  max-width: 600px;
-  width: 100%;
-  display: flex;
-  gap: 12px;
-}
+.jd-cta-inner { max-width: 600px; width: 100%; display: flex; gap: 12px; }
 
 .jd-btn-apply {
   flex: 1;
   padding: 16px 24px;
   border-radius: 16px;
   border: none;
-  background: #3b82f6;
-  color: #ffffff;
+  background: var(--blue);
+  color: #fff;
   font-size: 16px;
   font-weight: 650;
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
+  font-family: inherit;
 }
-
-.jd-btn-apply:hover {
-  background: #2563eb;
-}
-
-.jd-btn-apply:active {
-  transform: scale(0.97);
-}
+.jd-btn-apply:hover  { background: #2563eb; }
+.jd-btn-apply:active { transform: scale(0.97); }
 
 .jd-btn-save {
   padding: 16px 24px;
@@ -514,30 +493,21 @@
   border-radius: 16px;
   font-size: 14px;
   font-weight: 600;
-  color: #3b82f6;
+  color: var(--blue);
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
+  font-family: inherit;
 }
-
 .jd-ai-action:hover {
   background: rgba(58, 130, 246, 0.10);
   border-color: rgba(58, 130, 246, 0.25);
 }
-
-.jd-ai-action svg {
-  width: 18px;
-  height: 18px;
-}
+.jd-ai-action svg { width: 18px; height: 18px; }
 
 /* ============================================
    Responsive
    ============================================ */
 @media (max-width: 480px) {
-  .jd-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .jd-role-title {
-    font-size: 24px;
-  }
+  .jd-stats { grid-template-columns: repeat(2, 1fr); }
+  .jd-role-title { font-size: 24px; }
 }

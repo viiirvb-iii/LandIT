@@ -309,10 +309,7 @@ function BoardingPassCard({ job, onToast, onOpenDetail, onDelete, onAdvanceStatu
           <div className="review-stat-label">Added</div>
           <div className="review-stat-value">{job.appliedDate || 'Today'}</div>
         </div>
-        <div className="review-stat">
-          <div className="review-stat-label">Match</div>
-          <div className="review-stat-value">{job.match}%</div>
-        </div>
+        <div className="ps-match">{job.match}%</div>
       </div>
 
       <div className="review-actions">

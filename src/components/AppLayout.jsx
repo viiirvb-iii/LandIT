@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { supabase, supabaseConfigured } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import Passport from './Passport'
 import './AppLayout.css'
 
@@ -9,125 +9,58 @@ export default function AppLayout({ children, activeTab }) {
   const [showPassport, setShowPassport] = useState(false)
   const [toast, setToast] = useState(null)
   const [passportData, setPassportData] = useState(null)
-  const { user, signOut } = useAuth()
+  const { signOut, user } = useAuth()
   const navigate = useNavigate()
 
-  // Fetch real user data for Passport
   useEffect(() => {
-    if (!supabaseConfigured || !supabase || !user) {
-      // Fallback for unauthenticated users
-      setPassportData({
-        name: user?.user_metadata?.full_name || user?.email || 'Traveller',
-        country: 'AUSTRALIA',
-        from: 'MELB',
-        to: 'HIRE',
-        flight: 'LD-2026',
-        gate: 'G7',
-        class: 'Grad',
-        season: '2026',
-        degree: '',
-        university: '',
-        year: '',
-        resumeUpdated: 'Not uploaded',
-        searching: 'Software roles',
-        locations: '',
-        fields: '',
-        swipedToday: 0,
-        tailorsLeft: 5,
-        stamps: [],
-      })
-      return
-    }
-
-    async function loadPassportData() {
-      // Fetch profile
+    if (!user) return
+    async function loadPassport() {
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .maybeSingle()
+        .single()
 
-      // Fetch resume status
-      const { data: resume } = await supabase
-        .from('parsed_resumes')
-        .select('parsed_at, skills_extracted, storage_path, parsed_data')
-        .eq('user_id', user.id)
-        .maybeSingle()
+      if (!profile) return
 
-      // Fetch swipe count for today
-      const today = new Date().toISOString().split('T')[0]
-      const { count: swipeCount } = await supabase
-        .from('swipe_history')
-        .select('*', { count: 'exact', head: true })
+      const { data: stamps } = await supabase
+        .from('stamps')
+        .select('label, stamp_type')
         .eq('user_id', user.id)
-        .gte('swiped_at', today)
-
-      // Fetch stamps (application milestones)
-      const { data: applications } = await supabase
-        .from('applications')
-        .select('id, status, job_id, jobs(company)')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .order('earned_at', { ascending: false })
         .limit(6)
 
-      const stamps = (applications || []).map(app => ({
-        icon: app.status === 'landed' ? '🎉' : app.status === 'applied' ? '✈' : '✦',
-        label: `${app.jobs?.company || 'Company'} ${app.status === 'applied' ? 'Applied' : app.status === 'landed' ? 'Landed!' : app.status}`,
-        variant: app.status === 'landed' ? 'gold' : 'filled',
-      }))
-
-      // Format resume date
-      let resumeStatus = 'Not uploaded'
-      if (resume?.parsed_at) {
-        const d = new Date(resume.parsed_at)
-        resumeStatus = `Updated ${d.toLocaleDateString('en-AU', { month: 'short', day: 'numeric' })}`
-      }
-
-      // Format locations
-      const locations = profile?.preferred_locations || []
-      const fields = profile?.preferred_fields || []
-
-      // Extract resume parsed info
-      const parsed = resume?.parsed_data || {}
-      const contact = parsed.contact || {}
-      const experience = parsed.experience || []
-      const education = parsed.education || []
-      const projects = parsed.projects || []
+      const { count: swipedToday } = await supabase
+        .from('swipe_history')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('swiped_at', new Date().toISOString().slice(0, 10))
 
       setPassportData({
-        name: profile?.full_name || contact.name || user.user_metadata?.full_name || user.email,
-        email: user.email,
-        phone: contact.phone || null,
-        location: contact.location || null,
-        country: profile?.country || 'AUSTRALIA',
-        from: profile?.city_from || 'MELB',
-        to: profile?.city_to || 'HIRE',
+        name: profile.full_name || 'Traveller',
+        country: profile.country || 'AUSTRALIA',
+        from: profile.city_from || 'MELB',
+        to: profile.city_to || 'HIRE',
         flight: 'LD-2026',
         gate: 'G7',
-        class: profile?.year || 'Grad',
+        class: profile.searching_for || '—',
         season: '2026',
-        degree: profile?.degree || '',
-        university: profile?.university || '',
-        year: profile?.year || '',
-        resumeUpdated: resumeStatus,
-        resumeSkills: resume?.skills_extracted || [],
-        resumePath: resume?.storage_path || null,
-        resumeSummary: parsed.summary || null,
-        resumeExperience: experience,
-        resumeEducation: education,
-        resumeProjects: projects,
-        careerLevel: parsed.career_level || null,
-        searching: profile?.searching_for || 'Software roles',
-        locations: locations.length > 0 ? locations.join(', ') : 'Not set',
-        fields: fields.length > 0 ? fields.join(', ') : 'Not set',
-        swipedToday: swipeCount || 0,
-        tailorsLeft: profile?.ai_tailors_remaining ?? 5,
-        stamps,
+        degree: profile.degree || '—',
+        university: profile.university || '—',
+        year: profile.year || '—',
+        resumeUpdated: profile.resume_updated_at
+          ? `Updated ${new Date(profile.resume_updated_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}`
+          : 'Not uploaded',
+        searching: profile.searching_for || '—',
+        locations: profile.preferred_locations?.length ? profile.preferred_locations : ['Not set'],
+        fields: profile.preferred_fields?.length ? profile.preferred_fields : ['Not set'],
+        swipedToday: swipedToday ?? 0,
+        tailorsLeft: profile.ai_tailors_remaining ?? 0,
+        stamps: (stamps || []).map(s => ({ label: s.label })),
       })
     }
-
-    loadPassportData()
-  }, [user, showPassport]) // Reload when passport opens
+    loadPassport()
+  }, [user])
 
   const handleSignOut = async () => {
     await signOut()

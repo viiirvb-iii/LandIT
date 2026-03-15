@@ -161,7 +161,7 @@
   border: 1px solid rgba(255,69,58,0.18);
 }
 
-/* ── Gap Chips ── */
+/* ── Gap Section ── */
 
 .gap-section {
   background: rgba(255,255,255,0.05);
@@ -187,7 +187,14 @@
 }
 
 .gap-chip {
-  display: inline-flex;
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 500;
+  background: rgba(255,69,58,0.08);
+  border: 1px solid rgba(255,69,58,0.18);
+  color: var(--red);
+  display: flex;
   align-items: center;
   gap: 5px;
   font-size: 10px;
@@ -221,9 +228,10 @@
   border: none;
 }
 
-/* ── Company Suggestion Cards ── */
+/* ── Company Cards ── */
 
 .company-cards {
+  padding: 0 14px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -234,6 +242,8 @@
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 18px;
   overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .company-card-hero {
