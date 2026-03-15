@@ -74,7 +74,6 @@ export default function Signup() {
       <div className="auth-card">
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="plane-icon">✈</span>
             <span className="auth-brand">Land<span className="brand-accent">It</span></span>
           </div>
           <h1>Get Your Boarding Pass</h1>
@@ -87,7 +86,6 @@ export default function Signup() {
           <div className="input-group">
             <label htmlFor="name">Full Name</label>
             <div className="input-wrapper">
-              <span className="input-icon">✈</span>
               <input
                 id="name"
                 type="text"
@@ -102,7 +100,6 @@ export default function Signup() {
           <div className="input-group">
             <label htmlFor="email">Email</label>
             <div className="input-wrapper">
-              <span className="input-icon">✉</span>
               <input
                 id="email"
                 type="email"
@@ -117,7 +114,6 @@ export default function Signup() {
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <div className="input-wrapper">
-              <span className="input-icon">🔒</span>
               <input
                 id="password"
                 type="password"
