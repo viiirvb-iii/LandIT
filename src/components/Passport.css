@@ -67,10 +67,10 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-/* ----- Passport cover card (dark blue gradient) ----- */
+/* ----- Boarding pass cover (dark blue gradient) ----- */
 
 .passport-cover {
   background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 50%, #3b82f6 100%);
@@ -106,21 +106,29 @@
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.01em;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .passport-cover-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 2px;
+}
+
+.passport-cover-email {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 18px;
+  letter-spacing: 0.02em;
 }
 
 .passport-cover-route {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .passport-cover-route-city {
@@ -138,6 +146,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 12px;
+  margin-bottom: 16px;
 }
 
 .passport-cover-field-label {
@@ -152,6 +161,43 @@
 .passport-cover-field-value {
   font-size: 14px;
   font-weight: 700;
+}
+
+/* Personal details on boarding pass */
+.passport-cover-details {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.passport-cover-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.passport-cover-detail-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.passport-cover-detail-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.passport-level-badge {
+  text-transform: capitalize;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 11px;
 }
 
 /* ----- Generic card ----- */
@@ -169,7 +215,10 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: rgba(255, 255, 255, 0.35);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* ----- Info rows ----- */
@@ -178,8 +227,8 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .passport-info-row:last-child {
@@ -187,17 +236,224 @@
 }
 
 .passport-info-label {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(255, 255, 255, 0.40);
   font-weight: 500;
 }
 
 .passport-info-value {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(255, 255, 255, 0.90);
   font-weight: 600;
   text-align: right;
   max-width: 60%;
+}
+
+/* ----- Resume section ----- */
+
+.passport-resume-status {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: rgba(59, 130, 246, 0.8);
+}
+
+.passport-resume-summary {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.5;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  border-left: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+.passport-resume-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.passport-resume-empty {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* Skills chips */
+.passport-skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.passport-skill-chip {
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  background: rgba(59, 130, 246, 0.12);
+  color: rgba(147, 197, 253, 0.9);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  letter-spacing: 0.2px;
+}
+
+.passport-skill-more {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Experience items */
+.passport-exp-item {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.passport-exp-item:last-child {
+  border-bottom: none;
+}
+
+.passport-exp-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.passport-exp-company {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.passport-exp-date {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.passport-exp-bullets {
+  margin: 6px 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.passport-exp-bullets li {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.45;
+  position: relative;
+  padding-left: 10px;
+}
+
+.passport-exp-bullets li::before {
+  content: "·";
+  position: absolute;
+  left: 0;
+  color: rgba(59, 130, 246, 0.5);
+  font-weight: 700;
+}
+
+/* Education items */
+.passport-edu-item {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.passport-edu-item:last-child {
+  border-bottom: none;
+}
+
+.passport-edu-degree {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.passport-edu-school {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.passport-edu-year {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Project items */
+.passport-proj-item {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.passport-proj-item:last-child {
+  border-bottom: none;
+}
+
+.passport-proj-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.passport-proj-desc {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.passport-proj-tech {
+  font-size: 10px;
+  color: rgba(59, 130, 246, 0.6);
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+
+/* ----- Session stats row ----- */
+
+.passport-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.passport-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.passport-stat-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.passport-stat-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.3);
 }
 
 /* ----- Stamps grid ----- */
@@ -224,15 +480,15 @@
 }
 
 .passport-stamp--filled {
-  background: rgba(58,130,246,0.18);
+  background: rgba(58, 130, 246, 0.18);
   color: #3a82f6;
-  border: 1px solid rgba(58,130,246,0.25);
+  border: 1px solid rgba(58, 130, 246, 0.25);
 }
 
 .passport-stamp--gold {
-  background: rgba(245,158,11,0.15);
+  background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
-  border: 1px solid rgba(245,158,11,0.25);
+  border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
 .passport-stamp--empty {

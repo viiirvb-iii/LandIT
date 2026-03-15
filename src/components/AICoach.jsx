@@ -605,10 +605,13 @@ export default function AICoach({ job, open, onClose, onToast }) {
                 className="coach-btn-export"
                 onClick={async () => {
                   try {
-                    await exportResumePdf();
+                    // Build content from accepted suggestions
+                    const accepted = history.filter(h => h.status === "accepted");
+                    const content = accepted.map(h => `${h.title}\n${suggestions.find(s => s.title === h.title)?.after || ""}`).join("\n\n");
+                    await exportResumePdf(content || "No changes applied yet", job?.role, job?.company);
                     if (onToast) onToast("Resume exported successfully");
                   } catch {
-                    if (onToast) onToast("PDF export — check backend is running");
+                    if (onToast) onToast("PDF export failed");
                   }
                 }}
               >

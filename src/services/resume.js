@@ -158,34 +158,56 @@ export function computeMatchScore(userSkills, jobSkillMatches) {
 }
 
 /**
- * Export the user's tailored resume as a downloadable PDF.
- * Fetches the latest tailored resume from Supabase and triggers download.
+ * Export tailored resume text as a downloadable PDF.
+ * Generates the PDF client-side using jsPDF.
  */
-export async function exportResumePdf(jobId) {
-  if (!supabaseConfigured || !supabase) {
-    throw new Error("Supabase not configured");
+export async function exportResumePdf(tailoredText, jobTitle, company) {
+  const { jsPDF } = await import("jspdf");
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  const maxWidth = pageWidth - margin * 2;
+  let y = 20;
+
+  // Header
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Tailored Resume", margin, y);
+  y += 8;
+
+  if (jobTitle || company) {
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    doc.text(`For: ${jobTitle || ""} at ${company || ""}`, margin, y);
+    doc.setTextColor(0);
+    y += 10;
   }
 
-  const { data, error } = await supabase.functions.invoke("export-resume-pdf", {
-    body: { job_id: jobId },
-  });
+  // Body
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
 
-  if (error) {
-    const detail = await extractFunctionError(error, error.message);
-    throw new Error(`Export failed: ${detail}`);
+  const lines = doc.splitTextToSize(tailoredText || "No content", maxWidth);
+  for (const line of lines) {
+    if (y > 275) {
+      doc.addPage();
+      y = 20;
+    }
+    // Section headers (ALL CAPS lines)
+    if (line === line.toUpperCase() && line.trim().length > 2 && line.trim().length < 40) {
+      y += 4;
+      doc.setFont("helvetica", "bold");
+      doc.text(line, margin, y);
+      doc.setFont("helvetica", "normal");
+    } else {
+      doc.text(line, margin, y);
+    }
+    y += 5.5;
   }
 
-  // If the edge function returns a blob/PDF, trigger download
-  if (data instanceof Blob) {
-    const url = URL.createObjectURL(data);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "Resume_Tailored.pdf";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  return data;
+  doc.save(`Resume_Tailored_${(company || "export").replace(/\s+/g, "_")}.pdf`);
 }
 
 /**

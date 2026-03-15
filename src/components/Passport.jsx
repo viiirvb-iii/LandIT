@@ -1,8 +1,6 @@
 import React from "react";
 import "./Passport.css";
 
-const STAMP_VARIANTS = ["filled", "gold", "empty"];
-
 function getStampVariant(stamp) {
   if (!stamp || !stamp.label) return "empty";
   if (stamp.variant) return stamp.variant;
@@ -14,6 +12,9 @@ export default function Passport({ open, onClose, data }) {
 
   const {
     name,
+    email,
+    phone,
+    location,
     country,
     from,
     to,
@@ -25,6 +26,12 @@ export default function Passport({ open, onClose, data }) {
     university,
     year,
     resumeUpdated,
+    resumeSkills = [],
+    resumeSummary,
+    resumeExperience = [],
+    resumeEducation = [],
+    resumeProjects = [],
+    careerLevel,
     searching,
     locations,
     fields,
@@ -33,7 +40,6 @@ export default function Passport({ open, onClose, data }) {
     stamps = [],
   } = data;
 
-  // Ensure we always render 6 stamp slots
   const stampSlots = Array.from({ length: 6 }, (_, i) => stamps[i] || null);
 
   return (
@@ -52,13 +58,14 @@ export default function Passport({ open, onClose, data }) {
 
       {/* Scrollable content */}
       <div className="passport-content">
-        {/* Passport cover card */}
+        {/* ===== Boarding Pass Cover ===== */}
         <div className="passport-cover">
           <div className="passport-cover-label">
-            landed &middot; passenger document
+            landed &middot; boarding pass
           </div>
           <div className="passport-cover-country">{country}</div>
           <div className="passport-cover-name">{name}</div>
+          {email && <div className="passport-cover-email">{email}</div>}
 
           <div className="passport-cover-route">
             <span className="passport-cover-route-city">{from}</span>
@@ -68,7 +75,6 @@ export default function Passport({ open, onClose, data }) {
               height="12"
               viewBox="0 0 28 12"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 d="M2 6h22m0 0l-5-5m5 5l-5 5"
@@ -99,38 +105,47 @@ export default function Passport({ open, onClose, data }) {
               <div className="passport-cover-field-value">{season}</div>
             </div>
           </div>
+
+          {/* Personal details row */}
+          <div className="passport-cover-details">
+            {phone && (
+              <div className="passport-cover-detail">
+                <span className="passport-cover-detail-label">Phone</span>
+                <span className="passport-cover-detail-value">{phone}</span>
+              </div>
+            )}
+            {location && (
+              <div className="passport-cover-detail">
+                <span className="passport-cover-detail-label">Location</span>
+                <span className="passport-cover-detail-value">{location}</span>
+              </div>
+            )}
+            {careerLevel && (
+              <div className="passport-cover-detail">
+                <span className="passport-cover-detail-label">Level</span>
+                <span className="passport-cover-detail-value passport-level-badge">{careerLevel}</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Static profile */}
+        {/* ===== Profile Card ===== */}
         <div className="passport-card">
-          <div className="passport-card-title">Static profile</div>
-
+          <div className="passport-card-title">Profile</div>
           <div className="passport-info-row">
             <span className="passport-info-label">Degree</span>
-            <span className="passport-info-value">{degree}</span>
+            <span className="passport-info-value">{degree || "—"}</span>
           </div>
           <div className="passport-info-row">
             <span className="passport-info-label">University</span>
-            <span className="passport-info-value">{university}</span>
+            <span className="passport-info-value">{university || "—"}</span>
           </div>
           <div className="passport-info-row">
             <span className="passport-info-label">Year</span>
-            <span className="passport-info-value">{year}</span>
+            <span className="passport-info-value">{year || "—"}</span>
           </div>
           <div className="passport-info-row">
-            <span className="passport-info-label">Base resume</span>
-            <span className="passport-info-value">
-              {resumeUpdated || "Not set"}
-            </span>
-          </div>
-        </div>
-
-        {/* This session */}
-        <div className="passport-card">
-          <div className="passport-card-title">This session</div>
-
-          <div className="passport-info-row">
-            <span className="passport-info-label">Searching for</span>
+            <span className="passport-info-label">Searching</span>
             <span className="passport-info-value">{searching}</span>
           </div>
           <div className="passport-info-row">
@@ -145,20 +160,130 @@ export default function Passport({ open, onClose, data }) {
               {Array.isArray(fields) ? fields.join(", ") : fields}
             </span>
           </div>
-          <div className="passport-info-row">
-            <span className="passport-info-label">Swiped today</span>
-            <span className="passport-info-value">{swipedToday}</span>
+        </div>
+
+        {/* ===== Resume Section ===== */}
+        <div className="passport-card">
+          <div className="passport-card-title">
+            Resume
+            <span className="passport-resume-status">{resumeUpdated}</span>
           </div>
-          <div className="passport-info-row">
-            <span className="passport-info-label">AI tailors left</span>
-            <span className="passport-info-value">{tailorsLeft}</span>
+
+          {/* Summary */}
+          {resumeSummary && (
+            <div className="passport-resume-summary">{resumeSummary}</div>
+          )}
+
+          {/* Skills */}
+          {resumeSkills.length > 0 && (
+            <>
+              <div className="passport-resume-section-label">Skills</div>
+              <div className="passport-skills-grid">
+                {resumeSkills.slice(0, 15).map((skill, i) => (
+                  <span key={i} className="passport-skill-chip">{skill}</span>
+                ))}
+                {resumeSkills.length > 15 && (
+                  <span className="passport-skill-chip passport-skill-more">
+                    +{resumeSkills.length - 15}
+                  </span>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Experience */}
+          {resumeExperience.length > 0 && (
+            <>
+              <div className="passport-resume-section-label">Experience</div>
+              {resumeExperience.slice(0, 4).map((exp, i) => (
+                <div key={i} className="passport-exp-item">
+                  <div className="passport-exp-title">{exp.title}</div>
+                  <div className="passport-exp-company">
+                    {exp.company}
+                    {exp.start_date && (
+                      <span className="passport-exp-date">
+                        {exp.start_date} — {exp.end_date || "Present"}
+                      </span>
+                    )}
+                  </div>
+                  {exp.bullets && exp.bullets.length > 0 && (
+                    <ul className="passport-exp-bullets">
+                      {exp.bullets.slice(0, 2).map((b, j) => (
+                        <li key={j}>{b}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* Education */}
+          {resumeEducation.length > 0 && (
+            <>
+              <div className="passport-resume-section-label">Education</div>
+              {resumeEducation.map((edu, i) => (
+                <div key={i} className="passport-edu-item">
+                  <div className="passport-edu-degree">{edu.degree}</div>
+                  <div className="passport-edu-school">
+                    {edu.institution}
+                    {edu.year && <span className="passport-edu-year">{edu.year}</span>}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* Projects */}
+          {resumeProjects.length > 0 && (
+            <>
+              <div className="passport-resume-section-label">Projects</div>
+              {resumeProjects.slice(0, 3).map((proj, i) => (
+                <div key={i} className="passport-proj-item">
+                  <div className="passport-proj-name">{proj.name}</div>
+                  {proj.description && (
+                    <div className="passport-proj-desc">{proj.description}</div>
+                  )}
+                  {proj.technologies && proj.technologies.length > 0 && (
+                    <div className="passport-proj-tech">
+                      {proj.technologies.join(" · ")}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* No resume state */}
+          {!resumeSummary && resumeSkills.length === 0 && resumeExperience.length === 0 && (
+            <div className="passport-resume-empty">
+              No resume uploaded yet. Upload one during onboarding or via AI Coach.
+            </div>
+          )}
+        </div>
+
+        {/* ===== Session Stats ===== */}
+        <div className="passport-card">
+          <div className="passport-card-title">Session</div>
+          <div className="passport-stats-row">
+            <div className="passport-stat">
+              <span className="passport-stat-num">{swipedToday}</span>
+              <span className="passport-stat-label">Swiped today</span>
+            </div>
+            <div className="passport-stat">
+              <span className="passport-stat-num">{tailorsLeft}</span>
+              <span className="passport-stat-label">AI tailors left</span>
+            </div>
+            <div className="passport-stat">
+              <span className="passport-stat-num">{resumeSkills.length}</span>
+              <span className="passport-stat-label">Skills found</span>
+            </div>
           </div>
         </div>
 
-        {/* Application stamps */}
+        {/* ===== Application Stamps ===== */}
         <div className="passport-card">
           <div className="passport-card-title">Application stamps</div>
-
           <div className="passport-stamps-grid">
             {stampSlots.map((stamp, i) => {
               const variant = getStampVariant(stamp);

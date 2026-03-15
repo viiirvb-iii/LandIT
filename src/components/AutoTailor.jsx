@@ -120,12 +120,12 @@ export default function AutoTailor({ job, open, onClose, onToast }) {
 
   const handleExport = async () => {
     try {
-      await exportResumePdf();
-      if (onToast) onToast("Tailored PDF exported");
-    } catch {
-      if (onToast) onToast("PDF export — check backend is running");
+      await exportResumePdf(tailoredText, job?.role, job?.company);
+      if (onToast) onToast("Tailored PDF downloaded");
+    } catch (err) {
+      console.error("Export failed:", err);
+      if (onToast) onToast("PDF export failed");
     }
-    onClose();
   };
 
   const handleRevert = () => {
