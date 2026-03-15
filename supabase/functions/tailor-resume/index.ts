@@ -3,22 +3,35 @@ import { corsHeaders } from "../_shared/cors.ts";
 import { callClaude, parseJsonResponse } from "../_shared/claude.ts";
 import { getEmbedding } from "../_shared/embeddings.ts";
 import { validateTailoredOutput } from "../_shared/validation.ts";
+import { sanitizeInput } from "../_shared/sanitizer.ts";
+import { calculateDiff } from "../_shared/diff.ts";
+import {
+  preservePersonalInfo,
+  preserveOriginalSkills,
+  restoreDates,
+  protectCustomSections,
+} from "../_shared/safety.ts";
 import {
   removeAiPhrases,
   calculateKeywordMatch,
   checkMasterAlignment,
+  runRefinementPipeline,
+  type RefinementConfig,
 } from "../_shared/refiner.ts";
+import {
+  IMPROVE_NUDGE_PROMPT,
+  IMPROVE_KEYWORDS_PROMPT,
+  IMPROVE_FULL_PROMPT,
+} from "../_shared/prompts.ts";
 
-const TAILOR_SYSTEM_PROMPT = `You are a resume tailoring assistant. You have the user's ACTUAL resume and the ACTUAL job posting.
+const BASE_TAILOR_PROMPT = `You have the user's ACTUAL resume and the ACTUAL job posting.
 
 STRICT RULES:
 1. ONLY reference skills, experience, and qualifications that appear in <resume>.
 2. NEVER invent achievements, metrics, skills, company names, or job titles not in the resume.
-3. You may REPHRASE existing bullet points to better match job posting language, but the underlying facts MUST come from the resume.
-4. You may REORDER sections to prioritize the most relevant experience.
-5. For missing skills listed in <skill_analysis>: only suggest adding if the user has CLOSELY RELATED experience (e.g., if they used "React" you can suggest mentioning "frontend frameworks"). Otherwise, list it as an honest gap.
-6. If the resume genuinely lacks something the job requires, say so honestly in honest_gaps.
-7. Any numbers, percentages, or metrics in your "tailored" text MUST exist in the original resume text.
+3. Any numbers, percentages, or metrics in your "tailored" text MUST exist in the original resume text.
+4. For missing skills listed in <skill_analysis>: only suggest adding if the user has CLOSELY RELATED experience. Otherwise, list it as an honest gap.
+5. If the resume genuinely lacks something the job requires, say so honestly in honest_gaps.
 
 Return ONLY valid JSON:
 {
@@ -32,6 +45,18 @@ Return ONLY valid JSON:
   "ats_score_estimate": 0,
   "honest_gaps": ["skills or experience the user genuinely lacks for this role"]
 }`;
+
+function getSystemPrompt(mode: string): string {
+  switch (mode) {
+    case "nudge":
+      return IMPROVE_NUDGE_PROMPT + "\n\n" + BASE_TAILOR_PROMPT;
+    case "full":
+      return IMPROVE_FULL_PROMPT + "\n\n" + BASE_TAILOR_PROMPT;
+    case "keywords":
+    default:
+      return IMPROVE_KEYWORDS_PROMPT + "\n\n" + BASE_TAILOR_PROMPT;
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -63,13 +88,21 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { job_id } = await req.json();
+    const { job_id, mode, refinement_config } = await req.json();
     if (!job_id) {
       return new Response(JSON.stringify({ error: "job_id required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const tailorMode = mode || "keywords";
+    const refConfig: RefinementConfig = {
+      enable_keyword_injection: refinement_config?.enable_keyword_injection ?? true,
+      enable_ai_phrase_removal: refinement_config?.enable_ai_phrase_removal ?? true,
+      enable_master_alignment: refinement_config?.enable_master_alignment ?? true,
+      max_passes: refinement_config?.max_passes ?? 1,
+    };
 
     // 1. Fetch parsed resume
     const { data: resume, error: resumeErr } = await supabase
@@ -81,10 +114,7 @@ Deno.serve(async (req) => {
     if (resumeErr || !resume) {
       return new Response(
         JSON.stringify({ error: "No parsed resume found. Upload and parse your resume first." }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -102,7 +132,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2b. If job has sparse data, synthesize from available fields
+    // 2b. Synthesize sparse job data
     if (!job.description && !job.about) {
       if (job.raw_description) {
         job.description = job.raw_description;
@@ -112,7 +142,7 @@ Deno.serve(async (req) => {
         if (job.location) parts.push(`Location: ${job.location}`);
         if (job.job_type) parts.push(`Type: ${job.job_type}`);
         if (job.field) parts.push(`Field: ${job.field}`);
-        job.description = parts.join(". ") + ". Tailor the resume for this type of role based on common industry requirements.";
+        job.description = parts.join(". ") + ". Tailor the resume for this type of role.";
       }
     }
     if (!job.skill_matches || job.skill_matches.length === 0) {
@@ -126,40 +156,38 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 3. Deterministic skill matching using word-boundary matching (Resume-Matcher style)
+    // 3. Deterministic skill matching
     const resumeText = resume.raw_text || JSON.stringify(resume.parsed_data);
     const jobSkills: string[] = (job.skill_matches || []).map(
       (s: { name?: string; skill?: string }) =>
         (s.name || s.skill || "").toLowerCase()
     );
 
-    const { score: matchPct, matched, missing } = calculateKeywordMatch(
-      resumeText,
-      jobSkills
-    );
+    const { score: matchPct, matched, missing } = calculateKeywordMatch(resumeText, jobSkills);
 
-    // 4. Semantic retrieval - get relevant resume chunks
+    // 4. Semantic retrieval
     let relevantChunks: string[] = [];
     try {
       const jobText = `${job.role} ${job.description || ""} ${job.about || ""}`;
       const jobEmbedding = await getEmbedding(jobText.slice(0, 8000));
-
       const { data: chunks } = await supabase.rpc("match_resume_chunks", {
         query_embedding: jobEmbedding,
         match_user_id: user.id,
         match_count: 5,
       });
-
       if (chunks) {
-        relevantChunks = chunks.map(
-          (c: { chunk_text: string }) => c.chunk_text
-        );
+        relevantChunks = chunks.map((c: { chunk_text: string }) => c.chunk_text);
       }
     } catch (e) {
-      console.error("Semantic retrieval failed, using full resume:", e);
+      console.error("Semantic retrieval failed:", e);
     }
 
-    // 5. Assemble grounded context and call Claude
+    // 5. Sanitize job description text
+    const sanitizedJobDesc = sanitizeInput(
+      `${job.description || ""} ${job.about || ""}`
+    );
+
+    // 6. Call Claude with mode-specific prompt
     const contextMessage = `<resume>
 <structured>
 ${JSON.stringify(resume.parsed_data, null, 2)}
@@ -177,8 +205,7 @@ Title: ${job.role}
 Company: ${job.company}
 Location: ${job.location || ""}
 Type: ${job.job_type || ""}
-Description: ${job.description || ""}
-About: ${job.about || ""}
+Description: ${sanitizedJobDesc}
 Requirements: ${JSON.stringify(job.requirements || [])}
 Required Skills: ${JSON.stringify(job.skill_matches || [])}
 </job>
@@ -191,8 +218,9 @@ Match percentage: ${matchPct}%
 
 Tailor this resume for the job posting above. Follow all rules strictly.`;
 
+    const systemPrompt = getSystemPrompt(tailorMode);
     const claudeResponse = await callClaude(
-      TAILOR_SYSTEM_PROMPT,
+      systemPrompt,
       [{ type: "text", text: contextMessage }],
       8192
     );
@@ -203,17 +231,30 @@ Tailor this resume for the job posting above. Follow all rules strictly.`;
     } catch {
       return new Response(
         JSON.stringify({ error: "Failed to parse AI response", raw: claudeResponse.slice(0, 500) }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // 6. Post-processing: AI phrase removal on tailored text (Resume-Matcher)
+    // 7. Multi-pass refinement pipeline
     const jobDesc = `${job.description || ""} ${job.about || ""} ${JSON.stringify(job.requirements || [])}`;
-    let totalPhrasesRemoved = 0;
+    let refinementResult = null;
 
+    if (refConfig.enable_keyword_injection || refConfig.enable_ai_phrase_removal || refConfig.enable_master_alignment) {
+      try {
+        refinementResult = await runRefinementPipeline(
+          resume.parsed_data as Record<string, unknown>,
+          resumeText,
+          jobSkills,
+          jobDesc,
+          refConfig
+        );
+      } catch (e) {
+        console.error("Refinement pipeline failed (non-blocking):", e);
+      }
+    }
+
+    // 8. AI phrase removal on tailored sections
+    let totalPhrasesRemoved = 0;
     const sections = (tailorResult.tailored_sections as Array<{ section: string; original: string; tailored: string }>) || [];
     for (const sec of sections) {
       if (sec.tailored) {
@@ -223,13 +264,31 @@ Tailor this resume for the job posting above. Follow all rules strictly.`;
       }
     }
 
-    // 7. Hallucination detection via master alignment check
+    // 9. Safety preservations on parsed data
+    const parsedData = resume.parsed_data as Record<string, unknown>;
+    const safetyWarnings: string[] = [];
+
+    if (refinementResult?.refined_data) {
+      let safeData = preservePersonalInfo(parsedData, refinementResult.refined_data);
+      const { result: skillSafe, restoredCount: skillsRestored } = preserveOriginalSkills(parsedData, safeData);
+      safeData = skillSafe;
+      const { result: dateSafe, restoredCount: datesRestored } = restoreDates(parsedData, safeData);
+      safeData = dateSafe;
+      const { result: sectionSafe, removedSections } = protectCustomSections(parsedData, safeData);
+      safeData = sectionSafe;
+
+      if (skillsRestored > 0) safetyWarnings.push(`${skillsRestored} dropped skill(s) restored`);
+      if (datesRestored > 0) safetyWarnings.push(`${datesRestored} date(s) restored to month precision`);
+      if (removedSections.length > 0) safetyWarnings.push(`Removed hallucinated sections: ${removedSections.join(", ")}`);
+
+      refinementResult.refined_data = safeData;
+    }
+
+    // 10. Hallucination detection
     const tailoredSkills = (tailorResult.ats_keywords_added as string[]) || [];
     const tailoredCompanies: string[] = [];
     const tailoredCerts: string[] = [];
 
-    // Extract company/cert names from parsed data for alignment check
-    const parsedData = resume.parsed_data as Record<string, unknown>;
     if (parsedData) {
       const exp = (parsedData.experience as Array<{ company?: string }>) || [];
       for (const e of exp) {
@@ -239,14 +298,9 @@ Tailor this resume for the job posting above. Follow all rules strictly.`;
       tailoredCerts.push(...certs);
     }
 
-    const alignment = checkMasterAlignment(
-      tailoredSkills,
-      tailoredCompanies,
-      tailoredCerts,
-      resumeText
-    );
+    const alignment = checkMasterAlignment(tailoredSkills, tailoredCompanies, tailoredCerts, resumeText);
 
-    // 8. Standard validation
+    // 11. Standard validation
     const validation = validateTailoredOutput(
       tailorResult as Parameters<typeof validateTailoredOutput>[0],
       resume.skills_extracted || [],
@@ -254,22 +308,25 @@ Tailor this resume for the job posting above. Follow all rules strictly.`;
       resume.raw_text || ""
     );
 
+    // 12. Diff calculation
+    const diffResult = calculateDiff(parsedData, refinementResult?.refined_data || parsedData);
+
     // Merge all warnings
     const allWarnings = [
       ...validation.warnings,
       ...alignment.violations.map((v) => v.message),
+      ...safetyWarnings,
     ];
 
     if (allWarnings.length > 0) {
-      (tailorResult as Record<string, unknown>).validation_warnings = allWarnings;
+      tailorResult.validation_warnings = allWarnings;
     }
     if (totalPhrasesRemoved > 0) {
-      (tailorResult as Record<string, unknown>).ai_phrases_removed = totalPhrasesRemoved;
+      tailorResult.ai_phrases_removed = totalPhrasesRemoved;
     }
 
-    // 9. Store result in tailored_resumes table
-    const atsScoreAfter =
-      (tailorResult.ats_score_estimate as number) || matchPct;
+    // 13. Store result
+    const atsScoreAfter = (tailorResult.ats_score_estimate as number) || matchPct;
 
     await supabase.from("tailored_resumes").insert({
       user_id: user.id,
@@ -279,9 +336,22 @@ Tailor this resume for the job posting above. Follow all rules strictly.`;
       ats_score_before: matchPct,
       ats_score_after: atsScoreAfter,
       changes: tailorResult.changes_made || [],
+      mode: tailorMode,
+      diff_summary: diffResult.summary,
+      diff_changes: diffResult.changes,
+      refinement_stats: refinementResult
+        ? {
+            passes: refinementResult.passes_completed,
+            keywords_injected: refinementResult.keywords_injected,
+            phrases_removed: refinementResult.ai_phrases_removed + totalPhrasesRemoved,
+            alignment_violations: refinementResult.alignment_violations,
+            final_match_pct: refinementResult.final_match_pct,
+          }
+        : {},
+      safety_warnings: safetyWarnings,
     });
 
-    // 10. Decrement ai_tailors_remaining
+    // 14. Decrement ai_tailors_remaining
     const { data: profile } = await supabase
       .from("profiles")
       .select("ai_tailors_remaining")
@@ -302,16 +372,29 @@ Tailor this resume for the job posting above. Follow all rules strictly.`;
         success: true,
         result: tailorResult,
         skill_analysis: { matched, missing, match_percentage: matchPct },
-        validation: validation,
+        validation,
+        diff: diffResult,
+        refinement: refinementResult
+          ? {
+              passes: refinementResult.passes_completed,
+              keywords_injected: refinementResult.keywords_injected,
+              phrases_removed: refinementResult.ai_phrases_removed + totalPhrasesRemoved,
+              final_match_pct: refinementResult.final_match_pct,
+              keyword_analysis: refinementResult.keyword_analysis,
+            }
+          : null,
+        safety_warnings: safetyWarnings,
+        mode: tailorMode,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
-  } catch (err) {
-    console.error("tailor-resume error:", err);
+  } catch (err: unknown) {
+    const e = err as Error;
+    console.error("tailor-resume error:", e?.message);
     return new Response(
-      JSON.stringify({ error: "Internal error", details: String(err) }),
+      JSON.stringify({ error: "Internal error", details: e?.message || String(err) }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

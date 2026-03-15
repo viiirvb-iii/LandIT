@@ -3,6 +3,7 @@ import { corsHeaders } from "../_shared/cors.ts";
 import { callClaude, parseJsonResponse } from "../_shared/claude.ts";
 import { getEmbedding } from "../_shared/embeddings.ts";
 import { validateCoachOutput } from "../_shared/validation.ts";
+import { sanitizeInput } from "../_shared/sanitizer.ts";
 
 const COACH_SYSTEM_PROMPT = `You are a resume coach. You have the user's ACTUAL resume and the ACTUAL job posting.
 
@@ -180,8 +181,12 @@ Deno.serve(async (req) => {
     }
 
     // 5. Build grounded context
-    const userAnswersSection = user_answers
-      ? `\n<user_answers>\nThe user provided these additional details during Q&A:\n${JSON.stringify(user_answers, null, 2)}\n</user_answers>`
+    // Sanitize user answers to prevent prompt injection
+    const sanitizedAnswers = user_answers
+      ? JSON.parse(sanitizeInput(JSON.stringify(user_answers)))
+      : null;
+    const userAnswersSection = sanitizedAnswers
+      ? `\n<user_answers>\nThe user provided these additional details during Q&A:\n${JSON.stringify(sanitizedAnswers, null, 2)}\n</user_answers>`
       : "";
 
     const profileSection = profile
